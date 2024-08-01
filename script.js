@@ -27,10 +27,10 @@ function openChannel(channelId) {
           url = 'https://dacastmmd.mmdlive.lldns.net/dacastmmd/596115da85954b4da6ed86c199f2501c/chunklist_b4628000.m3u8'; // Ayiti TV
           break;
       case 'channel5':
-          url = 'https://lakay.online/tele6app/livestream/tracks-v1a1/mono.m3u8'; // Tele 6 Univers
+          url = 'https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8'; // Telemix
           break;
       case 'channel6':
-          url = 'https://lakay.online/hs/telelabrise/tracks-v1a1/mono.m3u8'; // Tele Labrise
+          url = 'https://haititivi.com/haititv/tvs/mono.m3u8'; // Tele Labrise
           break;
       case 'channel7':
           url = 'https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8'; // Kajou TV
