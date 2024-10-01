@@ -63,7 +63,7 @@ function openChannel(channelId) {
             url = 'http://server.teletripotay.com/tripotay2/tracks-v1a1/mono.m3u8'; // Tripotay Lakay
             break;
         case 'channel17':
-            url = 'https://ythls.armelin.one/channel/UCLeNHM8XDkZmd2rhV3ZG7Vg.m3u8'; // Pitit Manman Marie TV
+            url = 'http://tna5.giniko.com/live/c7368be90a9f9ac6c3e778dd23a276a6/66fd6a68/hdirect-nagotv.m3u8'; // Nago TV
             break;
         case 'channel18':
             url = 'https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8'; // Radio Télé 4VEH
