@@ -15,7 +15,7 @@ function openChannel(channelId) {
   let url = '';
   switch(channelId) {
       case 'channel1':
-          url = 'https://live-hls-xpil.livepush.io/live_cdn/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8'; // Tele Pacific
+          url = 'https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8'; // Tele Pacific
           break;
       case 'channel2':
           url = 'http://teleginen.srfms.com:1935/teleginen/livestream/chunklist_w531595620.m3u8'; // Tele Ginen
@@ -30,7 +30,7 @@ function openChannel(channelId) {
           url = 'https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8'; // Telemix
           break;
       case 'channel6':
-          url = 'https://haititivi.com/haititv/tvs/mono.m3u8'; // Tele Labrise
+          url = 'https://haititivi.com/haititv/tvs/mono.m3u8'; // SNL
           break;
       case 'channel7':
           url = 'https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8'; // Kajou TV
@@ -51,7 +51,7 @@ function openChannel(channelId) {
           url = 'https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8'; // Tele Pam
           break;
       case 'channel13':
-          url = 'rtmp://62.151.177.172/live5//telebiznispam'; // Radio Tele Biznis Pam
+          url = 'https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8'; // HMI PROMZ NEWS
           break;
       case 'channel14':
           url = 'http://162.244.81.145:3333/live//telebostonrtb/chunklist_w649067629.m3u8'; // Radio Tele Boston
