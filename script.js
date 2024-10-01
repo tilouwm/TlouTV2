@@ -60,7 +60,7 @@ function openChannel(channelId) {
             url = 'https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1712363388.m3u8'; // Fidele TV
             break;
         case 'channel16':
-            url = 'http://server.teletripotay.com/tripotay2/tracks-v1a1/mono.m3u8'; // Tripotay Lakay
+            url = 'https://video1.getstreamhosting.com:1936/8212/8212/playlist.m3u8'; // BPX
             break;
         case 'channel17':
             url = 'http://tna5.giniko.com/live/c7368be90a9f9ac6c3e778dd23a276a6/66fd6a68/hdirect-nagotv.m3u8'; // Nago TV
@@ -108,24 +108,9 @@ function openChannel(channelId) {
             url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-koultv.m3u8'; // KouL TV
             break;
         case 'channel32':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/telekiskeya.m3u8'; // Télé Kiskeya
-            break;
-        case 'channel33':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-telemetrolple2.m3u8'; // Télé Métropole
-            break;
-        case 'channel34':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-tnhtv2.m3u8'; // TNH
-            break;
-        case 'channel35':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-telecaraibes.m3u8'; // Télé Caraibes
-            break;
-        case 'channel36':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-tele6.m3u8'; // Télé 6 Univers (Aux Cayes)
-            break;
-        case 'channel37':
             url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-konpastation.m3u8'; // Konpa Station TV
             break;
-        case 'channel38':
+        case 'channel33':
             url = 'http://hdirecttna100-2.tulix.tv/hdirect_live/twokoul/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/index.m3u8'; // Two KouL - 100% Music Videos
             break;
         default:
