@@ -99,19 +99,7 @@ function openChannel(channelId) {
             url = 'http://hls.tmacaraibes.com/live/index.m3u8'; // TMA
             break;
         case 'channel29':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-cinepam-2.m3u8'; // Cinépam
-            break;
-        case 'channel30':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-canalbleu.m3u8'; // Canal Bleu
-            break;
-        case 'channel31':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-koultv.m3u8'; // KouL TV
-            break;
-        case 'channel32':
-            url = 'http://tna5.giniko.com/live/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/hdirect-konpastation.m3u8'; // Konpa Station TV
-            break;
-        case 'channel33':
-            url = 'http://hdirecttna100-2.tulix.tv/hdirect_live/twokoul/7bb93d91b16578d1e8c9dfed1800666f/66fcbe51/index.m3u8'; // Two KouL - 100% Music Videos
+            url = 'https://stream.beltv.net:1002/live/acw_01/index.m3u8'; // Bel TV
             break;
         default:
             alert('Channel not found!');
