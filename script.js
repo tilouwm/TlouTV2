@@ -63,7 +63,7 @@ function openChannel(channelId) {
             url = 'https://video1.getstreamhosting.com:1936/8212/8212/playlist.m3u8'; // BPX
             break;
         case 'channel17':
-            url = 'http://tna5.giniko.com/live/c7368be90a9f9ac6c3e778dd23a276a6/66fd6a68/hdirect-nagotv.m3u8'; // Nago TV
+            url = 'https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8'; // Nago TV
             break;
         case 'channel18':
             url = 'https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8'; // Radio Télé 4VEH
