@@ -102,7 +102,7 @@ function openChannel(channelId) {
             url = 'https://stream.beltv.net:1002/live/acw_01/index.m3u8'; // Bel TV
             break;
         case 'channel30':
-            url = 'https://hb.streamhaiti.com/hb/website/04/tracks-v1/index.fmp4.m3u8'; // Tele Eclair
+            url = 'https://lakay.online/ott/eclair/tracks-v1a1/mono.m3u8'; // Tele Eclair
             break;
         default:
             alert('Channel not found!');
