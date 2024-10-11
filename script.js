@@ -104,7 +104,7 @@ function openChannel(channelId) {
         case 'channel30':
             url = 'https://lakay.online/ott/eclair/tracks-v1a1/mono.m3u8'; // Tele Eclair
             break;
-        case 'channel30':
+        case 'channel31':
             url = 'https://lakay.online/web/tva30/tracks-v1a1/mono.m3u8'; // TVA 30
             break;   
         case 'channel32':
