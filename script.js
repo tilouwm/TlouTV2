@@ -101,6 +101,9 @@ function openChannel(channelId) {
         case 'channel29':
             url = 'https://stream.beltv.net:1002/live/acw_01/index.m3u8'; // Bel TV
             break;
+        case 'channel30':
+            url = 'https://customer-gllhkkbamkskdl1p.cloudflarestream.com/eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIn0.eyJzdWIiOiJhZDI2OTllNzVhNjNlZGY3M2Q0ZGE0Mzc5YTRjZjg1ZSIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIiwiZXhwIjoxNzI4NjY0MjI5LCJhY2Nlc3NSdWxlcyI6W3sidHlwZSI6ImlwLmdlb2lwLmNvdW50cnkiLCJhY3Rpb24iOiJibG9jayIsImNvdW50cnkiOlsiUlUiLCJCWSJdfV19.jECORvgvWRY2pz4gHDLhYsb8do6U_a1J5m7DCd3-TYkDUuipey_qSkwhcHyNeOZYXSjwvIhMQbSdBPj-4X6-mYxf1PSBbDSRYPlU1UeMHS6xDSH-n6y5D2SqZMzbHZbX968hn5AAeZt_jnsO_82hFwpj7gQYOGeGN_dgC-5qr9Ex5CqlKtOazeZPMMp4rYV7BDh_dGxwaWanvXZWMVx9lYcHr3t5kzLNFqJcUuArytiRxvLQS--Sds6ukJmB8MqqxexdvF9WZOwRX1Z-kUHrpzqzmXbXl8ioWLYpWxorJ-XreOmX6d7bz0WsD4ED6cySPLGWPuuMF7JdUrfo3noGQw/manifest/stream_t1_r1080001.m3u8?useVODOTFE=false&llhlsHBs=0.5'; // Bel TV
+            break;
         default:
             alert('Channel not found!');
             return;
