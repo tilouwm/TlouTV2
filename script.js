@@ -104,6 +104,12 @@ function openChannel(channelId) {
         case 'channel30':
             url = 'https://lakay.online/ott/eclair/tracks-v1a1/mono.m3u8'; // Tele Eclair
             break;
+        case 'channel30':
+            url = 'https://lakay.online/web/tva30/tracks-v1a1/mono.m3u8'; // TVA 30
+            break;   
+        case 'channel32':
+            url = 'https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8'; // Totalmix Radio
+            break; 
         default:
             alert('Channel not found!');
             return;
