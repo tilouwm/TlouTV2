@@ -110,6 +110,9 @@ function openChannel(channelId) {
         case 'channel32':
             url = 'https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8'; // Totalmix Radio
             break; 
+             case 'channel33':
+            url = 'https://customer-gllhkkbamkskdl1p.cloudflarestream.com/eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIn0.eyJzdWIiOiJjYjJiZDVhODgwNWJhNTdiNWMyOWZiNWU0ZDEwZGVhOCIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIiwiZXhwIjoxNzMzNTc4MzczLCJhY2Nlc3NSdWxlcyI6W3sidHlwZSI6ImlwLmdlb2lwLmNvdW50cnkiLCJhY3Rpb24iOiJibG9jayIsImNvdW50cnkiOlsiUlUiLCJCWSJdfV19.ptW4rQ4DgQwi60qwOyBqGyLAWrFWRN0aSp8j_6ju1qTvcsKrk_NtXZQrvQFKnvhsbNPAt8mrUCjBVJ6hDksSBZ061crOQVJAashaXWYWNiLS3FADDWmehQ_5jitvBqAClOfWNrZEslkT6nHTklzLynsvlhtoDN_Z91tEuwpTFRl1F2NgJ_pjBvAoBfz72xpQIGF8PnxBRnOmGYrPizQvyelf2iXFcfvnThz3JblFtw1JsdzdMbYTwUWdOLflqqf8UVtm9nf8iLLG25kXKbIpn8xl0ezbQOqG2kKbvUlvTuJLRSWTSGBooKHk5ohm8V1LY3f_zFChmEyVhC4VLyJdJg/manifest/stream_t3f9dceafbc841b6f6bae8b5659eec8f9_r894970012.m3u8'; // TVA 30
+            break;   
         default:
             alert('Channel not found!');
             return;
