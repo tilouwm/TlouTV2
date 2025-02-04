@@ -54,7 +54,7 @@ function openChannel(channelId) {
             url = 'https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8'; // HMI PROMZ NEWS
             break;
         case 'channel14':
-            url = 'http://162.244.81.145:3333/live//telebostonrtb/chunklist_w649067629.m3u8'; // Radio Tele Boston
+            url = 'https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8'; // Radio Tele Boston
             break;
         case 'channel15':
             url = 'https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1712363388.m3u8'; // Fidele TV
