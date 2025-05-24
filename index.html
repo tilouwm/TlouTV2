@@ -1,159 +1,85 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TlouTv</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TlouTv 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
-    <div id="logoAnimation" class="logo-animation">
-        <img src="https://i.ibb.co/br4TDgt/Tlou-Tv-logo.jpg" alt="TlouTv Logo" class="logo">
+  <div class="app-container">
+    <aside class="sidebar">
+      <h1 class="logo">TlouTv</h1>
+      <div class="search-tools">
+        <button id="toggleSearch">🔍</button>
+        <input type="text" id="searchInput" placeholder="Search..." style="display:none;" />
+        <button id="searchBtn" style="display:none;">Go</button>
+      </div>
+      <nav>
+        <ul>
+          <li class="menu-item" data-category="favorites">⭐ Favorites</li>
+          <li class="menu-item active" data-category="haiti">🇭🇹 Haiti</li>
+          <li class="menu-item" data-category="france">🇫🇷 France</li>
+          <li class="menu-item" data-category="usa">🇺🇸 USA</li>
+          <li class="menu-item" data-category="caribbean">🌴 Caribbean</li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div id="channelRows">
+<section class="channel-row" id="static-france">
+  <h2>France</h2>
+  <div class="channel-slider">
+    
+    <div class="channel-card" onclick="window.open('https://static.france24.com/live/F24_FR_HI/stream.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/France_24_logo.svg" alt="France 24 (FR)" />
+      <div>France 24 (FR)</div>
+      <button class="fav-btn" title="Favorite">☆</button>
     </div>
+    
 
-    <header id="mainContent">
-        <h1>TlouTv</h1>
-        <h2>Live TV Channels</h2>
-    </header>
+    <div class="channel-card" onclick="window.open('https://live.tv5monde.com/tv5monde_stream/playlist.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/TV5Monde_logo_2016.svg" alt="TV5MONDE" />
+      <div>TV5MONDE</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
 
-    <main id="mainContent" style="display: none;">
-        <div class="channel-list">
-            <div class="channel" tabindex="0" onclick="openChannel('channel1')">
-                <img src="https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png" alt="Tele Pacific Logo">
-                <div class="channel-name">Tele Pacific</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel2')">
-                <img src="https://static.wikia.nocookie.net/logopedia/images/0/09/RTG_Logo_%28With_Full_Name%29.png" alt="Radio Tele Ginen Logo">
-                <div class="channel-name">Radio Tele Ginen</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel3')">
-                <img src="https://m.media-amazon.com/images/I/611Ffvky5yL.png" alt="Haiti News Logo">
-                <div class="channel-name">Haiti News</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel4')">
-                <img src="https://i.ibb.co/HGfjmgD/removal-ai-fb28fe02-1167-447e-bf61-2171033e7cfe-images.png" alt="Ayiti TV Logo">
-                <div class="channel-name">Ayiti TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel5')">
-                <img src="https://i.ibb.co/RB7dzZq/logo-mix-2.png" alt="Telemix Logo">
-                <div class="channel-name">Telemix</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel6')">
-                <img src="https://i.ibb.co/2NW7kFM/images.jpg" alt="SNL Logo">
-                <div class="channel-name">SNL</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel7')">
-                <img src="https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png/v1/fill/w_360,h_208,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/PNG-LOGO-Design-2.png" alt="Kajou TV Logo">
-                <div class="channel-name">Kajou TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel8')">
-                <img src="https://i.imgur.com/4z0FiEA.png" alt="RTH 2000 Logo">
-                <div class="channel-name">RTH 2000</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel9')">
-                <img src="https://i.imgur.com/4z0FiEA.png" alt="RTH 2000 TV2 Logo">
-                <div class="channel-name">RTH 2000 TV2</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel10')">
-                <img src="https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png" alt="Radio Tele Puissance Logo">
-                <div class="channel-name">Radio Tele Puissance</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel11')">
-                <img src="https://m.media-amazon.com/images/I/71w9kTfB7xL.png" alt="4diaspo TV Logo">
-                <div class="channel-name">4diaspo TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel12')">
-                <img src="https://telepam.tv/wp-content/uploads/2022/09/telepammmm.png" alt="Tele Pam Logo">
-                <div class="channel-name">Tele Pam</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel13')">
-                <img src="https://i.imgur.com/gwPaw3v.png" alt="HMI Promz News Logo">
-                <div class="channel-name">HMI Promz News</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel14')">
-                <img src="https://i.ibb.co/x3Gx3Ps/unnamed.png" alt="Radio Tele Boston Logo">
-                <div class="channel-name">Radio Tele Boston</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel15')">
-                <img src="https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg" alt="Fidele TV Logo">
-                <div class="channel-name">Fidele TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel16')">
-                <img src="https://i.ibb.co/SvGYHS7/images-1.jpg" alt="BPX">
-                <div class="channel-name">BPX</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel17')">
-                <img src="https://i.ibb.co/fSnCtJb/nago-tv.png" alt="Nago TV Logo">
-                <div class="channel-name">Nago TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel18')">
-                <img src="https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png" alt="Tele 4VEH Logo">
-                <div class="channel-name">Tele 4VEH</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel19')">
-                <img src="https://images.givelively.org/nonprofits/cb2020c9-71c2-4920-ad32-36f63bd7aef6/logos/christian-multi-media-network_processed_96612ebe1aaa555d1ff9fcfdde6a4cbc76db6b7adfcebbc48aa3ca3be40c8313_logo.png" alt="Tele Louange Logo">
-                <div class="channel-name">Tele Louange</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel20')">
-                <img src="https://dslv9ilpbe7p1.cloudfront.net/nYhAQY37idxm1hlkmP1qPQ_store_logo_image.png" alt="Adduction Media Logo">
-                <div class="channel-name">Adduction Media</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel21')">
-                <img src="https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png" alt="Madras FM TV Logo">
-                <div class="channel-name">Madras FM TV</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel22')">
-                <img src="https://i1.wp.com/vjdid.com/wp-content/uploads/2017/10/logo-bblack-caribbean-contour-noir.png" alt="Bblack Caribbean Logo">
-                <div class="channel-name">Bblack Caribbean</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel23')">
-                <img src="https://i.ibb.co/mvJc4z0/maxresdefault.jpg" alt="Bblack Africa Logo">
-                <div class="channel-name">Bblack Africa</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel24')">
-                <img src="https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg" alt="Afrobeats Logo">
-                <div class="channel-name">Afrobeats</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel25')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png" alt="Trace Urban Logo">
-                <div class="channel-name">Trace Urban</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel26')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png" alt="Trace Latina Logo">
-                <div class="channel-name">Trace Latina</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel27')">
-                <img src="https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png" alt="DBM Logo">
-                <div class="channel-name">DBM</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel28')">
-                <img src="https://i.ibb.co/rtPW6pV/R.png" alt="TMA Logo">
-                <div class="channel-name">TMA</div>
-            </div>
-            <!-- Newly added channels -->
-            <div class="channel" tabindex="0" onclick="openChannel('channel29')">
-                <img src="https://beltv.net/wp-content/uploads/2024/04/BEL-TV-LOGO.png" alt="Bel TV Logo">
-                <div class="channel-name">Bel TV</div>
-            </div> 
-            <div class="channel" tabindex="0" onclick="openChannel('channel30')">
-                <img src="https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png" alt="Tele Eclair Logo">
-                <div class="channel-name">Tele Eclair</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel31')">
-                <img src="https://televariete.com/tva30/logo.png" alt="TVA 30 Logo">
-                <div class="channel-name">TVA 30</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel32')">
-                <img src="https://cdn-radiotime-logos.tunein.com/s127273g.png" alt="Totalmix Radio">
-                <div class="channel-name">Totalmix Radio</div>
-            </div>
-            <div class="channel" tabindex="0" onclick="openChannel('channel33')">
-                <img src="https://i.ytimg.com/vi/G8E8iQtjiwE/hq720.jpg" alt="Television Caraibes">
-                <div class="channel-name">Television Caraibes</div>
-            </div>
-        </div>
+    <div class="channel-card" onclick="window.open('https://bfmtv-bfmtv-live-hls.cdn.orange.fr/live-bfmtv-bfmtv-hls/live.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/BFM_TV_logo_2021.svg/512px-BFM_TV_logo_2021.svg.png" alt="BFM TV" />
+      <div>BFM TV</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://rakuten-euronews-1-fr.samsung.wurl.tv/playlist.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Euronews_Logo_2016.svg/2560px-Euronews_Logo_2016.svg.png" alt="Euronews FR" />
+      <div>Euronews FR</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://cnews-live-hls.orange.fr/live/cnews-hls/live.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/CNEWS_Logo_2017.svg/1280px-CNEWS_Logo_2017.svg.png" alt="CNews" />
+      <div>CNews</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+  </div>
+</section>
+</div>
     </main>
+  </div>
 
-    <script src="script.js"></script>
+  <div id="videoModal" class="video-modal" style="display: none;">
+    <video id="videoPlayer" controls autoplay></video>
+    <div id="epgInfo">Now: N/A | Next: N/A</div>
+    <button id="closePlayer">Close</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
