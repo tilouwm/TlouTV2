@@ -262,12 +262,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     channels.forEach(channel => {
       const card = document.createElement("div");
-      card.className = "channel-card";
-      card.innerHTML = `
+      
+card.className = "channel-card";
+card.setAttribute("tabindex", "0");
+card.setAttribute("role", "button");
+card.innerHTML = `
         <img src="${channel.logo}" alt="${channel.name}" />
         <div>${channel.name}</div>
         <button class="fav-btn" title="Favorite">${favorites.includes(channel.id) ? "★" : "☆"}</button>
       `;
+card.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") playChannel(channel);
+});
+
       card.querySelector(".fav-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         toggleFavorite(channel.id);
@@ -342,12 +349,19 @@ document.addEventListener("DOMContentLoaded", () => {
     slider.classList.add("channel-slider");
     matches.forEach(channel => {
       const card = document.createElement("div");
-      card.className = "channel-card";
-      card.innerHTML = `
+      
+card.className = "channel-card";
+card.setAttribute("tabindex", "0");
+card.setAttribute("role", "button");
+card.innerHTML = `
         <img src="${channel.logo}" alt="${channel.name}" />
         <div>${channel.name}</div>
         <button class="fav-btn" title="Favorite">${favorites.includes(channel.id) ? "★" : "☆"}</button>
       `;
+card.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") playChannel(channel);
+});
+
       card.querySelector(".fav-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         toggleFavorite(channel.id);
