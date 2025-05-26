@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TlouTv 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h1 class="logo">TlouTv</h1>
+      <div class="search-tools">
+        <button id="toggleSearch">🔍</button>
+        <input type="text" id="searchInput" placeholder="Search..." style="display:none;" />
+        <button id="searchBtn" style="display:none;">Go</button>
+      </div>
+      <nav>
+        <ul>
+          <li class="menu-item" data-category="favorites">⭐ Favorites</li>
+          <li class="menu-item active" data-category="haiti">🇭🇹 Haiti</li>
+          <li class="menu-item" data-category="france">🇫🇷 France</li>
+          <li class="menu-item" data-category="usa">🇺🇸 USA</li>
+          <li class="menu-item" data-category="caribbean">🌴 Caribbean</li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div id="channelRows">
+<section class="channel-row" id="static-france">
+  <h2>France</h2>
+  <div class="channel-slider">
+    
+    <div class="channel-card" onclick="window.open('https://static.france24.com/live/F24_FR_HI/stream.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/France_24_logo.svg" alt="France 24 (FR)" />
+      <div>France 24 (FR)</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://live.tv5monde.com/tv5monde_stream/playlist.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/TV5Monde_logo_2016.svg" alt="TV5MONDE" />
+      <div>TV5MONDE</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://bfmtv-bfmtv-live-hls.cdn.orange.fr/live-bfmtv-bfmtv-hls/live.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/BFM_TV_logo_2021.svg/512px-BFM_TV_logo_2021.svg.png" alt="BFM TV" />
+      <div>BFM TV</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://rakuten-euronews-1-fr.samsung.wurl.tv/playlist.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Euronews_Logo_2016.svg/2560px-Euronews_Logo_2016.svg.png" alt="Euronews FR" />
+      <div>Euronews FR</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+
+    <div class="channel-card" onclick="window.open('https://cnews-live-hls.orange.fr/live/cnews-hls/live.m3u8', '_blank')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/CNEWS_Logo_2017.svg/1280px-CNEWS_Logo_2017.svg.png" alt="CNews" />
+      <div>CNews</div>
+      <button class="fav-btn" title="Favorite">☆</button>
+    </div>
+    
+  </div>
+</section>
+</div>
+    </main>
+  </div>
+
+  <div id="videoModal" class="video-modal" style="display: none;">
+    <video id="videoPlayer" controls autoplay></video>
+    <div id="epgInfo">Now: N/A | Next: N/A</div>
+    <button id="closePlayer">Close</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
