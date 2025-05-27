@@ -238,8 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stream: "https://cnews-live-hls.orange.fr/live/cnews-hls/live.m3u8"
       }
     ],
-    usa: [
-  {
+    usa: [{
     id: "usa_add_1",
     name: "ABC 25 Columbia",
     logo: "",
@@ -988,8 +987,7 @@ document.addEventListener("DOMContentLoaded", () => {
   name: "TV One",
   logo: "",
   stream: "https://fl3.moveonjoy.com/TV_ONE/index.m3u8"
-}
-],
+}]
 
     caribbean: []
   };
