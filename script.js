@@ -242,175 +242,169 @@ document.addEventListener("DOMContentLoaded", () => {
       {
     id: "usa_add_1",
     name: "ABC 25 Columbia",
-    logo: "",
+    logo: "https://wpcdn.us-east-1.vip.tn-cloud.net/www.abccolumbia.com/content/uploads/2022/10/t/q/wolo-abc-25-columbia-440x200-1.png",
     stream: "https://fl1.moveonjoy.com/ABC_EAST/index.m3u8"
   },
   {
     id: "usa_add_2",
-    name: "ACCN (720p)",
-    logo: "",
+    name: "ACCN",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN_-z1o5WkbiEgNyNS0CBdcynX0QS_l_7emA&s",
     stream: "https://fl3.moveonjoy.com/ACC_NETWORK/index.m3u8"
   },
   {
     id: "usa_add_3",
-    name: "AMC East (1080p)",
-    logo: "",
+    name: "AMC East",
+    logo: "https://1000logos.net/wp-content/uploads/2023/05/AMC-TV-Logo-2013.png",
     stream: "https://fl5.moveonjoy.com/AMC_NETWORK/index.m3u8"
   },
   {
     id: "usa_add_4",
     name: "Aspire",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Aspire_tv.png/1200px-Aspire_tv.png",
     stream: "https://fl3.moveonjoy.com/Aspire/index.m3u8"
   },
   {
     id: "usa_add_5",
     name: "BBC America East",
-    logo: "",
+    logo: "https://static.wikia.nocookie.net/logopedia/images/7/7d/BBC_America.svg/revision/latest?cb=20220330103750",
     stream: "https://fl3.moveonjoy.com/BBC_AMERICA/index.m3u8"
   },
   {
     id: "usa_add_6",
     name: "BBC News North America",
-    logo: "",
+    logo: "https://pbs.twimg.com/profile_images/1288471278953869320/Ki2rybZI_400x400.jpg",
     stream: "https://fl3.moveonjoy.com/BBC_WORLD_NEWS/index.m3u8"
   },
   {
     id: "usa_add_7",
     name: "BET East",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/BET-2021Logo.svg",
     stream: "https://fl3.moveonjoy.com/BET_EAST/index.m3u8"
   },
   {
     id: "usa_add_8",
     name: "BET Gospel",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/BET-2021Logo.svg",
     stream: "https://fl3.moveonjoy.com/BET_GOSPEL/index.m3u8"
   },
   {
     id: "usa_add_9",
     name: "BET Her East",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/BET-2021Logo.svg",
     stream: "https://fl3.moveonjoy.com/BET_HER/index.m3u8"
   },
   {
     id: "usa_add_10",
     name: "BET Jams",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/BET-2021Logo.svg",
     stream: "https://fl3.moveonjoy.com/BET_Jams/index.m3u8"
   },
   {
     id: "usa_add_11",
     name: "BET Soul",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/BET-2021Logo.svg",
     stream: "https://fl3.moveonjoy.com/BET_SOUL/index.m3u8"
   },
   {
     id: "usa_add_12",
     name: "Big Ten Network",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/en/3/39/Big_Ten_Network_Logo.svg",
     stream: "https://fl3.moveonjoy.com/BIG_TEN_NETWORK/index.m3u8"
   },
   {
     id: "usa_add_13",
     name: "Bloomberg TV",
-    logo: "",
+    logo: "https://cdn.worldvectorlogo.com/logos/bloomberg-television.svg",
     stream: "https://fl3.moveonjoy.com/BLOOMBERG/index.m3u8"
   },
   {
     id: "usa_add_14",
     name: "Bounce",
-    logo: "",
+    logo: "https://storage.googleapis.com/btvwp-uploads/2018/10/515d1f8b-bounce_logo_720x486.jpg",
     stream: "https://fl3.moveonjoy.com/BOUNCE_TV/index.m3u8"
   },
   {
     id: "usa_add_15",
     name: "Bravo East",
-    logo: "",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeTvn0YFu54_I272EC-WlFG9g_2AixhInMQA&s",
     stream: "https://fl3.moveonjoy.com/BRAVO/index.m3u8"
   },
   {
     id: "usa_add_16",
     name: "Buzzr",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/d/d6/Buzzr_logo.svg",
     stream: "https://fl3.moveonjoy.com/Buzzr/index.m3u8"
   },
   {
     id: "usa_add_17",
     name: "C-SPAN",
-    logo: "",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsHDHUb2SVaYQMchfssEQoA4ydIwQi4k8nQg&s",
     stream: "https://fl3.moveonjoy.com/C-SPAN/index.m3u8"
   },
   {
     id: "usa_add_18",
-    name: "CBS East (720p)",
-    logo: "",
+    name: "CBS East",
+    logo: "https://mms.businesswire.com/media/20201008005740/en/828766/5/cbs_hero_midnight_logo_092220.jpg?download=1",
     stream: "https://fl3.moveonjoy.com/CBS_News/index.m3u8"
   },
   {
     id: "usa_add_19",
     name: "CBS Sports Network USA",
-    logo: "",
+    logo: "https://public-assets-pressexpress.s3.amazonaws.com/assets/releases/docimages/2250/887144-854918/a4df4ef049b119253c9833bea8ed6515.jpg",
     stream: "https://fl3.moveonjoy.com/CBS_SPORTS_NETWORK/index.m3u8"
   },
   {
     id: "usa_add_20",
-    name: "Cleo TV (720p)",
-    logo: "",
+    name: "Cleo TV",
+    logo: "https://yt3.googleusercontent.com/mvn0bshh5-0dg2UipmuTFjE9EP8TEm4et3y4PxIeO86z7k9zELp_RC-lYAE5YCH2OsM3yA7ACRE=s900-c-k-c0x00ffffff-no-rj",
     stream: "https://fl3.moveonjoy.com/Cleo_TV/index.m3u8"
   },
   {
     id: "usa_add_21",
     name: "CMT East",
-    logo: "",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJNerMmzRfov4WRmqzeCXvk4Hkvk02pjzx1g&s",
     stream: "https://fl3.moveonjoy.com/CMT/index.m3u8"
   },
   {
     id: "usa_add_22",
     name: "CNBC",
-    logo: "",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/CNBC_2023.svg/1200px-CNBC_2023.svg.png",
     stream: "https://fl3.moveonjoy.com/CNBC/index.m3u8"
   },
   {
-    id: "usa_add_23",
-    name: "CNBC",
-    logo: "",
-    stream: "https://fl5.moveonjoy.com/CNBC/index.m3u8"
-  },
-  {
     id: "usa_add_24",
-    name: "Comedy Central East (720p)",
-    logo: "",
+    name: "Comedy Central East",
+    logo: "https://variety.com/wp-content/uploads/2013/10/comedy_central_logo-black.jpg",
     stream: "https://fl3.moveonjoy.com/Comedy_Central/index.m3u8"
   },
   {
     id: "usa_add_25",
-    name: "Comet (720p)",
-    logo: "",
+    name: "Comet",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/9/97/Comet_logo.svg",
     stream: "https://fl3.moveonjoy.com/COMET/index.m3u8"
   },
   {
   id: "usa_add_26",
   name: "Court TV",
-  logo: "",
+  logo: "https://upload.wikimedia.org/wikipedia/en/b/bf/Court_TV_2019.png",
   stream: "https://fl3.moveonjoy.com/COURT_TV/index.m3u8"
 },
 {
   id: "usa_add_27",
   name: "Cozi TV",
-  logo: "",
+  logo: "https://cdn.mos.cms.futurecdn.net/A2nAS4YiEfQAmjp87PbJ78-1200-80.jpg",
   stream: "https://fl3.moveonjoy.com/COZI_TV/index.m3u8"
 },
 {
   id: "usa_add_28",
   name: "Crave 1",
-  logo: "",
+  logo: "https://brucetelecom.com/wp-content/uploads/2019/12/Crave-1.png",
   stream: "https://fl3.moveonjoy.com/CRAVE_1/index.m3u8"
 },
 {
   id: "usa_add_29",
   name: "Crave 2",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVN8QzuooUeDoBoEac4WR0Okjig1tMW0wIGw&s",
   stream: "https://fl3.moveonjoy.com/CRAVE_2/index.m3u8"
 },
 {
