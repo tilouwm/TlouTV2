@@ -1048,19 +1048,21 @@ card.addEventListener("keydown", (e) => {
     renderChannels(activeTab);
   }
 
-  function playChannel(channel) {
-    const video = document.getElementById("videoPlayer");
-    const modal = document.getElementById("videoModal");
-    modal.style.display = "flex";
+ function playChannel(channel) {
+  const videoPlayer = document.getElementById("videoPlayer");
+  const videoModal = document.getElementById("videoModal");
 
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(channel.stream);
-      hls.attachMedia(video);
-    } else {
-      video.src = channel.stream;
-    }
+  videoPlayer.src = channel.stream;
+  videoModal.style.display = "flex";
+
+  // Fullscreen ONLY on Firestick / Android TV
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isFirestick = userAgent.includes("aft") || userAgent.includes("android tv");
+
+  if (isFirestick) {
+    videoPlayer.requestFullscreen?.();
   }
+}
 
   document.getElementById("closePlayer").onclick = () => {
     const modal = document.getElementById("videoModal");
