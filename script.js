@@ -238,7 +238,759 @@ document.addEventListener("DOMContentLoaded", () => {
         stream: "https://cnews-live-hls.orange.fr/live/cnews-hls/live.m3u8"
       }
     ],
-    usa: [],
+    usa: [
+  {
+    id: "usa_add_1",
+    name: "ABC 25 Columbia",
+    logo: "",
+    stream: "https://fl1.moveonjoy.com/ABC_EAST/index.m3u8"
+  },
+  {
+    id: "usa_add_2",
+    name: "ACCN (720p)",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/ACC_NETWORK/index.m3u8"
+  },
+  {
+    id: "usa_add_3",
+    name: "AMC East (1080p)",
+    logo: "",
+    stream: "https://fl5.moveonjoy.com/AMC_NETWORK/index.m3u8"
+  },
+  {
+    id: "usa_add_4",
+    name: "Aspire",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/Aspire/index.m3u8"
+  },
+  {
+    id: "usa_add_5",
+    name: "BBC America East",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BBC_AMERICA/index.m3u8"
+  },
+  {
+    id: "usa_add_6",
+    name: "BBC News North America",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BBC_WORLD_NEWS/index.m3u8"
+  },
+  {
+    id: "usa_add_7",
+    name: "BET East",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BET_EAST/index.m3u8"
+  },
+  {
+    id: "usa_add_8",
+    name: "BET Gospel",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BET_GOSPEL/index.m3u8"
+  },
+  {
+    id: "usa_add_9",
+    name: "BET Her East",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BET_HER/index.m3u8"
+  },
+  {
+    id: "usa_add_10",
+    name: "BET Jams",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BET_Jams/index.m3u8"
+  },
+  {
+    id: "usa_add_11",
+    name: "BET Soul",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BET_SOUL/index.m3u8"
+  },
+  {
+    id: "usa_add_12",
+    name: "Big Ten Network",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BIG_TEN_NETWORK/index.m3u8"
+  },
+  {
+    id: "usa_add_13",
+    name: "Bloomberg TV",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BLOOMBERG/index.m3u8"
+  },
+  {
+    id: "usa_add_14",
+    name: "Bounce",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BOUNCE_TV/index.m3u8"
+  },
+  {
+    id: "usa_add_15",
+    name: "Bravo East",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/BRAVO/index.m3u8"
+  },
+  {
+    id: "usa_add_16",
+    name: "Buzzr",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/Buzzr/index.m3u8"
+  },
+  {
+    id: "usa_add_17",
+    name: "C-SPAN",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/C-SPAN/index.m3u8"
+  },
+  {
+    id: "usa_add_18",
+    name: "CBS East (720p)",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/CBS_News/index.m3u8"
+  },
+  {
+    id: "usa_add_19",
+    name: "CBS Sports Network USA",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/CBS_SPORTS_NETWORK/index.m3u8"
+  },
+  {
+    id: "usa_add_20",
+    name: "Cleo TV (720p)",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/Cleo_TV/index.m3u8"
+  },
+  {
+    id: "usa_add_21",
+    name: "CMT East",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/CMT/index.m3u8"
+  },
+  {
+    id: "usa_add_22",
+    name: "CNBC",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/CNBC/index.m3u8"
+  },
+  {
+    id: "usa_add_23",
+    name: "CNBC",
+    logo: "",
+    stream: "https://fl5.moveonjoy.com/CNBC/index.m3u8"
+  },
+  {
+    id: "usa_add_24",
+    name: "Comedy Central East (720p)",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/Comedy_Central/index.m3u8"
+  },
+  {
+    id: "usa_add_25",
+    name: "Comet (720p)",
+    logo: "",
+    stream: "https://fl3.moveonjoy.com/COMET/index.m3u8"
+  },
+  {
+  id: "usa_add_26",
+  name: "Court TV",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/COURT_TV/index.m3u8"
+},
+{
+  id: "usa_add_27",
+  name: "Cozi TV",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/COZI_TV/index.m3u8"
+},
+{
+  id: "usa_add_28",
+  name: "Crave 1",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/CRAVE_1/index.m3u8"
+},
+{
+  id: "usa_add_29",
+  name: "Crave 2",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/CRAVE_2/index.m3u8"
+},
+{
+  id: "usa_add_30",
+  name: "Crave 3",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/CRAVE_3/index.m3u8"
+},
+{
+  id: "usa_add_31",
+  name: "Crave 4",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/CRAVE_4/index.m3u8"
+},
+{
+  id: "usa_add_32",
+  name: "CuriosityStream (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/Curiosity_Stream/index.m3u8"
+},
+{
+  id: "usa_add_33",
+  name: "Disney Channel East",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/DISNEY/index.m3u8"
+},
+{
+  id: "usa_add_34",
+  name: "Disney Junior East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/DISNEY_JR/index.m3u8"
+},
+{
+  id: "usa_add_35",
+  name: "Disney XD West (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/DISNEY_XD/index.m3u8"
+},
+{
+  id: "usa_add_36",
+  name: "E! East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/E_ENTERTAINMENT_TELEVISION/index.m3u8"
+},
+{
+  id: "usa_add_37",
+  name: "ESPN U (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/ESPN_U/index.m3u8"
+},
+{
+  id: "usa_add_38",
+  name: "ESPNews (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/ESPN_NEWS/index.m3u8"
+},
+{
+  id: "usa_add_39",
+  name: "Fox Business Network (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FOX_Business_Network/index.m3u8"
+},
+{
+  id: "usa_add_40",
+  name: "Fox News Channel (720p)",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_41",
+  name: "Fox News Channel (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_42",
+  name: "Fox News Channel (720p)",
+  logo: "",
+  stream: "https://fl4.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_43",
+  name: "Fox News Channel (720p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_44",
+  name: "Fox News Channel (720p)",
+  logo: "",
+  stream: "https://fl6.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_45",
+  name: "Fox Soul",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/FOX_SOUL/index.m3u8"
+},
+{
+  id: "usa_add_46",
+  name: "Fox Sports 1",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FOX_Sports_1/index.m3u8"
+},
+{
+  id: "usa_add_47",
+  name: "Free form East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FREE_FORM/index.m3u8"
+},
+{
+  id: "usa_add_48",
+  name: "Fuse East (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FUSE/index.m3u8"
+},
+{
+  id: "usa_add_49",
+  name: "FX East",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/FX/index.m3u8"
+},
+{
+  id: "usa_add_50",
+  name: "FXM East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FX_MOVIE/index.m3u8"
+},
+{
+  id: "usa_add_51",
+  name: "FXX East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FXX/index.m3u8"
+},
+{
+  id: "usa_add_52",
+  name: "FYI East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/FYI/index.m3u8"
+},
+{
+  id: "usa_add_53",
+  name: "GetTV (480p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/GET_TV/index.m3u8"
+},
+{
+  id: "usa_add_54",
+  name: "Golf Channel",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/GOLF_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_55",
+  name: "Grit",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/GRIT_TV/index.m3u8"
+},
+{
+  id: "usa_add_56",
+  name: "Hallmark Channel East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/HALLMARK_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_57",
+  name: "Hallmark Drama (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/HALLMARK_DRAMA/index.m3u8"
+},
+{
+  id: "usa_add_58",
+  name: "Hallmark Movies Mysteries East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/HALLMARK_MOVIES_MYSTERIES/index.m3u8"
+},
+{
+  id: "usa_add_59",
+  name: "HSN",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/HSN/index.m3u8"
+},
+{
+  id: "usa_add_60",
+  name: "INSP",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/INSP/index.m3u8"
+},
+{
+  id: "usa_add_61",
+  name: "ION Plus East (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/ION_Plus/index.m3u8"
+},
+{
+  id: "usa_add_62",
+  name: "ION TV East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/ION_TV/index.m3u8"
+},
+{
+  id: "usa_add_63",
+  name: "KSAT-DT2 (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/ME_TV/index.m3u8"
+},
+{
+  id: "usa_add_64",
+  name: "Lifetime East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/LIFETIME/index.m3u8"
+},
+{
+  id: "usa_add_65",
+  name: "Lifetime Movies East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/LIFETIME_MOVIE_NETWORK/index.m3u8"
+},
+{
+  id: "usa_add_66",
+  name: "Love Nature",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/LOVE_NATURE/index.m3u8"
+},
+{
+  id: "usa_add_67",
+  name: "MAV TV (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MAV_TV/index.m3u8"
+},
+{
+  id: "usa_add_68",
+  name: "MGM+ East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/EPIX/index.m3u8"
+},
+{
+  id: "usa_add_69",
+  name: "MGM+ Marquee",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/EPIX_DRIVE_IN/index.m3u8"
+},
+{
+  id: "usa_add_70",
+  name: "MLB Network",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MLB_NETWORK/index.m3u8"
+},
+{
+  id: "usa_add_71",
+  name: "MSG",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MSG/index.m3u8"
+},
+{
+  id: "usa_add_72",
+  name: "MTV2 (720p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/MTV_2/index.m3u8"
+},
+{
+  id: "usa_add_73",
+  name: "MTV2 East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MTV_2/index.m3u8"
+},
+{
+  id: "usa_add_74",
+  name: "MTV Classic (360p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/MTV_CLASSIC/index.m3u8"
+},
+{
+  id: "usa_add_75",
+  name: "MTV Classic East (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MTV_CLASSIC/index.m3u8"
+},
+{
+  id: "usa_add_76",
+  name: "MTV East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MTV/index.m3u8"
+},
+{
+  id: "usa_add_77",
+  name: "MTV Live",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MTV_LIVE/index.m3u8"
+},
+{
+  id: "usa_add_78",
+  name: "MTV Live (720p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/MTV_LIVE/index.m3u8"
+},
+{
+  id: "usa_add_79",
+  name: "MTVU",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/MTV_U/index.m3u8"
+},
+{
+  id: "usa_add_80",
+  name: "mtvU (480p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/MTV_U/index.m3u8"
+},
+{
+  id: "usa_add_81",
+  name: "Much (720p)",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/MUCH/index.m3u8"
+},
+{
+  id: "usa_add_82",
+  name: "National Geographic East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/National_Geographic/index.m3u8"
+},
+{
+  id: "usa_add_83",
+  name: "National Geographic Wild East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/Nat_Geo_Wild/index.m3u8"
+},
+{
+  id: "usa_add_84",
+  name: "NBA TV",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NBA_TV/index.m3u8"
+},
+{
+  id: "usa_add_85",
+  name: "News Nation (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NEWS_NATION/index.m3u8"
+},
+{
+  id: "usa_add_86",
+  name: "NFL Network",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NFL_NETWORK/index.m3u8"
+},
+{
+  id: "usa_add_87",
+  name: "NFL RedZone",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/NFL_RedZone/index.m3u8"
+},
+{
+  id: "usa_add_88",
+  name: "NHL Network (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NHL_NETWORK/index.m3u8"
+},
+{
+  id: "usa_add_89",
+  name: "Nick Jr East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NICK_JR/index.m3u8"
+},
+{
+  id: "usa_add_90",
+  name: "Nick Jr. East (720p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/NICK_JR/index.m3u8"
+},
+{
+  id: "usa_add_91",
+  name: "Nick Music (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/NICK_MUSIC/index.m3u8"
+},
+{
+  id: "usa_add_92",
+  name: "Nick Music (480p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/NICK_MUSIC/index.m3u8"
+},
+{
+  id: "usa_add_93",
+  name: "Nicktoons East",
+  logo: "",
+  stream: "https://fl1.moveonjoy.com/NICKTOONS/index.m3u8"
+},
+{
+  id: "usa_add_94",
+  name: "Outdoor Channel",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/OUTDOOR_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_95",
+  name: "OuterMax East (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/OUTER_MAX/index.m3u8"
+},
+{
+  id: "usa_add_96",
+  name: "Outside TV",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/OUTSIDE_TV/index.m3u8"
+},
+{
+  id: "usa_add_97",
+  name: "Ovation (1080p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/Ovation/index.m3u8"
+},
+{
+  id: "usa_add_98",
+  name: "Oxygen East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/OXYGEN/index.m3u8"
+},
+{
+  id: "usa_add_99",
+  name: "Paramount Network East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/PARAMOUNT_NETWORK/index.m3u8"
+},
+{
+  id: "usa_add_100",
+  name: "Pursuit Channel (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/Pursuit_Channel/index.m3u8"
+},
+{
+  id: "usa_add_101",
+  name: "QVC (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/QVC/index.m3u8"
+},
+{
+  id: "usa_add_102",
+  name: "Reelz (720p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/REELZ/index.m3u8"
+},
+{
+  id: "usa_add_103",
+  name: "Revolt",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/REVOLT/index.m3u8"
+},
+{
+  id: "usa_add_104",
+  name: "Showtime 2 East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SHOWTIME_2/index.m3u8"
+},
+{
+  id: "usa_add_105",
+  name: "Showtime East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SHOWTIME/index.m3u8"
+},
+{
+  id: "usa_add_106",
+  name: "Showtime Next East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SHOWTIME_NEXT/index.m3u8"
+},
+{
+  id: "usa_add_107",
+  name: "Showtime West (1080p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SHOWTIME_WEST/index.m3u8"
+},
+{
+  id: "usa_add_108",
+  name: "Showtime Women East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SHOWTIME_WOMEN/index.m3u8"
+},
+{
+  id: "usa_add_109",
+  name: "Smithsonian Channel East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SMITHSONIAN_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_110",
+  name: "Sportsman Channel",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SPORTSMAN_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_111",
+  name: "SportsNet New York (540p)",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SNY/index.m3u8"
+},
+{
+  id: "usa_add_112",
+  name: "Start TV",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/Start_Tv/index.m3u8"
+},
+{
+  id: "usa_add_113",
+  name: "Starz East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/STARZ/index.m3u8"
+},
+{
+  id: "usa_add_114",
+  name: "Starz Encore Classic East",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/STARZ_ENCORE_CLASSIC/index.m3u8"
+},
+{
+  id: "usa_add_115",
+  name: "Starz West",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/STARZ_WEST/index.m3u8"
+},
+{
+  id: "usa_add_116",
+  name: "Sundance TV East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SUNDANCE/index.m3u8"
+},
+{
+  id: "usa_add_117",
+  name: "Syfy East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/SYFY/index.m3u8"
+},
+{
+  id: "usa_add_118",
+  name: "Tennis Channel",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/TENNIS_CHANNEL/index.m3u8"
+},
+{
+  id: "usa_add_119",
+  name: "TSN1 (1080p)",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/TSN_1/index.m3u8"
+},
+{
+  id: "usa_add_120",
+  name: "TSN2",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/TSN_2/index.m3u8"
+},
+{
+  id: "usa_add_121",
+  name: "TSN3",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/TSN_3/index.m3u8"
+},
+{
+  id: "usa_add_122",
+  name: "TSN4",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/TSN_4/index.m3u8"
+},
+{
+  id: "usa_add_123",
+  name: "TSN5",
+  logo: "",
+  stream: "https://fl5.moveonjoy.com/TSN_5/index.m3u8"
+},
+{
+  id: "usa_add_124",
+  name: "TV Land East",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/TV_Land/index.m3u8"
+},
+{
+  id: "usa_add_125",
+  name: "TV One",
+  logo: "",
+  stream: "https://fl3.moveonjoy.com/TV_ONE/index.m3u8"
+}
+],
+
     caribbean: []
   };
 
