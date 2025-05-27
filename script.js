@@ -410,577 +410,373 @@ document.addEventListener("DOMContentLoaded", () => {
 {
   id: "usa_add_30",
   name: "Crave 3",
-  logo: "",
+  logo: "https://www.start.ca/wp-content/uploads/2022/09/StartTV_ChannelLogos_Crave3.png",
   stream: "https://fl3.moveonjoy.com/CRAVE_3/index.m3u8"
 },
 {
   id: "usa_add_31",
   name: "Crave 4",
-  logo: "",
+  logo: "https://www.cooptel.ca/wp-content/uploads/2022/01/Crave4.png",
   stream: "https://fl3.moveonjoy.com/CRAVE_4/index.m3u8"
-},
-{
-  id: "usa_add_32",
-  name: "CuriosityStream (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/Curiosity_Stream/index.m3u8"
 },
 {
   id: "usa_add_33",
   name: "Disney Channel East",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/dreamlogos/images/4/48/Disney_channel_Logo_2010.png",
   stream: "https://fl5.moveonjoy.com/DISNEY/index.m3u8"
 },
 {
   id: "usa_add_34",
   name: "Disney Junior East",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/tgif/images/8/83/Disney_Junior_Logo.png/revision/latest?cb=20230529162024",
   stream: "https://fl3.moveonjoy.com/DISNEY_JR/index.m3u8"
 },
 {
   id: "usa_add_35",
-  name: "Disney XD West (720p)",
-  logo: "",
+  name: "Disney XD West",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/2015_Disney_XD_logo.svg/800px-2015_Disney_XD_logo.svg.png",
   stream: "https://fl3.moveonjoy.com/DISNEY_XD/index.m3u8"
 },
 {
   id: "usa_add_36",
   name: "E! East",
-  logo: "",
+  logo: "https://yt3.googleusercontent.com/5dENunTd9mqCTygK6W2EBKC7aWW_v4odPBFVikDFIXvGJXv8wpiTdQycysr9P4cyzBjAnXkwZA=s900-c-k-c0x00ffffff-no-rj",
   stream: "https://fl3.moveonjoy.com/E_ENTERTAINMENT_TELEVISION/index.m3u8"
 },
 {
   id: "usa_add_37",
-  name: "ESPN U (720p)",
-  logo: "",
+  name: "ESPN U",
+  logo: "https://static.wikia.nocookie.net/disney/images/6/62/2000px-ESPN_U.svg.png/revision/latest?cb=20121029061856",
   stream: "https://fl3.moveonjoy.com/ESPN_U/index.m3u8"
 },
 {
   id: "usa_add_38",
-  name: "ESPNews (720p)",
-  logo: "",
+  name: "ESPNews",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkHwQu-zJYQZ-35odEWWMpzg4AUGrCv4mLWw&s",
   stream: "https://fl3.moveonjoy.com/ESPN_NEWS/index.m3u8"
 },
 {
   id: "usa_add_39",
-  name: "Fox Business Network (720p)",
-  logo: "",
+  name: "Fox Business Network",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNai03uLWEQU2VNYbFtBo22ZOdLGzIFLpPOg&s",
   stream: "https://fl3.moveonjoy.com/FOX_Business_Network/index.m3u8"
 },
 {
   id: "usa_add_40",
-  name: "Fox News Channel (720p)",
-  logo: "",
+  name: "Fox News Channel",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Fox_News_Channel_logo.svg/1200px-Fox_News_Channel_logo.svg.png",
   stream: "https://fl1.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_41",
-  name: "Fox News Channel (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_42",
-  name: "Fox News Channel (720p)",
-  logo: "",
-  stream: "https://fl4.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_43",
-  name: "Fox News Channel (720p)",
-  logo: "",
-  stream: "https://fl5.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_44",
-  name: "Fox News Channel (720p)",
-  logo: "",
-  stream: "https://fl6.moveonjoy.com/FOX_NEWS_CHANNEL/index.m3u8"
 },
 {
   id: "usa_add_45",
   name: "Fox Soul",
-  logo: "",
+  logo: "https://images-cdn1.welcomesoftware.com/assets/fox+soul.jpg/Zz0wZGFmNWM3OGEyMDMxMWVmYTEwM2QyZTIxN2ExY2U1OA==?width=768&height=430",
   stream: "https://fl1.moveonjoy.com/FOX_SOUL/index.m3u8"
 },
 {
   id: "usa_add_46",
   name: "Fox Sports 1",
-  logo: "",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/2015_Fox_Sports_1_logo.svg/1200px-2015_Fox_Sports_1_logo.svg.png",
   stream: "https://fl3.moveonjoy.com/FOX_Sports_1/index.m3u8"
 },
 {
   id: "usa_add_47",
   name: "Free form East",
-  logo: "",
+  logo: "https://assets.cdn.watchdisneyfe.com/delta/assets/freeform/freeform-new-og.jpg",
   stream: "https://fl3.moveonjoy.com/FREE_FORM/index.m3u8"
 },
 {
   id: "usa_add_48",
-  name: "Fuse East (720p)",
-  logo: "",
+  name: "Fuse East",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/c/c2/Fuse_Black_Logo_2017.png",
   stream: "https://fl3.moveonjoy.com/FUSE/index.m3u8"
 },
 {
   id: "usa_add_49",
   name: "FX East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwPbDnP0clpoBoMBh_S1Cjnrb3fdjYXbrL_Q&s",
   stream: "https://fl5.moveonjoy.com/FX/index.m3u8"
 },
 {
   id: "usa_add_50",
   name: "FXM East",
-  logo: "",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/FX_Movies_logo.svg/1200px-FX_Movies_logo.svg.png",
   stream: "https://fl3.moveonjoy.com/FX_MOVIE/index.m3u8"
 },
 {
   id: "usa_add_51",
   name: "FXX East",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/logo-timeline/images/1/11/FXX.png/revision/latest?cb=20191230235038",
   stream: "https://fl3.moveonjoy.com/FXX/index.m3u8"
 },
 {
   id: "usa_add_52",
   name: "FYI East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTLSRenw5gtqCGVk20rfOFf8E-ExU8x_xpMA&s",
   stream: "https://fl3.moveonjoy.com/FYI/index.m3u8"
-},
-{
-  id: "usa_add_53",
-  name: "GetTV (480p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/GET_TV/index.m3u8"
-},
-{
-  id: "usa_add_54",
-  name: "Golf Channel",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/GOLF_CHANNEL/index.m3u8"
 },
 {
   id: "usa_add_55",
   name: "Grit",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/logopedia/images/0/0d/Grit_TV_White.png/revision/latest?cb=20220930152416",
   stream: "https://fl3.moveonjoy.com/GRIT_TV/index.m3u8"
 },
 {
   id: "usa_add_56",
   name: "Hallmark Channel East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-J7zIbdW9VBBgM_qI1YiOcZUtpPUJD7o6zA&s",
   stream: "https://fl3.moveonjoy.com/HALLMARK_CHANNEL/index.m3u8"
 },
 {
   id: "usa_add_57",
-  name: "Hallmark Drama (720p)",
-  logo: "",
+  name: "Hallmark Drama",
+  logo: "https://static.wikia.nocookie.net/logopedia/images/3/33/Hallmark_Drama_%28Gold%29.svg/revision/latest?cb=20171130164502",
   stream: "https://fl3.moveonjoy.com/HALLMARK_DRAMA/index.m3u8"
 },
 {
   id: "usa_add_58",
   name: "Hallmark Movies Mysteries East",
-  logo: "",
+  logo: "https://w7.pngwing.com/pngs/5/426/png-transparent-hallmark-movies-mysteries-television-channel-hallmark-channel-television-show-movies-miscellaneous-television-blue.png",
   stream: "https://fl3.moveonjoy.com/HALLMARK_MOVIES_MYSTERIES/index.m3u8"
 },
 {
-  id: "usa_add_59",
-  name: "HSN",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/HSN/index.m3u8"
-},
-{
-  id: "usa_add_60",
-  name: "INSP",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/INSP/index.m3u8"
-},
-{
   id: "usa_add_61",
-  name: "ION Plus East (720p)",
-  logo: "",
+  name: "ION Plus East",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/3/31/ION_Plus_logo.svg",
   stream: "https://fl3.moveonjoy.com/ION_Plus/index.m3u8"
 },
 {
   id: "usa_add_62",
   name: "ION TV East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEtcBJTvmPG5_4v1lhDP0OmPHO8a6xzmoPJQ&s",
   stream: "https://fl3.moveonjoy.com/ION_TV/index.m3u8"
-},
-{
-  id: "usa_add_63",
-  name: "KSAT-DT2 (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/ME_TV/index.m3u8"
 },
 {
   id: "usa_add_64",
   name: "Lifetime East",
-  logo: "",
+  logo: "https://seeklogo.com/images/L/lifetime-tv-logo-F20AAEFC65-seeklogo.com.png",
   stream: "https://fl3.moveonjoy.com/LIFETIME/index.m3u8"
 },
 {
   id: "usa_add_65",
   name: "Lifetime Movies East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPIsc5e84R2yGOBzTfRYrDrWPS1XxGSDnwfg&s",
   stream: "https://fl3.moveonjoy.com/LIFETIME_MOVIE_NETWORK/index.m3u8"
-},
-{
-  id: "usa_add_66",
-  name: "Love Nature",
-  logo: "",
-  stream: "https://fl1.moveonjoy.com/LOVE_NATURE/index.m3u8"
-},
-{
-  id: "usa_add_67",
-  name: "MAV TV (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/MAV_TV/index.m3u8"
 },
 {
   id: "usa_add_68",
   name: "MGM+ East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRodA0w8wryO_aWhBpe2VFse-H3t2ku2krSuQ&s",
   stream: "https://fl3.moveonjoy.com/EPIX/index.m3u8"
 },
 {
   id: "usa_add_69",
   name: "MGM+ Marquee",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSAf8b2zYbf2FFZnrb8UUue458Czph5Qileg&s",
   stream: "https://fl3.moveonjoy.com/EPIX_DRIVE_IN/index.m3u8"
-},
-{
-  id: "usa_add_70",
-  name: "MLB Network",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/MLB_NETWORK/index.m3u8"
 },
 {
   id: "usa_add_71",
   name: "MSG",
-  logo: "",
+  logo: "https://www.tvguide.com/a/img/resize/85ca5dd1f043693fce1aebaa8514d4eddd9efd81/hub/2023/03/28/d9eb9621-3fbf-490e-8382-c682223fe857/msglogo.png?auto=webp&format=pjpg",
   stream: "https://fl3.moveonjoy.com/MSG/index.m3u8"
 },
 {
   id: "usa_add_72",
   name: "MTV2 (720p)",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbVX8N9caR7p2W_ortNcizqoqknzxTks7RBQ&s",
   stream: "https://fl5.moveonjoy.com/MTV_2/index.m3u8"
 },
 {
-  id: "usa_add_73",
-  name: "MTV2 East",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/MTV_2/index.m3u8"
-},
-{
-  id: "usa_add_74",
-  name: "MTV Classic (360p)",
-  logo: "",
-  stream: "https://fl5.moveonjoy.com/MTV_CLASSIC/index.m3u8"
-},
-{
   id: "usa_add_75",
-  name: "MTV Classic East (720p)",
-  logo: "",
+  name: "MTV Classic East",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/1/10/MTV_Classic_US.svg",
   stream: "https://fl3.moveonjoy.com/MTV_CLASSIC/index.m3u8"
 },
 {
-  id: "usa_add_76",
-  name: "MTV East",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/MTV/index.m3u8"
-},
-{
-  id: "usa_add_77",
-  name: "MTV Live",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/MTV_LIVE/index.m3u8"
-},
-{
   id: "usa_add_78",
-  name: "MTV Live (720p)",
-  logo: "",
+  name: "MTV Live",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMCRxr3ARrMGyNPsZZE7Pij1zh3hx9X8_afw&s",
   stream: "https://fl5.moveonjoy.com/MTV_LIVE/index.m3u8"
 },
 {
   id: "usa_add_79",
   name: "MTVU",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFTiUoU82UF2uuA4J5JY5Dd2pQwH1hUcj9ug&s",
   stream: "https://fl3.moveonjoy.com/MTV_U/index.m3u8"
-},
-{
-  id: "usa_add_80",
-  name: "mtvU (480p)",
-  logo: "",
-  stream: "https://fl5.moveonjoy.com/MTV_U/index.m3u8"
 },
 {
   id: "usa_add_81",
   name: "Much (720p)",
-  logo: "",
+  logo: "https://static.tvtropes.org/pmwiki/pub/images/297px_muchmusic_logosvg.png",
   stream: "https://fl1.moveonjoy.com/MUCH/index.m3u8"
 },
 {
   id: "usa_add_82",
   name: "National Geographic East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIzwzDXCZwlRY36-gtGasdQWUiuN5Vhuwpvg&s",
   stream: "https://fl3.moveonjoy.com/National_Geographic/index.m3u8"
 },
 {
   id: "usa_add_83",
   name: "National Geographic Wild East",
-  logo: "",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/National_Geographic_Wild_logo.svg/1200px-National_Geographic_Wild_logo.svg.png",
   stream: "https://fl3.moveonjoy.com/Nat_Geo_Wild/index.m3u8"
 },
 {
   id: "usa_add_84",
   name: "NBA TV",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKZFiCQeT2twfp-iI5i2GAeODTyC3nGG9Vhg&s",
   stream: "https://fl3.moveonjoy.com/NBA_TV/index.m3u8"
 },
 {
-  id: "usa_add_85",
-  name: "News Nation (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/NEWS_NATION/index.m3u8"
-},
-{
-  id: "usa_add_86",
-  name: "NFL Network",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/NFL_NETWORK/index.m3u8"
-},
-{
-  id: "usa_add_87",
-  name: "NFL RedZone",
-  logo: "",
-  stream: "https://fl1.moveonjoy.com/NFL_RedZone/index.m3u8"
-},
-{
-  id: "usa_add_88",
-  name: "NHL Network (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/NHL_NETWORK/index.m3u8"
-},
-{
-  id: "usa_add_89",
-  name: "Nick Jr East",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/NICK_JR/index.m3u8"
-},
-{
   id: "usa_add_90",
-  name: "Nick Jr. East (720p)",
-  logo: "",
+  name: "Nick Jr. East",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEScHipCYb9eKnxlmAs_3-DAVbVuOxwK2yBQ&s",
   stream: "https://fl5.moveonjoy.com/NICK_JR/index.m3u8"
 },
 {
   id: "usa_add_91",
-  name: "Nick Music (720p)",
-  logo: "",
+  name: "Nick Music",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbY2G7jmTxniEqH-nhDLg3BTG1lgYpA9hmjA&s",
   stream: "https://fl3.moveonjoy.com/NICK_MUSIC/index.m3u8"
-},
-{
-  id: "usa_add_92",
-  name: "Nick Music (480p)",
-  logo: "",
-  stream: "https://fl5.moveonjoy.com/NICK_MUSIC/index.m3u8"
 },
 {
   id: "usa_add_93",
   name: "Nicktoons East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXEgXKyX_NeizFt7UPM5jYGjnXRoGy5Xc2Qw&s",
   stream: "https://fl1.moveonjoy.com/NICKTOONS/index.m3u8"
-},
-{
-  id: "usa_add_94",
-  name: "Outdoor Channel",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/OUTDOOR_CHANNEL/index.m3u8"
 },
 {
   id: "usa_add_95",
   name: "OuterMax East (720p)",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/logosfake/images/b/b5/OuterMax_%282001%29.svg/revision/latest?cb=20210119152852",
   stream: "https://fl3.moveonjoy.com/OUTER_MAX/index.m3u8"
-},
-{
-  id: "usa_add_96",
-  name: "Outside TV",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/OUTSIDE_TV/index.m3u8"
-},
-{
-  id: "usa_add_97",
-  name: "Ovation (1080p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/Ovation/index.m3u8"
 },
 {
   id: "usa_add_98",
   name: "Oxygen East",
-  logo: "",
+  logo: "https://www.tvinsider.com/wp-content/uploads/2020/05/oxygen.png",
   stream: "https://fl3.moveonjoy.com/OXYGEN/index.m3u8"
 },
 {
   id: "usa_add_99",
   name: "Paramount Network East",
-  logo: "",
+  logo: "https://yt3.googleusercontent.com/nX44BMyDJbQEAiu7EIi3tCc3vjVNyywnp35ZPKFkp2g9MGKwdTHIrKsj9tZsRjGdmcrBnC0B=s900-c-k-c0x00ffffff-no-rj",
   stream: "https://fl3.moveonjoy.com/PARAMOUNT_NETWORK/index.m3u8"
-},
-{
-  id: "usa_add_100",
-  name: "Pursuit Channel (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/Pursuit_Channel/index.m3u8"
-},
-{
-  id: "usa_add_101",
-  name: "QVC (720p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/QVC/index.m3u8"
 },
 {
   id: "usa_add_102",
   name: "Reelz (720p)",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWQSaJB4n1YVcfJjmuy85iNdIiFsm85kNcIg&s",
   stream: "https://fl3.moveonjoy.com/REELZ/index.m3u8"
 },
 {
   id: "usa_add_103",
   name: "Revolt",
-  logo: "",
+  logo: "https://cdnimg.spectrum.net/imageserver/image/default?providerId=REVOLT_TV_HD&productId=MUSOD&sourceType=colorHybrid",
   stream: "https://fl3.moveonjoy.com/REVOLT/index.m3u8"
 },
 {
   id: "usa_add_104",
   name: "Showtime 2 East",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/logopedia/images/3/34/Showtime_2_East_%281997%29.svg/revision/latest?cb=20250211205009",
   stream: "https://fl3.moveonjoy.com/SHOWTIME_2/index.m3u8"
 },
 {
   id: "usa_add_105",
   name: "Showtime East",
-  logo: "",
+  logo: "https://cordcutting.com/wp-content/uploads/2019/12/Showtime-Logo-New.png",
   stream: "https://fl3.moveonjoy.com/SHOWTIME/index.m3u8"
 },
 {
   id: "usa_add_106",
   name: "Showtime Next East",
-  logo: "",
+  logo: "https://static.wikia.nocookie.net/logopedia/images/7/78/Showtime_Next_%282022-%29.svg/revision/latest/scale-to-width-down/300?cb=20230126015111",
   stream: "https://fl3.moveonjoy.com/SHOWTIME_NEXT/index.m3u8"
 },
 {
   id: "usa_add_107",
-  name: "Showtime West (1080p)",
-  logo: "",
+  name: "Showtime West",
+  logo: "https://cdn.freebiesupply.com/logos/thumbs/2x/showtime-west-logo.png",
   stream: "https://fl3.moveonjoy.com/SHOWTIME_WEST/index.m3u8"
 },
 {
   id: "usa_add_108",
   name: "Showtime Women East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFp0Cak_gOInKsfkWGzNfv7B7SZzwqZH5opQ&s",
   stream: "https://fl3.moveonjoy.com/SHOWTIME_WOMEN/index.m3u8"
-},
-{
-  id: "usa_add_109",
-  name: "Smithsonian Channel East",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/SMITHSONIAN_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_110",
-  name: "Sportsman Channel",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/SPORTSMAN_CHANNEL/index.m3u8"
-},
-{
-  id: "usa_add_111",
-  name: "SportsNet New York (540p)",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/SNY/index.m3u8"
-},
-{
-  id: "usa_add_112",
-  name: "Start TV",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/Start_Tv/index.m3u8"
 },
 {
   id: "usa_add_113",
   name: "Starz East",
-  logo: "",
+  logo: "https://yt3.googleusercontent.com/Q_vwnQ-ml3qjT9WU1Ji6aiPyHTqw2-DRE0selV1F2KdXnV8YI-pQb4r55bcEnXNUP3ja2YYK=s900-c-k-c0x00ffffff-no-rj",
   stream: "https://fl3.moveonjoy.com/STARZ/index.m3u8"
 },
 {
   id: "usa_add_114",
   name: "Starz Encore Classic East",
-  logo: "",
+  logo: "https://upload.wikimedia.org/wikipedia/commons/1/19/Starz_Encore_Classic.svg",
   stream: "https://fl5.moveonjoy.com/STARZ_ENCORE_CLASSIC/index.m3u8"
 },
 {
   id: "usa_add_115",
   name: "Starz West",
-  logo: "",
+  logo: "https://cdn.freebiesupply.com/logos/large/2x/starz-west-logo-svg-vector.svg",
   stream: "https://fl3.moveonjoy.com/STARZ_WEST/index.m3u8"
 },
 {
   id: "usa_add_116",
   name: "Sundance TV East",
-  logo: "",
+  logo: "https://www.hollywoodreporter.com/wp-content/uploads/2014/01/sundancetv_logo_a_l.jpg",
   stream: "https://fl3.moveonjoy.com/SUNDANCE/index.m3u8"
 },
 {
   id: "usa_add_117",
   name: "Syfy East",
-  logo: "",
+  logo: "https://yt3.googleusercontent.com/PAO1zdi5-ZWaGxsxARO14s66fAZ201ufG0qDdyFk0TMID7cs_s3xEmTxTWEgI2wKJd5d85N3l3I=s900-c-k-c0x00ffffff-no-rj",
   stream: "https://fl3.moveonjoy.com/SYFY/index.m3u8"
 },
 {
-  id: "usa_add_118",
-  name: "Tennis Channel",
-  logo: "",
-  stream: "https://fl3.moveonjoy.com/TENNIS_CHANNEL/index.m3u8"
-},
-{
   id: "usa_add_119",
-  name: "TSN1 (1080p)",
-  logo: "",
+  name: "TSN1",
+  logo: "https://www.tsn.ca/polopoly_fs/1.1104783!/fileimage/httpImage/image.jpg_gen/derivatives/landscape_620/tsn.jpg",
   stream: "https://fl5.moveonjoy.com/TSN_1/index.m3u8"
 },
 {
   id: "usa_add_120",
   name: "TSN2",
-  logo: "",
+  logo: "https://www.tsn.ca/polopoly_fs/1.1104783!/fileimage/httpImage/image.jpg_gen/derivatives/landscape_620/tsn.jpg",
   stream: "https://fl5.moveonjoy.com/TSN_2/index.m3u8"
 },
 {
   id: "usa_add_121",
   name: "TSN3",
-  logo: "",
+  logo: "https://www.tsn.ca/polopoly_fs/1.1104783!/fileimage/httpImage/image.jpg_gen/derivatives/landscape_620/tsn.jpg",
   stream: "https://fl5.moveonjoy.com/TSN_3/index.m3u8"
 },
 {
   id: "usa_add_122",
   name: "TSN4",
-  logo: "",
+  logo: "https://www.tsn.ca/polopoly_fs/1.1104783!/fileimage/httpImage/image.jpg_gen/derivatives/landscape_620/tsn.jpg",
   stream: "https://fl5.moveonjoy.com/TSN_4/index.m3u8"
 },
 {
   id: "usa_add_123",
   name: "TSN5",
-  logo: "",
+  logo: "https://www.tsn.ca/polopoly_fs/1.1104783!/fileimage/httpImage/image.jpg_gen/derivatives/landscape_620/tsn.jpg",
   stream: "https://fl5.moveonjoy.com/TSN_5/index.m3u8"
 },
 {
   id: "usa_add_124",
   name: "TV Land East",
-  logo: "",
+  logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmPRBJpl2ayOfp9ooR5E9XC6nMerBr_VK9KQ&s",
   stream: "https://fl3.moveonjoy.com/TV_Land/index.m3u8"
 },
 {
   id: "usa_add_125",
   name: "TV One",
-  logo: "",
+  logo: "https://i1.wp.com/tvone.tv/wp-content/uploads/sites/97/2017/01/Logo-2.jpg?zoom=2&resize=266%2C266&quality=80&strip=all&ssl=1",
   stream: "https://fl3.moveonjoy.com/TV_ONE/index.m3u8"
 }
     ],
