@@ -1203,3 +1203,20 @@ card.addEventListener("keydown", (e) => {
 
   renderChannels("haiti");
 });
+
+document.addEventListener("keydown", function(e) {
+  const focused = document.activeElement;
+  const isMenu = focused.closest("#menu");
+  const isGrid = focused.closest(".channel-list");
+
+  if (e.key === "ArrowRight" && isMenu) {
+    const firstChannel = document.querySelector(".channel-list .channel");
+    if (firstChannel) firstChannel.focus();
+    e.preventDefault();
+  } else if (e.key === "ArrowLeft" && isGrid) {
+    const firstMenu = document.querySelector("#menu button, #menu .menu-item");
+    if (firstMenu) firstMenu.focus();
+    e.preventDefault();
+  }
+});
+
