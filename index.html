@@ -314,12 +314,6 @@
             },
             {
                 "id": "channel33",
-                "name": "Television Caraibes",
-                "logo": "https://i.ytimg.com/vi/G8E8iQtjiwE/hq720.jpg",
-                "stream": "https://customer-gllhkkbamkskdl1p.cloudflarestream.com/.../stream.m3u8"
-            },
-            {
-                "id": "channel34",
                 "name": "Rezo Boul",
                 "logo": "https://www.rezoboul.com/uploads/images/logo_site_1714115779.png",
                 "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8"
@@ -382,6 +376,8 @@
                         videoPlayer.play();
                     });
 
+                    // --- NEW LOGIC FOR ERROR RECOVERY ---
+                    let errorRetries = 0;
                     hlsInstance.on(Hls.Events.ERROR, (event, data) => {
                         console.error('HLS.js error:', data);
                         if (data.fatal) {
@@ -390,7 +386,14 @@
                                     displayErrorMessage("Network error: Stream failed to load.");
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    displayErrorMessage("Media error: Failed to play stream. Audio may still work.");
+                                    // This is the new recovery attempt logic
+                                    if (errorRetries < 2) {
+                                        errorRetries++;
+                                        console.log(`Media error, attempting to recover... Retry #${errorRetries}`);
+                                        hlsInstance.recoverMediaError();
+                                    } else {
+                                        displayErrorMessage("Media error: Failed to play stream after several retries. Audio may still work.");
+                                    }
                                     break;
                                 default:
                                     displayErrorMessage("An unknown error occurred. Please try another channel.");
