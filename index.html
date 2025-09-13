@@ -326,6 +326,8 @@
             }
         ];
 
+        let hlsInstance = null; // A global variable to hold the HLS.js instance
+
         // Function to create a single channel card element
         function createChannelCard(channel) {
             const card = document.createElement('div');
@@ -366,23 +368,29 @@
                 loadingSpinner.classList.remove('hidden');
                 videoContent.classList.add('hidden');
                 
-                if (Hls.isSupported()) {
-                    const hls = new Hls();
-                    hls.loadSource(streamUrl);
-                    hls.attachMedia(videoPlayer);
+                // If a previous HLS instance exists, destroy it to prevent memory leaks
+                if (hlsInstance) {
+                    hlsInstance.destroy();
+                }
 
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls();
+                    hlsInstance.loadSource(streamUrl);
+                    hlsInstance.attachMedia(videoPlayer);
+
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                         videoPlayer.play();
                     });
 
-                    hls.on(Hls.Events.ERROR, (event, data) => {
+                    hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                        console.error('HLS.js error:', data);
                         if (data.fatal) {
                             switch(data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
                                     displayErrorMessage("Network error: Stream failed to load.");
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    displayErrorMessage("Media error: Failed to play stream.");
+                                    displayErrorMessage("Media error: Failed to play stream. Audio may still work.");
                                     break;
                                 default:
                                     displayErrorMessage("An unknown error occurred. Please try another channel.");
@@ -434,12 +442,22 @@
             document.title = "Haitian TV Channels"; // Reset page title
             // Clear the selected card highlight
             document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected-card'));
+            
+            // Explicitly exit full screen to fix the unresponsive UI issue on some devices
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari, Chrome and Opera */
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) { /* Firefox */
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) { /* IE/Edge */
+                document.msExitFullscreen();
+            }
         }
 
         // Function to display an error message
         function displayErrorMessage(message) {
             const videoModal = document.getElementById('video-modal');
-            const videoPlayer = document.getElementById('video-player');
             const loadingSpinner = document.getElementById('loading-spinner');
             const videoContent = document.querySelector('.video-player-content');
             
