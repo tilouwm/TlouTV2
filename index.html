@@ -658,6 +658,11 @@
         
         // Exits the video player and modal
         function exitVideoPlayer() {
+            // Exit fullscreen if active
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+
             if (hlsInstance) {
                 hlsInstance.stopLoad();
                 hlsInstance.detachMedia();
@@ -713,17 +718,19 @@
 
             // Handle back button presses based on current view
             if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
-                if (videoModal.style.display === 'flex') {
-                    event.preventDefault(); // Stop the default back behavior
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    }
-                    exitVideoPlayer();
-                } else if (exitModal.style.display === 'flex') {
-                    event.preventDefault();
+                event.preventDefault(); // Prevents the OS from processing the key press
+
+                const isVideoPlaying = videoModal.style.display === 'flex';
+                const isExitModalVisible = exitModal.style.display === 'flex';
+
+                if (isExitModalVisible) {
+                    // If the exit modal is visible, pressing back cancels it
                     cancelExitBtn.click();
+                } else if (isVideoPlaying) {
+                    // If the video is playing, pressing back exits the video player
+                    exitVideoPlayer();
                 } else {
-                    event.preventDefault();
+                    // Otherwise, we are on the channel list, so pressing back shows the exit modal
                     showExitModal();
                 }
                 return;
