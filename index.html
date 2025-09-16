@@ -390,14 +390,13 @@
 
         // Main app initialization function
         async function initApp() {
-            // Initialize Firebase
+            // First, load and render channels immediately
+            fetchChannels();
+
+            // Then, initialize Firebase and handle user authentication in the background
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-
-            // Fetch and render channels immediately, without waiting for auth
-            // This is the main fix to the "0 channels" problem.
-            await fetchChannels();
 
             // Handle user authentication
             if (initialAuthToken) {
@@ -440,7 +439,7 @@
         }
 
         // Fetch channel data from JSON file
-        async function fetchChannels() {
+        function fetchChannels() {
             try {
                 const channelsJsonText = document.getElementById('channels-data').textContent;
                 channelData = JSON.parse(channelsJsonText);
