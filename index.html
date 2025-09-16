@@ -2,18 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- The viewport meta tag is crucial for responsive design, telling the browser to scale the content to the device's width. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haitian TV Channels</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- New font import for a more stylish look -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        setLogLevel('debug');
+        
+        // Expose global variables for use in the script
+        window.initializeApp = initializeApp;
+        window.getAuth = getAuth;
+        window.signInAnonymously = signInAnonymously;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.getFirestore = getFirestore;
+        window.doc = doc;
+        window.onSnapshot = onSnapshot;
+        window.setDoc = setDoc;
+    </script>
     <style>
         body {
-            /* Changed font family to Montserrat for a more stylish feel */
             font-family: 'Montserrat', sans-serif;
             background-color: #1f2937;
             color: #d1d5db;
@@ -24,6 +41,9 @@
         }
         .scroll-container::-webkit-scrollbar {
             display: none;
+        }
+        .channel-card {
+            min-height: 180px;
         }
         .channel-card-logo {
             width: 100%;
@@ -53,6 +73,8 @@
             position: relative;
             width: 100%;
             height: 100%;
+            max-width: 1280px;
+            max-height: 720px;
         }
         .video-player {
             width: 100%;
@@ -60,9 +82,8 @@
             display: block;
         }
         .selected-card {
-            border: 2px solid #ca8a04; /* A dark yellow border */
+            border: 2px solid #ca8a04;
         }
-        /* Loader styles */
         .loader {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -77,31 +98,30 @@
         }
     </style>
 </head>
-<!-- The body uses flexbox to switch from a column layout on mobile to a row layout on larger screens -->
 <body class="flex flex-col md:flex-row min-h-screen">
 
     <!-- Left-side Menu / Header -->
     <nav id="menu-container" class="bg-gray-800 shadow-xl p-4 md:w-64 md:flex-shrink-0 md:h-screen flex flex-col items-start">
         <img src="https://i.ibb.co/JFFBc4Xf/Chat-GPT-Image-Sep-13-2025-02-23-05-PM.png" alt="TV Channels Logo" class="w-80 h-auto rounded-lg mt-8 mx-auto">
         <div class="space-y-2 mt-4 w-full">
-            <!-- Updated the background color and font properties -->
-            <a href="#" class="block bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md">
-                Haiti
-            </a>
+            <button id="all-channels-btn" class="w-full text-left bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+                All Channels
+            </button>
+            <button id="favorites-btn" class="w-full text-left bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+                <i class="fas fa-star mr-2"></i>Favorites
+            </button>
         </div>
     </nav>
 
     <!-- Right-side Channel List -->
     <main class="flex-grow p-4 md:p-8 flex flex-col md:h-screen">
-        <h2 class="text-3xl font-bold text-yellow-600 mb-6">Channels (<span id="channel-count">0</span>)</h2>
-        <!-- This grid is the core of the responsiveness, adapting the number of columns based on screen size -->
+        <h2 id="main-title" class="text-3xl font-bold text-yellow-600 mb-6">Channels (<span id="channel-count">0</span>)</h2>
         <div id="channels-list" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto flex-grow scroll-container pr-2">
             <!-- Channel cards will be generated here by JavaScript -->
         </div>
     </main>
 
     <!-- Video Player Modal -->
-    <!-- The video modal is designed to cover the entire screen for an immersive experience on any device -->
     <div id="video-modal" class="video-player-container">
         <!-- Exit Button -->
         <button id="exit-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
@@ -117,9 +137,9 @@
         </div>
     </div>
 
-    <script>
-        // Data for the channels
-        const channelsData = [
+    <!-- Embedded channel data to avoid fetch errors in the environment -->
+    <script id="channels-data" type="application/json">
+        [
             {
                 "id": "channel1",
                 "name": "Tele Pacific",
@@ -141,8 +161,8 @@
             {
                 "id": "channel4",
                 "name": "Ayiti TV",
-                "logo": "https://i.ibb.co/HGfjmgD/removal-ai-fb28fe02-1167-447e-bf61-2171033e7cfe-images.png",
-                "stream": "https://dacastmmd.mmdlive.lldns.net/dacastmmd/596115da85954b4da6ed86c199f2501c/chunklist_b4628000.m3u8"
+                "logo": "https://m.media-amazon.com/images/I/61k8Qk5j9-L.png",
+                "stream": "http://fuego-iptv.net:80/play/live.php?mac=00:1A:79:7d:b0:58&stream=276315&extension=ts&play_token=G01xkhIy81"
             },
             {
                 "id": "channel5",
@@ -316,205 +336,391 @@
                 "id": "channel33",
                 "name": "Rezo Boul",
                 "logo": "https://www.rezoboul.com/uploads/images/logo_site_1714115779.png",
-                "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8"
+                "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m38u"
             }
-        ];
+        ]
+    </script>
 
-        let hlsInstance = null; // A global variable to hold the HLS.js instance
+    <script type="module">
+        // Global variables for Firebase services
+        let db;
+        let auth;
+        let userId = 'default-user-id'; // Default ID for anonymous users
+        let channelData = [];
+        let favorites = new Set();
+        let currentFilter = 'all';
+        let hlsInstance = null;
+        let currentFocusedIndex = -1; // New variable to track keyboard focus
+        
+        // Get global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // DOM Elements
+        const channelsList = document.getElementById('channels-list');
+        const channelCount = document.getElementById('channel-count');
+        const videoModal = document.getElementById('video-modal');
+        const videoPlayer = document.getElementById('video-player');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const videoContent = document.querySelector('.video-player-content');
+        const exitBtn = document.getElementById('exit-btn');
+        const allChannelsBtn = document.getElementById('all-channels-btn');
+        const favoritesBtn = document.getElementById('favorites-btn');
+        const mainTitle = document.getElementById('main-title');
 
-        // Function to create a single channel card element
+        // Main app initialization function
+        async function initApp() {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Handle user authentication
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } catch (error) {
+                    console.error("Error signing in with custom token, signing in anonymously:", error);
+                    await signInAnonymously(auth);
+                }
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            // Listen for auth state changes
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Authenticated with user ID:", userId);
+                    await fetchChannels();
+                    listenToFavorites();
+                } else {
+                    console.log("User is signed out.");
+                }
+            });
+
+            // Event listeners
+            exitBtn.addEventListener('click', exitVideoPlayer);
+            allChannelsBtn.addEventListener('click', () => filterChannels('all'));
+            favoritesBtn.addEventListener('click', () => filterChannels('favorites'));
+            
+            // Add global keydown listener for remote control navigation
+            document.addEventListener('keydown', handleKeyNavigation);
+        }
+
+        // Fetch channel data from JSON file
+        async function fetchChannels() {
+            try {
+                const channelsJsonText = document.getElementById('channels-data').textContent;
+                channelData = JSON.parse(channelsJsonText);
+                renderChannels();
+            } catch (error) {
+                console.error("Failed to load channel data:", error);
+                channelsList.innerHTML = `<p class="text-red-400 text-center">Failed to load channels. Please try again later.</p>`;
+            }
+        }
+
+        // Firestore listener for real-time favorite updates
+        function listenToFavorites() {
+            const userFavoritesRef = doc(db, `/artifacts/${appId}/users/${userId}/favorites`, 'list');
+            onSnapshot(userFavoritesRef, (doc) => {
+                if (doc.exists()) {
+                    favorites = new Set(doc.data().channels || []);
+                } else {
+                    favorites = new Set();
+                }
+                renderChannels();
+            });
+        }
+        
+        // Save favorites to Firestore
+        async function saveFavorites() {
+            const userFavoritesRef = doc(db, `/artifacts/${appId}/users/${userId}/favorites`, 'list');
+            try {
+                await setDoc(userFavoritesRef, { channels: Array.from(favorites) }, { merge: true });
+            } catch (error) {
+                console.error("Error saving favorites:", error);
+            }
+        }
+
+        // Lazy loading observer
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target.querySelector('img');
+                    img.src = img.dataset.src;
+                    img.onerror = () => {
+                        img.src = "https://placehold.co/120x80/000000/FFFFFF?text=Logo+Fail";
+                    };
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        // Renders the list of channels based on the current filter
+        function renderChannels() {
+            channelsList.innerHTML = '';
+            const filteredChannels = channelData.filter(channel => 
+                currentFilter === 'all' || favorites.has(channel.id)
+            );
+
+            // Update main title with filtered count
+            mainTitle.textContent = `${currentFilter === 'all' ? 'All Channels' : 'Favorites'} (${filteredChannels.length})`;
+
+            if (filteredChannels.length === 0 && currentFilter === 'favorites') {
+                channelsList.innerHTML = `<p class="text-gray-400 text-center col-span-full mt-10">You have no favorite channels. Add some by clicking the star icon!</p>`;
+            }
+            
+            filteredChannels.forEach(channel => {
+                const card = createChannelCard(channel);
+                channelsList.appendChild(card);
+                observer.observe(card); // Start observing for lazy loading
+            });
+
+            // Set initial focus for keyboard navigation
+            currentFocusedIndex = filteredChannels.length > 0 ? 0 : -1;
+            updateFocus(currentFocusedIndex);
+
+            channelCount.textContent = filteredChannels.length;
+        }
+        
+        // Toggles the filter between all and favorites
+        function filterChannels(filter) {
+            currentFilter = filter;
+            allChannelsBtn.classList.toggle('bg-yellow-600', filter === 'all');
+            allChannelsBtn.classList.toggle('bg-gray-700', filter !== 'all');
+            favoritesBtn.classList.toggle('bg-yellow-600', filter === 'favorites');
+            favoritesBtn.classList.toggle('bg-gray-700', filter !== 'all');
+            renderChannels();
+        }
+
+        // Creates a single channel card element
         function createChannelCard(channel) {
+            const isFavorite = favorites.has(channel.id);
             const card = document.createElement('div');
-            card.className = "channel-card bg-gray-900 p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:border-2 hover:border-yellow-600 cursor-pointer flex flex-col items-center justify-center space-y-4";
+            // Re-adding hover classes for the highlight effect
+            card.className = "channel-card bg-gray-900 p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-gray-800 cursor-pointer flex flex-col items-center justify-center space-y-4 relative group";
             card.dataset.stream = channel.stream;
             card.dataset.name = channel.name;
+            card.dataset.id = channel.id;
+            // Add a tabindex to make the card focusable
+            card.setAttribute('tabindex', '0');
 
             const logo = document.createElement('img');
-            logo.src = channel.logo;
+            logo.dataset.src = channel.logo; // Use data-src for lazy loading
             logo.alt = `${channel.name} logo`;
             logo.className = "channel-card-logo";
 
             const name = document.createElement('h3');
             name.textContent = channel.name;
-            name.className = "text-lg font-semibold text-yellow-600 text-center";
+            name.className = "text-lg font-semibold text-yellow-600 text-center mt-2";
+
+            const favoriteIcon = document.createElement('i');
+            // Using 'group-hover' to make the icon's color change when the card is hovered
+            favoriteIcon.className = `fas fa-star absolute top-2 right-2 text-xl cursor-pointer transition-colors duration-200 ${isFavorite ? 'text-yellow-500' : 'text-gray-500 group-hover:text-yellow-300'}`;
+            favoriteIcon.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent the card click event from firing
+                toggleFavorite(channel.id);
+            });
 
             card.appendChild(logo);
             card.appendChild(name);
-
-            // Add click event listener to handle selection and video playback
-            card.addEventListener('click', () => {
-                const videoModal = document.getElementById('video-modal');
-                const videoPlayer = document.getElementById('video-player');
-                const loadingSpinner = document.getElementById('loading-spinner');
-                const videoContent = document.querySelector('.video-player-content');
-                const streamUrl = card.dataset.stream;
-                const channelName = card.dataset.name;
-
-                // Update the page title
-                document.title = `Haitian TV Channels - ${channelName}`;
-
-                // Remove highlight from all other cards
-                document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected-card'));
-                // Add highlight to the selected card
-                card.classList.add('selected-card');
-                
-                // Show loading spinner and hide video content
-                loadingSpinner.classList.remove('hidden');
-                videoContent.classList.add('hidden');
-                
-                // If a previous HLS instance exists, destroy it to prevent memory leaks
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                }
-
-                if (Hls.isSupported()) {
-                    hlsInstance = new Hls();
-                    hlsInstance.loadSource(streamUrl);
-                    hlsInstance.attachMedia(videoPlayer);
-
-                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                        videoPlayer.play();
-                    });
-
-                    // --- NEW LOGIC FOR ERROR RECOVERY ---
-                    let errorRetries = 0;
-                    hlsInstance.on(Hls.Events.ERROR, (event, data) => {
-                        console.error('HLS.js error:', data);
-                        if (data.fatal) {
-                            switch(data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    displayErrorMessage("Network error: Stream failed to load.");
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    // This is the new recovery attempt logic
-                                    if (errorRetries < 2) {
-                                        errorRetries++;
-                                        console.log(`Media error, attempting to recover... Retry #${errorRetries}`);
-                                        hlsInstance.recoverMediaError();
-                                    } else {
-                                        displayErrorMessage("Media error: Failed to play stream after several retries. Audio may still work.");
-                                    }
-                                    break;
-                                default:
-                                    displayErrorMessage("An unknown error occurred. Please try another channel.");
-                                    break;
-                            }
-                        }
-                    });
-
-                } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoPlayer.src = streamUrl;
-                    videoPlayer.addEventListener('loadedmetadata', () => {
-                        videoPlayer.play();
-                    });
-                } else {
-                    displayErrorMessage('Your browser does not support HLS video streaming.');
-                }
-                
-                // Event listener for when video starts playing
-                videoPlayer.onplay = () => {
-                    loadingSpinner.classList.add('hidden');
-                    videoContent.classList.remove('hidden');
-                };
-
-                videoModal.style.display = 'flex';
-                // Request full screen for the video player container
-                if (videoPlayer) {
-                    const playerContainer = document.getElementById('video-modal');
-                    if (playerContainer.requestFullscreen) {
-                        playerContainer.requestFullscreen();
-                    } else if (playerContainer.mozRequestFullScreen) { // Firefox
-                        playerContainer.mozRequestFullScreen();
-                    } else if (playerContainer.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                        playerContainer.webkitRequestFullscreen();
-                    } else if (playerContainer.msRequestFullscreen) { // IE/Edge
-                        playerContainer.msRequestFullscreen();
-                    }
-                }
-            });
+            card.appendChild(favoriteIcon);
+            
+            card.addEventListener('click', handleChannelClick);
             return card;
         }
 
-        // Function to handle the video player and modal when exiting full-screen
-        function exitVideoPlayer() {
-            const videoModal = document.getElementById('video-modal');
-            const videoPlayer = document.getElementById('video-player');
-            videoPlayer.pause();
-            videoPlayer.removeAttribute('src'); // Stop stream to save bandwidth
-            videoModal.style.display = 'none';
-            document.title = "Haitian TV Channels"; // Reset page title
-            // Clear the selected card highlight
-            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected-card'));
-            
-            // Explicitly exit full screen to fix the unresponsive UI issue on some devices
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) { /* Safari, Chrome and Opera */
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) { /* Firefox */
-                document.mozCancelFullScreen();
-            } else if (document.msExitFullscreen) { /* IE/Edge */
-                document.msExitFullscreen();
+        // Toggles a channel's favorite status
+        function toggleFavorite(channelId) {
+            if (favorites.has(channelId)) {
+                favorites.delete(channelId);
+            } else {
+                favorites.add(channelId);
+            }
+            saveFavorites();
+            renderChannels(); // Re-render to update the icons
+        }
+
+        function playStream(streamUrl) {
+            // Gracefully stop and destroy the existing HLS stream before creating a new one
+            if (hlsInstance) {
+                hlsInstance.stopLoad();
+                hlsInstance.detachMedia();
+                try {
+                    hlsInstance.destroy();
+                } catch (e) {
+                    console.error("Error destroying HLS instance:", e);
+                }
+                hlsInstance = null;
+            }
+
+            // The `hls.js` library is a robust solution for HLS streams, which are often tokenized.
+            // We specifically check for .m3u8 and streams with 'extension=ts' in the URL to use hls.js.
+            if (Hls.isSupported() && (streamUrl.endsWith('.m3u8') || streamUrl.includes('extension=ts'))) {
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(streamUrl);
+                hlsInstance.attachMedia(videoPlayer);
+
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    videoPlayer.play();
+                });
+                
+                // Handle fatal errors with retries or messages
+                let errorRetries = 0;
+                hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                displayErrorMessage("Stream is offline or no longer available.");
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                if (errorRetries < 2) {
+                                    errorRetries++;
+                                    hlsInstance.recoverMediaError();
+                                } else {
+                                    displayErrorMessage("Media error: Failed to play stream.");
+                                }
+                                break;
+                            default:
+                                displayErrorMessage("An unknown error occurred. Please try another channel.");
+                                break;
+                        }
+                        loadingSpinner.classList.add('hidden');
+                        videoContent.classList.add('hidden');
+                    }
+                });
+            } else {
+                // For other formats or non-Hls.js compatible browsers, try native playback
+                videoPlayer.src = streamUrl;
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.play();
+                });
+                videoPlayer.onerror = () => {
+                    displayErrorMessage("Your browser encountered an error with this stream.");
+                    loadingSpinner.classList.add('hidden');
+                    videoContent.classList.add('hidden');
+                };
             }
         }
 
-        // Function to display an error message
-        function displayErrorMessage(message) {
-            const videoModal = document.getElementById('video-modal');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const videoContent = document.querySelector('.video-player-content');
-            
-            loadingSpinner.classList.add('hidden');
-            videoContent.classList.add('hidden');
+        // Handles the click event for playing a channel
+        function handleChannelClick(event) {
+            const card = event.currentTarget;
+            const streamUrl = card.dataset.stream;
+            const channelName = card.dataset.name;
 
+            document.title = `Haitian TV Channels - ${channelName}`;
+            
+            // The logic to add the selected-card class is now managed by updateFocus
+            
+            loadingSpinner.classList.remove('hidden');
+            videoContent.classList.add('hidden');
+            
+            playStream(streamUrl);
+            
+            videoPlayer.onplay = () => {
+                loadingSpinner.classList.add('hidden');
+                videoContent.classList.remove('hidden');
+            };
+
+            videoModal.style.display = 'flex';
+            
+            // Request full screen on the video player
+            if (videoPlayer.requestFullscreen) {
+                videoPlayer.requestFullscreen();
+            }
+        }
+        
+        // Exits the video player and modal
+        function exitVideoPlayer() {
+            if (hlsInstance) {
+                hlsInstance.stopLoad();
+                hlsInstance.detachMedia();
+                try {
+                    hlsInstance.destroy();
+                } catch (e) {
+                    console.error("Error destroying HLS instance on exit:", e);
+                }
+                hlsInstance = null;
+            }
+            videoPlayer.pause();
+            videoPlayer.removeAttribute('src');
+            videoModal.style.display = 'none';
+            document.title = "Haitian TV Channels";
+            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected-card'));
+            currentFocusedIndex = -1; // Reset focus on exit
+        }
+
+        // Displays a temporary error message
+        function displayErrorMessage(message) {
             const messageBox = document.createElement('div');
-            messageBox.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-red-500 text-white rounded-lg shadow-xl text-center';
+            messageBox.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-red-500 text-white rounded-lg shadow-xl text-center z-20';
             messageBox.textContent = message;
             videoModal.appendChild(messageBox);
             setTimeout(() => messageBox.remove(), 5000);
         }
-        
-        // Listen for the exit button click
-        document.getElementById('exit-btn').addEventListener('click', exitVideoPlayer);
 
-        // Listen for full-screen exit events
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                exitVideoPlayer();
-            }
-        });
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (!document.webkitFullscreenElement) {
-                exitVideoPlayer();
-            }
-        });
-        document.addEventListener('mozfullscreenchange', () => {
-            if (!document.mozFullScreenElement) {
-                exitVideoPlayer();
-            }
-        });
-        document.addEventListener('MSFullscreenChange', () => {
-            if (!document.msFullscreenElement) {
-                exitVideoPlayer();
-            }
-        });
+        // --- New Keyboard Navigation Logic ---
+        function handleKeyNavigation(event) {
+            const channels = Array.from(channelsList.querySelectorAll('.channel-card'));
+            if (channels.length === 0) return;
 
+            // Handle the case where the user is in the video modal
+            if (videoModal.style.display === 'flex') {
+                if (event.key === 'Escape') {
+                    exitVideoPlayer();
+                }
+                return;
+            }
 
-        // Function to render the list of channels
-        function renderChannels() {
-            const channelsListContainer = document.getElementById('channels-list');
-            const channelCountElement = document.getElementById('channel-count');
-            channelsListContainer.innerHTML = '';
-            channelsData.forEach(channel => {
-                const channelCard = createChannelCard(channel);
-                channelsListContainer.appendChild(channelCard);
-            });
-            channelCountElement.textContent = channelsData.length;
+            let newIndex = currentFocusedIndex;
+
+            switch (event.key) {
+                case 'ArrowRight':
+                    newIndex = (currentFocusedIndex + 1) % channels.length;
+                    break;
+                case 'ArrowLeft':
+                    newIndex = (currentFocusedIndex - 1 + channels.length) % channels.length;
+                    break;
+                case 'ArrowDown':
+                case 'ArrowUp':
+                    // These keys would be useful in a grid layout, but here we can just do nothing for simplicity
+                    // or potentially scroll the list
+                    return;
+                case 'Enter':
+                    if (currentFocusedIndex !== -1) {
+                        channels[currentFocusedIndex].click();
+                    }
+                    return; // Prevent default behavior for Enter
+                default:
+                    return;
+            }
+            
+            event.preventDefault(); // Stop default browser behavior like scrolling
+            updateFocus(newIndex);
         }
 
-        // Call the function to render the channels when the page loads
-        document.addEventListener('DOMContentLoaded', renderChannels);
+        function updateFocus(newIndex) {
+            const channels = channelsList.querySelectorAll('.channel-card');
+            if (channels.length === 0) return;
+            
+            // Remove the selected class from the old card
+            if (currentFocusedIndex >= 0 && currentFocusedIndex < channels.length) {
+                channels[currentFocusedIndex].classList.remove('selected-card');
+            }
 
+            // Add the selected class to the new card
+            if (newIndex >= 0 && newIndex < channels.length) {
+                channels[newIndex].classList.add('selected-card');
+                channels[newIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            currentFocusedIndex = newIndex;
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
