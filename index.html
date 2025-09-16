@@ -368,6 +368,7 @@
         let hlsInstance = null;
         let currentFocusedIndex = -1; // New variable to track keyboard focus
         let focusedSection = 'menu'; // 'menu' or 'channels'
+        let lastSelectedChannelId = null; // New variable to store the ID of the last played channel
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -641,6 +642,7 @@
             const card = event.currentTarget;
             const streamUrl = card.dataset.stream;
             const channelName = card.dataset.name;
+            lastSelectedChannelId = card.dataset.id; // Store the ID of the last selected channel
 
             document.title = `Haitian TV Channels - ${channelName}`;
             
@@ -681,8 +683,19 @@
             videoPlayer.removeAttribute('src');
             videoModal.style.display = 'none';
             document.title = "Haitian TV Channels";
-            document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('selected-card'));
-            currentFocusedIndex = -1; // Reset focus on exit
+            
+            // Re-select the last focused channel after exiting
+            if (lastSelectedChannelId) {
+                const filteredChannels = channelData.filter(channel => currentFilter === 'all' || favorites.has(channel.id));
+                const lastChannelIndex = filteredChannels.findIndex(c => c.id === lastSelectedChannelId);
+                if (lastChannelIndex !== -1) {
+                    currentFocusedIndex = lastChannelIndex;
+                    updateFocus(currentFocusedIndex);
+                }
+            } else {
+                currentFocusedIndex = -1;
+                updateFocus(currentFocusedIndex);
+            }
         }
 
         function showExitModal() {
@@ -712,7 +725,10 @@
             if (videoModal.style.display === 'flex' && exitModal.style.display !== 'flex') {
                 // Logic for inside video player
                 if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
-                    showExitModal();
+                    // Back button now exits the video player immediately
+                    exitVideoPlayer();
+                    // Manually go back in history to handle the state change
+                    window.history.back(); 
                 }
                 return;
             } else if (exitModal.style.display === 'flex') {
