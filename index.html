@@ -369,7 +369,6 @@
         let currentFocusedIndex = -1; // New variable to track keyboard focus
         let focusedSection = 'menu'; // 'menu' or 'channels'
         let lastSelectedChannelId = null; // New variable to store the ID of the last played channel
-        let backPressCount = 0; // Tracks back button presses for the exit modal
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -425,21 +424,12 @@
 
             // Event listeners
             confirmExitBtn.addEventListener('click', () => window.history.back());
-            cancelExitBtn.addEventListener('click', () => {
-                exitModal.style.display = 'none';
-                backPressCount = 0; // Reset counter
-            });
+            cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             allChannelsBtn.addEventListener('click', () => filterChannels('all'));
             favoritesBtn.addEventListener('click', () => filterChannels('favorites'));
             
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
-            
-            // Add popstate listener for the Firestick remote's back button
-            window.addEventListener('popstate', handlePopState);
-            
-            // Push a state to the history to enable the popstate event
-            window.history.pushState({ page: 'main' }, 'Main');
         }
 
         // Fetch channel data from JSON file
@@ -660,9 +650,6 @@
 
             videoModal.style.display = 'flex';
             
-            // Push a new state to history when the video modal is opened
-            window.history.pushState({ page: 'video' }, channelName);
-            
             // Request full screen on the video player
             if (videoPlayer.requestFullscreen) {
                 videoPlayer.requestFullscreen();
@@ -724,34 +711,25 @@
             const numChannels = channelCards.length;
             const numButtons = menuButtons.length;
 
-            if (videoModal.style.display === 'flex' && exitModal.style.display !== 'flex') {
-                // Logic for inside video player
-                if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
-                    // Back button now exits the video player and full screen immediately
+            // Handle back button presses based on current view
+            if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
+                if (videoModal.style.display === 'flex') {
+                    event.preventDefault(); // Stop the default back behavior
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
                     }
                     exitVideoPlayer();
-                    // Manually go back in history to handle the state change
-                    window.history.back(); 
-                }
-                return;
-            } else if (exitModal.style.display === 'flex') {
-                // Logic for inside exit modal
-                if (key === 'Enter') {
-                    event.preventDefault();
-                    confirmExitBtn.click();
-                } else if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
+                } else if (exitModal.style.display === 'flex') {
                     event.preventDefault();
                     cancelExitBtn.click();
-                } else if (key === 'ArrowRight') {
-                    cancelExitBtn.focus();
-                } else if (key === 'ArrowLeft') {
-                    confirmExitBtn.focus();
+                } else {
+                    event.preventDefault();
+                    showExitModal();
                 }
                 return;
             }
 
+            // Handle other navigation keys
             if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Enter') {
                 event.preventDefault();
                 let nextIndex = currentFocusedIndex;
@@ -794,8 +772,6 @@
                 }
                 currentFocusedIndex = nextIndex;
                 updateFocus(currentFocusedIndex);
-            } else if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
-                window.history.back();
             }
         }
 
@@ -823,22 +799,6 @@
                 }
             } else if (focusedSection === 'menu') {
                 allChannelsBtn.focus();
-            }
-        }
-
-        // Handles the history back event, triggered by a Firestick remote's back button
-        function handlePopState(event) {
-            const state = event.state || {};
-            if (state.page === 'main') {
-                // We are already on the main page, so show the exit confirmation
-                if (videoModal.style.display !== 'flex' && exitModal.style.display !== 'flex') {
-                    showExitModal();
-                }
-            } else if (state.page === 'video') {
-                // The user is leaving the video player, so close it
-                exitVideoPlayer();
-                // Push a new state to history to prevent immediate re-opening of modal
-                window.history.pushState({ page: 'main' }, 'Main');
             }
         }
 
