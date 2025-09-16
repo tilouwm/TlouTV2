@@ -57,7 +57,7 @@
         .channel-card:hover .channel-card-logo {
             transform: scale(1.1);
         }
-        .video-player-container {
+        .video-player-container, .exit-modal-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -134,6 +134,22 @@
         </div>
         <div class="video-player-content hidden">
             <video id="video-player" class="video-player" controls autoplay></video>
+        </div>
+    </div>
+
+    <!-- Exit Confirmation Modal -->
+    <div id="exit-modal" class="exit-modal-container">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl text-center flex flex-col items-center space-y-6 max-w-sm w-full">
+            <h3 class="text-xl font-bold text-yellow-600">Exit Application?</h3>
+            <p class="text-gray-300">Are you sure you want to exit the app?</p>
+            <div class="flex space-x-4">
+                <button id="confirm-exit-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-red-700">
+                    Exit
+                </button>
+                <button id="cancel-exit-btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-gray-700">
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 
@@ -368,6 +384,9 @@
         const allChannelsBtn = document.getElementById('all-channels-btn');
         const favoritesBtn = document.getElementById('favorites-btn');
         const mainTitle = document.getElementById('main-title');
+        const exitModal = document.getElementById('exit-modal');
+        const confirmExitBtn = document.getElementById('confirm-exit-btn');
+        const cancelExitBtn = document.getElementById('cancel-exit-btn');
 
         // Main app initialization function
         async function initApp() {
@@ -404,9 +423,17 @@
             exitBtn.addEventListener('click', exitVideoPlayer);
             allChannelsBtn.addEventListener('click', () => filterChannels('all'));
             favoritesBtn.addEventListener('click', () => filterChannels('favorites'));
+            confirmExitBtn.addEventListener('click', () => window.history.back());
+            cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
+            
+            // Add popstate listener for the Firestick remote's back button
+            window.addEventListener('popstate', handlePopState);
+            
+            // Push a state to the history to enable the popstate event
+            window.history.pushState({ page: 'main' }, 'Main');
         }
 
         // Fetch channel data from JSON file
@@ -613,8 +640,6 @@
 
             document.title = `Haitian TV Channels - ${channelName}`;
             
-            // The logic to add the selected-card class is now managed by updateFocus
-            
             loadingSpinner.classList.remove('hidden');
             videoContent.classList.add('hidden');
             
@@ -626,6 +651,9 @@
             };
 
             videoModal.style.display = 'flex';
+            
+            // Push a new state to history when the video modal is opened
+            window.history.pushState({ page: 'video' }, channelName);
             
             // Request full screen on the video player
             if (videoPlayer.requestFullscreen) {
@@ -662,19 +690,38 @@
             setTimeout(() => messageBox.remove(), 5000);
         }
 
-        // --- New Keyboard Navigation Logic ---
+        // --- Keyboard Navigation Logic ---
         function handleKeyNavigation(event) {
             const channels = Array.from(channelsList.querySelectorAll('.channel-card'));
             if (channels.length === 0) return;
 
-            // Handle the case where the user is in the video modal
-            if (videoModal.style.display === 'flex') {
-                if (event.key === 'Escape') {
-                    exitVideoPlayer();
+            // Handle navigation within the exit modal
+            if (exitModal.style.display === 'flex') {
+                if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                    // Toggle focus between Exit and Cancel buttons
+                    const exitBtnFocus = document.activeElement === confirmExitBtn;
+                    (exitBtnFocus ? cancelExitBtn : confirmExitBtn).focus();
+                    event.preventDefault();
+                } else if (event.key === 'Enter') {
+                    document.activeElement.click();
+                    event.preventDefault();
+                } else if (event.key === 'Escape') {
+                    cancelExitBtn.click();
+                    event.preventDefault();
                 }
                 return;
             }
 
+            // Handle the case where the user is in the video modal
+            if (videoModal.style.display === 'flex') {
+                if (event.key === 'Escape') {
+                    // Navigate back in history, triggering popstate
+                    window.history.back();
+                }
+                return;
+            }
+            
+            // Handle navigation on the main channel list
             let newIndex = currentFocusedIndex;
 
             switch (event.key) {
@@ -686,19 +733,21 @@
                     break;
                 case 'ArrowDown':
                 case 'ArrowUp':
-                    // These keys would be useful in a grid layout, but here we can just do nothing for simplicity
-                    // or potentially scroll the list
-                    return;
+                    return; // No vertical navigation on this page
                 case 'Enter':
                     if (currentFocusedIndex !== -1) {
                         channels[currentFocusedIndex].click();
                     }
-                    return; // Prevent default behavior for Enter
+                    return;
+                case 'Escape':
+                    // Trigger the exit confirmation modal
+                    showExitConfirmation();
+                    return;
                 default:
                     return;
             }
             
-            event.preventDefault(); // Stop default browser behavior like scrolling
+            event.preventDefault();
             updateFocus(newIndex);
         }
 
@@ -706,18 +755,34 @@
             const channels = channelsList.querySelectorAll('.channel-card');
             if (channels.length === 0) return;
             
-            // Remove the selected class from the old card
             if (currentFocusedIndex >= 0 && currentFocusedIndex < channels.length) {
                 channels[currentFocusedIndex].classList.remove('selected-card');
             }
 
-            // Add the selected class to the new card
             if (newIndex >= 0 && newIndex < channels.length) {
                 channels[newIndex].classList.add('selected-card');
                 channels[newIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
             
             currentFocusedIndex = newIndex;
+        }
+        
+        // --- New Exit Confirmation Logic ---
+        function handlePopState(event) {
+            // If the user navigates back from the video player, exit it
+            if (videoModal.style.display === 'flex') {
+                exitVideoPlayer();
+                // Push a new state so the next back button press will trigger the exit confirmation
+                window.history.pushState({ page: 'main' }, 'Main');
+            } else if (exitModal.style.display !== 'flex') {
+                // Otherwise, show the exit confirmation modal
+                showExitConfirmation();
+            }
+        }
+        
+        function showExitConfirmation() {
+            exitModal.style.display = 'flex';
+            confirmExitBtn.focus(); // Focus on the "Exit" button by default
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
