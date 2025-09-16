@@ -124,7 +124,7 @@
     <!-- Video Player Modal -->
     <div id="video-modal" class="video-player-container">
         <!-- Exit Button -->
-        <button id="exit-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
+        <button id="exit-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50" tabindex="0">
             &times;
         </button>
         <!-- Loading Spinner -->
@@ -651,6 +651,9 @@
             };
 
             videoModal.style.display = 'flex';
+
+            // Set focus to the exit button when the modal opens
+            exitPlayerBtn.focus();
             
             // Request full screen on the video player
             if (videoPlayer.requestFullscreen) {
@@ -696,6 +699,8 @@
 
         function showExitModal() {
             exitModal.style.display = 'flex';
+            // Set focus to the confirm button
+            confirmExitBtn.focus();
         }
 
         // Displays a temporary error message
@@ -726,22 +731,42 @@
                 event.preventDefault(); // Prevents the OS from processing the key press
 
                 if (isVideoPlaying) {
-                    // If the video is playing, pressing back exits the video player
                     exitVideoPlayer();
+                    return;
                 } else if (isExitModalVisible) {
-                    // If the exit modal is visible, pressing back cancels it
                     cancelExitBtn.click();
+                    return;
                 } else {
-                    // Otherwise, we are on the channel list, so pressing back shows the exit modal
                     showExitModal();
+                    return;
                 }
-                return;
             }
 
             // Handle other navigation keys
             if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Enter') {
                 event.preventDefault();
                 let nextIndex = currentFocusedIndex;
+
+                if (isVideoPlaying) {
+                    // When video modal is open, only the exit button is focusable
+                    if (key === 'Enter') {
+                        exitPlayerBtn.click();
+                    }
+                    return;
+                }
+                
+                if (isExitModalVisible) {
+                    // Navigate between 'Exit' and 'Cancel' buttons
+                    const buttons = [confirmExitBtn, cancelExitBtn];
+                    const focusedButtonIndex = buttons.findIndex(btn => btn === document.activeElement);
+                    if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                        const nextButtonIndex = (focusedButtonIndex + 1) % buttons.length;
+                        buttons[nextButtonIndex].focus();
+                    } else if (key === 'Enter') {
+                        document.activeElement.click();
+                    }
+                    return;
+                }
 
                 if (focusedSection === 'menu') {
                     if (key === 'ArrowDown') {
