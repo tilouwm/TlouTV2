@@ -123,8 +123,8 @@
 
     <!-- Video Player Modal -->
     <div id="video-modal" class="video-player-container">
-        <!-- Exit Button -->
-        <button id="exit-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
+        <!-- Exit Button (Hidden - Back button handles this now) -->
+        <button id="exit-btn" class="hidden absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
             &times;
         </button>
         <!-- Loading Spinner -->
@@ -369,6 +369,7 @@
         let currentFocusedIndex = -1; // New variable to track keyboard focus
         let focusedSection = 'menu'; // 'menu' or 'channels'
         let lastSelectedChannelId = null; // New variable to store the ID of the last played channel
+        let backPressCount = 0; // Tracks back button presses for the exit modal
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -382,7 +383,6 @@
         const videoPlayer = document.getElementById('video-player');
         const loadingSpinner = document.getElementById('loading-spinner');
         const videoContent = document.querySelector('.video-player-content');
-        const exitBtn = document.getElementById('exit-btn');
         const allChannelsBtn = document.getElementById('all-channels-btn');
         const favoritesBtn = document.getElementById('favorites-btn');
         const mainTitle = document.getElementById('main-title');
@@ -424,11 +424,13 @@
             });
 
             // Event listeners
-            exitBtn.addEventListener('click', showExitModal);
+            confirmExitBtn.addEventListener('click', () => window.history.back());
+            cancelExitBtn.addEventListener('click', () => {
+                exitModal.style.display = 'none';
+                backPressCount = 0; // Reset counter
+            });
             allChannelsBtn.addEventListener('click', () => filterChannels('all'));
             favoritesBtn.addEventListener('click', () => filterChannels('favorites'));
-            confirmExitBtn.addEventListener('click', () => window.history.back());
-            cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
@@ -725,7 +727,10 @@
             if (videoModal.style.display === 'flex' && exitModal.style.display !== 'flex') {
                 // Logic for inside video player
                 if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
-                    // Back button now exits the video player immediately
+                    // Back button now exits the video player and full screen immediately
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    }
                     exitVideoPlayer();
                     // Manually go back in history to handle the state change
                     window.history.back(); 
@@ -827,7 +832,7 @@
             if (state.page === 'main') {
                 // We are already on the main page, so show the exit confirmation
                 if (videoModal.style.display !== 'flex' && exitModal.style.display !== 'flex') {
-                     showExitModal();
+                    showExitModal();
                 }
             } else if (state.page === 'video') {
                 // The user is leaving the video player, so close it
