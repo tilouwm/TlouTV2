@@ -104,10 +104,10 @@
     <nav id="menu-container" class="bg-gray-800 shadow-xl p-4 md:w-64 md:flex-shrink-0 md:h-screen flex flex-col items-start">
         <img src="https://i.ibb.co/JFFBc4Xf/Chat-GPT-Image-Sep-13-2025-02-23-05-PM.png" alt="TV Channels Logo" class="w-80 h-auto rounded-lg mt-8 mx-auto">
         <div class="space-y-2 mt-4 w-full">
-            <button id="all-channels-btn" class="w-full text-left bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+            <button id="all-channels-btn" class="w-full text-left bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md" tabindex="0">
                 All Channels
             </button>
-            <button id="favorites-btn" class="w-full text-left bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+            <button id="favorites-btn" class="w-full text-left bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md" tabindex="0">
                 <i class="fas fa-star mr-2"></i>Favorites
             </button>
         </div>
@@ -143,10 +143,10 @@
             <h3 class="text-xl font-bold text-yellow-600">Exit Application?</h3>
             <p class="text-gray-300">Are you sure you want to exit the app?</p>
             <div class="flex space-x-4">
-                <button id="confirm-exit-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-red-700">
+                <button id="confirm-exit-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-red-700" tabindex="0">
                     Exit
                 </button>
-                <button id="cancel-exit-btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-gray-700">
+                <button id="cancel-exit-btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-gray-700" tabindex="0">
                     Cancel
                 </button>
             </div>
@@ -387,7 +387,7 @@
         const exitModal = document.getElementById('exit-modal');
         const confirmExitBtn = document.getElementById('confirm-exit-btn');
         const cancelExitBtn = document.getElementById('cancel-exit-btn');
-
+        
         // Main app initialization function
         async function initApp() {
             // First, load and render channels immediately
@@ -689,94 +689,141 @@
             messageBox.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-red-500 text-white rounded-lg shadow-xl text-center z-20';
             messageBox.textContent = message;
             videoModal.appendChild(messageBox);
-            setTimeout(() => messageBox.remove(), 5000);
+            setTimeout(() => {
+                messageBox.remove();
+            }, 3000);
         }
 
-        // Keyboard navigation and control functions
-        function handleKeyNavigation(event) {
+        // --- Keyboard Navigation for Remote Control ---
+        function getFocusableElements() {
+            const mainButtons = Array.from(document.querySelectorAll('#menu-container button'));
+            const cards = Array.from(document.querySelectorAll('#channels-list .channel-card'));
+            const modalButtons = Array.from(document.querySelectorAll('#exit-modal button'));
             if (videoModal.style.display === 'flex') {
-                return; // Disable navigation when video player is open
+                return [exitBtn];
+            } else if (exitModal.style.display === 'flex') {
+                return modalButtons;
+            } else {
+                return [...mainButtons, ...cards];
+            }
+        }
+
+        function updateFocus(newIndex) {
+            const elements = getFocusableElements();
+            if (currentFocusedIndex >= 0 && currentFocusedIndex < elements.length) {
+                elements[currentFocusedIndex].classList.remove('selected-card');
+            }
+            if (newIndex >= 0 && newIndex < elements.length) {
+                elements[newIndex].classList.add('selected-card');
+                elements[newIndex].focus();
+                // Scroll the list to make the element visible if necessary
+                const focusedElement = elements[newIndex];
+                if (focusedElement && channelsList.contains(focusedElement)) {
+                    focusedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            currentFocusedIndex = newIndex;
+        }
+
+        function handleKeyNavigation(event) {
+            if (videoModal.style.display === 'flex' || exitModal.style.display === 'flex') {
+                handleModalNavigation(event);
+                return;
             }
 
-            const cards = document.querySelectorAll('.channel-card');
-            if (cards.length === 0) return;
+            const elements = getFocusableElements();
+            if (elements.length === 0) return;
 
+            const totalCols = window.innerWidth >= 1280 ? 4 : (window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 640 ? 2 : 1));
             let newIndex = currentFocusedIndex;
-            const columns = window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
 
             switch (event.key) {
                 case 'ArrowRight':
-                    newIndex = (newIndex + 1) % cards.length;
+                    newIndex = (newIndex + 1) % elements.length;
                     break;
                 case 'ArrowLeft':
-                    newIndex = (newIndex - 1 + cards.length) % cards.length;
+                    newIndex = (newIndex - 1 + elements.length) % elements.length;
                     break;
                 case 'ArrowDown':
-                    if (newIndex + columns < cards.length) {
-                        newIndex += columns;
+                    if (newIndex < 2) { // Special case for menu buttons
+                        newIndex = 2; // Jump to the first channel card
                     } else {
-                        // If no more rows, jump to the start of the next column
-                        newIndex = (newIndex + 1) % cards.length;
+                        newIndex = (newIndex + totalCols);
+                        if (newIndex >= elements.length) {
+                            newIndex = elements.length -1;
+                        }
                     }
                     break;
                 case 'ArrowUp':
-                    if (newIndex - columns >= 0) {
-                        newIndex -= columns;
-                    } else {
-                        // If no more rows, jump to the end of the previous column
-                        newIndex = (newIndex - 1 + cards.length) % cards.length;
+                    if (newIndex < 2) {
+                        return;
+                    }
+                    newIndex = newIndex - totalCols;
+                    if (newIndex < 2) {
+                        newIndex = 0; // Jump back to the top-most button
                     }
                     break;
                 case 'Enter':
                     if (currentFocusedIndex !== -1) {
-                        cards[currentFocusedIndex].click();
+                        elements[currentFocusedIndex].click();
                     }
                     return;
-                case 'SoftLeft': // Generic back button key for some remotes
                 case 'Backspace':
-                    showExitConfirmation();
-                    return;
-                default:
-                    return;
+                case 'Escape':
+                    // Prevent the back button from closing the app immediately
+                    event.preventDefault();
+                    exitModal.style.display = 'flex';
+                    // Set initial focus on the cancel button
+                    setTimeout(() => {
+                         document.getElementById('cancel-exit-btn').focus();
+                    }, 50);
+                    return; // Don't fall through to other navigation logic
             }
             updateFocus(newIndex);
         }
 
-        function updateFocus(index) {
-            const cards = document.querySelectorAll('.channel-card');
-            if (cards.length === 0) return;
-            
-            if (currentFocusedIndex !== -1 && cards[currentFocusedIndex]) {
-                cards[currentFocusedIndex].classList.remove('selected-card');
+        function handleModalNavigation(event) {
+            const elements = getFocusableElements();
+            if (elements.length === 0) return;
+
+            let newIndex = currentFocusedIndex;
+            switch (event.key) {
+                case 'ArrowRight':
+                    newIndex = (newIndex + 1) % elements.length;
+                    break;
+                case 'ArrowLeft':
+                    newIndex = (newIndex - 1 + elements.length) % elements.length;
+                    break;
+                case 'Enter':
+                    if (currentFocusedIndex !== -1) {
+                        elements[currentFocusedIndex].click();
+                    }
+                    break;
+                case 'Backspace':
+                case 'Escape':
+                    // This handles the back button on the video player and exit modal.
+                    if (videoModal.style.display === 'flex') {
+                        exitVideoPlayer();
+                    } else if (exitModal.style.display === 'flex') {
+                        exitModal.style.display = 'none';
+                    }
+                    break;
             }
-            if (index !== -1 && cards[index]) {
-                cards[index].classList.add('selected-card');
-                cards[index].focus(); // Ensure the element is focused for accessibility
-                currentFocusedIndex = index;
-            }
+            updateFocus(newIndex);
         }
-        
-        // Handle popstate event (Firestick back button)
+
+        // Handle the browser's back button and the Firestick remote's back button
         function handlePopState(event) {
-            if (event.state && event.state.page === 'main') {
-                // If the user navigates back to the main page, close the modal if it's open
-                if (videoModal.style.display === 'flex') {
-                    exitVideoPlayer();
-                }
-            } else if (event.state && event.state.page === 'video') {
-                // Do nothing if navigating to the video page
+            // Check the history state to determine if we are on the video player page
+            if (document.getElementById('video-modal').style.display === 'flex') {
+                exitVideoPlayer();
             } else {
-                // If the user presses back from the main screen, show the exit confirmation
-                showExitConfirmation();
+                exitModal.style.display = 'flex';
             }
         }
-        
-        function showExitConfirmation() {
-            exitModal.style.display = 'flex';
-        }
-        
-        // Start the application
-        initApp();
+
+        // Start the application once the DOM is ready
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
