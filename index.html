@@ -123,8 +123,8 @@
 
     <!-- Video Player Modal -->
     <div id="video-modal" class="video-player-container">
-        <!-- Exit Button (Hidden - Back button handles this now) -->
-        <button id="exit-btn" class="hidden absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
+        <!-- Exit Button -->
+        <button id="exit-btn" class="absolute top-4 right-4 text-white text-3xl font-bold bg-gray-700 p-2 rounded-full w-12 h-12 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50">
             &times;
         </button>
         <!-- Loading Spinner -->
@@ -388,6 +388,7 @@
         const exitModal = document.getElementById('exit-modal');
         const confirmExitBtn = document.getElementById('confirm-exit-btn');
         const cancelExitBtn = document.getElementById('cancel-exit-btn');
+        const exitPlayerBtn = document.getElementById('exit-btn');
         
         // Main app initialization function
         async function initApp() {
@@ -427,6 +428,7 @@
             cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             allChannelsBtn.addEventListener('click', () => filterChannels('all'));
             favoritesBtn.addEventListener('click', () => filterChannels('favorites'));
+            exitPlayerBtn.addEventListener('click', exitVideoPlayer);
             
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
@@ -716,19 +718,19 @@
             const numChannels = channelCards.length;
             const numButtons = menuButtons.length;
 
+            const isVideoPlaying = videoModal.style.display === 'flex';
+            const isExitModalVisible = exitModal.style.display === 'flex';
+            
             // Handle back button presses based on current view
             if (key === 'Escape' || key === 'Backspace' || key === 'GoBack') {
                 event.preventDefault(); // Prevents the OS from processing the key press
 
-                const isVideoPlaying = videoModal.style.display === 'flex';
-                const isExitModalVisible = exitModal.style.display === 'flex';
-
-                if (isExitModalVisible) {
-                    // If the exit modal is visible, pressing back cancels it
-                    cancelExitBtn.click();
-                } else if (isVideoPlaying) {
+                if (isVideoPlaying) {
                     // If the video is playing, pressing back exits the video player
                     exitVideoPlayer();
+                } else if (isExitModalVisible) {
+                    // If the exit modal is visible, pressing back cancels it
+                    cancelExitBtn.click();
                 } else {
                     // Otherwise, we are on the channel list, so pressing back shows the exit modal
                     showExitModal();
