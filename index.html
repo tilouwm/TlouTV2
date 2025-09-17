@@ -150,6 +150,10 @@
             font-weight: 600;
             border-color: transparent;
         }
+
+        .search-bar-focused {
+            border: 2px solid var(--accent-blue);
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -501,10 +505,14 @@
         const cancelExitBtn = document.getElementById('cancel-exit-btn');
         const exitPlayerBtn = document.getElementById('exit-btn');
         const searchInput = document.getElementById('search-input');
+        const searchInputWrapper = searchInput.parentElement;
         const filterButtons = document.querySelectorAll('.category-button'); // Now all sidebar buttons are categories
         const categoriesList = document.getElementById('categories-list');
         const allCountSpan = document.getElementById('all-count');
         const favoritesCountSpan = document.getElementById('favorites-count');
+
+        // State for search keyboard
+        let isSearchKeyboardVisible = false;
         
         // Main app initialization function
         async function initApp() {
@@ -557,6 +565,17 @@
                 });
             });
 
+            // Set up search bar focus and blur events
+            searchInput.addEventListener('focus', () => {
+                isSearchKeyboardVisible = true;
+                searchInputWrapper.classList.add('search-bar-focused');
+            });
+
+            searchInput.addEventListener('blur', () => {
+                isSearchKeyboardVisible = false;
+                searchInputWrapper.classList.remove('search-bar-focused');
+            });
+
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
         }
@@ -569,7 +588,7 @@
             if (currentCategory === 'Favorites') {
                 filtered = filtered.filter(channel => favorites.has(channel.id));
             } else if (currentCategory !== 'All') {
-                filtered = filtered.filter(channel => channel.category === currentCategory);
+                filtered = filtered.filter(channel => filtered.filter(c => c.category === currentCategory));
             }
             
             if (query) {
@@ -831,29 +850,37 @@
             const activeElement = document.activeElement;
             const cards = Array.from(channelsList.querySelectorAll('.channel-card'));
             const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
-            
-            // Special case: handle navigation from the search input
-            if (activeElement.id === 'search-input') {
+
+            // Check if search input has focus and a keyboard is active (or presumed active)
+            if (activeElement.id === 'search-input' && isSearchKeyboardVisible) {
+                // When a virtual keyboard is visible, we need to handle navigation differently
                 if (e.key === 'ArrowDown') {
+                    // This is the keypress that will take the user out of the search bar
                     e.preventDefault();
+                    isSearchKeyboardVisible = false; // "Hide" the virtual keyboard
+                    searchInput.blur(); // Remove focus from search bar
                     focusedSection = 'categories';
                     currentFocusedIndex = 0;
                     if (categoryButtons[currentFocusedIndex]) {
-                        categoryButtons[currentFocusedIndex].focus();
+                        updateFocus(-1); // Clear search bar focus
                         updateFocus(currentFocusedIndex);
+                        categoryButtons[currentFocusedIndex].focus();
                     }
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
+                    isSearchKeyboardVisible = false;
+                    searchInput.blur();
                     focusedSection = 'channels';
                     currentFocusedIndex = 0;
                     if (cards[currentFocusedIndex]) {
-                        cards[currentFocusedIndex].focus();
+                        updateFocus(-1);
                         updateFocus(currentFocusedIndex);
+                        cards[currentFocusedIndex].focus();
                     }
                 }
                 return;
             }
-
+            
             // Normal navigation based on the current section
             let newIndex = currentFocusedIndex;
             
@@ -942,12 +969,12 @@
                 document.querySelectorAll('.channel-card');
             
             elements.forEach((el, i) => {
-                if (i === index) {
-                    el.classList.add('selected-card');
-                } else {
-                    el.classList.remove('selected-card');
-                }
+                el.classList.remove('selected-card');
             });
+
+            if (index >= 0 && index < elements.length) {
+                 elements[index].classList.add('selected-card');
+            }
         }
 
         // Function to show a custom message modal instead of alert()
@@ -979,3 +1006,4 @@
     </script>
 </body>
 </html>
+
