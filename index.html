@@ -267,7 +267,7 @@
                 "name": "Telemix",
                 "logo": "https://i.ibb.co/RB7dzZq/logo-mix-2.png",
                 "stream": "https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8",
-                "category": "Entertainment"
+                "category": "General"
             },
             {
                 "id": "channel6",
@@ -281,7 +281,7 @@
                 "name": "Kajou TV",
                 "logo": "https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png",
                 "stream": "https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8",
-                "category": "Entertainment"
+                "category": "General"
             },
             {
                 "id": "channel8",
@@ -323,7 +323,7 @@
                 "name": "HMI Promz News",
                 "logo": "https://i.imgur.com/gwPaw3v.png",
                 "stream": "https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8",
-                "category": "News"
+                "category": "Music"
             },
             {
                 "id": "channel14",
@@ -351,7 +351,7 @@
                 "name": "Nago TV",
                 "logo": "https://i.ibb.co/fSnCtJb/nago-tv.png",
                 "stream": "https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8",
-                "category": "Entertainment"
+                "category": "General"
             },
             {
                 "id": "channel18",
@@ -456,14 +456,14 @@
                 "name": "Totalmix Radio",
                 "logo": "https://cdn-radiotime-logos.tunein.com/s127273g.png",
                 "stream": "https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8",
-                "category": "Music"
+                "category": "Sports"
             },
             {
                 "id": "channel33",
                 "name": "Rezo Boul",
                 "logo": "https://www.rezoboul.com/uploads/images/logo_site_1714115779.png",
                 "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8",
-                "category": "Entertainment"
+                "category": "Sports"
             }
         ]
     </script>
@@ -479,7 +479,7 @@
         let currentCategory = 'All';
         let hlsInstance = null;
         let currentFocusedIndex = -1; // New variable to track keyboard focus
-        let focusedSection = 'channels'; // 'categories' or 'channels'
+        let focusedSection = 'categories'; // 'categories' or 'channels'
         let lastSelectedChannelId = null; // New variable to store the ID of the last played channel
         let allChannelsCount = 0;
         
@@ -688,7 +688,7 @@
 
             // Set initial focus for keyboard navigation
             currentFocusedIndex = channelsToRender.length > 0 ? 0 : -1;
-            focusedSection = 'channels';
+            focusedSection = 'categories';
             updateFocus(currentFocusedIndex);
         }
         
@@ -955,4 +955,3 @@
     </script>
 </body>
 </html>
-
