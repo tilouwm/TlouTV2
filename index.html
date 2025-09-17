@@ -31,13 +31,13 @@
     </script>
     <style>
         :root {
-            --bg-dark: #281a3d;
-            --bg-medium: #382452;
+            --bg-dark: #121e3d; /* Dark blue background */
+            --bg-medium: #1c2849; /* Medium blue for containers */
             --text-light: #F0F0F0;
             --text-gray: #B0B0B0;
-            --accent-purple: #934ae8;
-            --card-border: 2px solid #5a3e7a;
-            --card-focus-border: 2px solid var(--accent-purple);
+            --accent-blue: #4a90e2; /* Bright blue accent */
+            --card-border: 2px solid #283e74; /* Darker blue border */
+            --card-focus-border: 2px solid var(--accent-blue);
         }
 
         body {
@@ -69,7 +69,7 @@
         }
         
         .channel-grid-container::-webkit-scrollbar-thumb {
-            background-color: var(--accent-purple);
+            background-color: var(--accent-blue);
             border-radius: 4px;
         }
 
@@ -113,7 +113,7 @@
 
         .selected-card {
             border: var(--card-focus-border);
-            box-shadow: 0 0 20px rgba(147, 74, 232, 0.5);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
             transform: scale(1.05);
         }
         
@@ -142,11 +142,11 @@
         }
         
         .category-button:hover {
-            background-color: #4a2c6d;
+            background-color: #2b3b64;
         }
 
         .category-button.active {
-            background-color: var(--accent-purple);
+            background-color: var(--accent-blue);
             font-weight: 600;
             border-color: transparent;
         }
@@ -156,8 +156,8 @@
 
     <!-- Top Navigation Bar -->
     <header class="bg-black p-4 md:p-6 flex flex-col md:flex-row items-center justify-between shadow-xl space-y-4 md:space-y-0">
-        <h1 class="text-3xl font-bold tracking-wide text-[var(--accent-purple)]">TlouTV</h1>
-        <div class="flex items-center space-x-2 bg-[var(--bg-medium)] rounded-full p-2 px-4 w-full md:w-96 focus-within:ring-2 focus-within:ring-[var(--accent-purple)] transition-all">
+        <h1 class="text-3xl font-bold tracking-wide text-[var(--accent-blue)]">TlouTV</h1>
+        <div class="flex items-center space-x-2 bg-[var(--bg-medium)] rounded-full p-2 px-4 w-full md:w-96 focus-within:ring-2 focus-within:ring-[var(--accent-blue)] transition-all">
             <i class="fas fa-search text-[var(--text-gray)] text-xl"></i>
             <input type="text" id="search-input" placeholder="Search channels..." class="p-1 bg-transparent text-white focus:outline-none w-full">
         </div>
@@ -175,7 +175,7 @@
             <div id="categories-list" class="space-y-2">
                 <button class="category-button flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium active" data-filter="All">
                     <span>All Channels</span>
-                    <span id="all-count" class="bg-purple-600 px-2 py-1 text-xs rounded-full">0</span>
+                    <span id="all-count" class="bg-blue-600 px-2 py-1 text-xs rounded-full">0</span>
                 </button>
                 <button class="category-button flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm font-medium" data-filter="Favorites">
                     <span>Favorites</span>
@@ -218,7 +218,7 @@
     <!-- Exit Confirmation Modal -->
     <div id="exit-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[1001] hidden">
         <div class="bg-[var(--bg-medium)] p-8 rounded-xl shadow-2xl text-center flex flex-col items-center space-y-6 max-w-sm w-full">
-            <h3 class="text-xl font-bold text-[var(--accent-purple)]">Exit Application?</h3>
+            <h3 class="text-xl font-bold text-[var(--accent-blue)]">Exit Application?</h3>
             <p class="text-[var(--text-gray)]">Are you sure you want to exit the app?</p>
             <div class="flex space-x-4">
                 <button id="confirm-exit-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-red-700" tabindex="0">
@@ -827,9 +827,34 @@
                 }
                 return;
             }
-            
+
+            const activeElement = document.activeElement;
             const cards = Array.from(channelsList.querySelectorAll('.channel-card'));
             const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
+            
+            // Special case: handle navigation from the search input
+            if (activeElement.id === 'search-input') {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    focusedSection = 'categories';
+                    currentFocusedIndex = 0;
+                    if (categoryButtons[currentFocusedIndex]) {
+                        categoryButtons[currentFocusedIndex].focus();
+                        updateFocus(currentFocusedIndex);
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    focusedSection = 'channels';
+                    currentFocusedIndex = 0;
+                    if (cards[currentFocusedIndex]) {
+                        cards[currentFocusedIndex].focus();
+                        updateFocus(currentFocusedIndex);
+                    }
+                }
+                return;
+            }
+
+            // Normal navigation based on the current section
             let newIndex = currentFocusedIndex;
             
             // Handle switching sections with left/right arrows
@@ -837,7 +862,6 @@
                 e.preventDefault();
                 focusedSection = 'categories';
                 updateFocus(-1); // Clear channel focus
-                const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
                 currentFocusedIndex = 0; // Set to the first category
                 updateFocus(currentFocusedIndex);
                 categoryButtons[currentFocusedIndex].focus();
@@ -931,7 +955,7 @@
             const modalHtml = `
                 <div id="custom-message-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[1002]">
                     <div class="bg-[var(--bg-medium)] p-8 rounded-xl shadow-2xl text-center flex flex-col items-center space-y-6 max-w-sm w-full">
-                        <h3 class="text-xl font-bold text-[var(--accent-purple)]">Message</h3>
+                        <h3 class="text-xl font-bold text-[var(--accent-blue)]">Message</h3>
                         <p class="text-[var(--text-gray)]">${message}</p>
                         <button id="close-message-btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-gray-700">
                             Close
