@@ -193,8 +193,8 @@
         <!-- This container now handles its own vertical scrolling -->
         <div class="channel-grid-container flex-grow flex flex-col">
             <div class="flex items-baseline mb-4 space-x-2">
-                 <h2 id="main-title" class="text-2xl font-semibold text-[var(--text-light)]">All Channels</h2>
-                 <span id="channel-count" class="text-[var(--text-gray)] text-lg">(0)</span>
+                <h2 id="main-title" class="text-2xl font-semibold text-[var(--text-light)]">All Channels</h2>
+                <span id="channel-count" class="text-[var(--text-gray)] text-lg">(0)</span>
             </div>
             
             <div id="channels-list" class="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -588,7 +588,7 @@
             if (currentCategory === 'Favorites') {
                 filtered = filtered.filter(channel => favorites.has(channel.id));
             } else if (currentCategory !== 'All') {
-                filtered = filtered.filter(channel => filtered.filter(c => c.category === currentCategory));
+                filtered = filtered.filter(channel => channel.category === currentCategory);
             }
             
             if (query) {
@@ -695,138 +695,56 @@
             channelCountSpan.textContent = `(${channelsToRender.length})`;
             
             if (channelsToRender.length === 0) {
-                 channelsList.innerHTML = `<p class="text-gray-400 text-center col-span-full mt-10">No channels found for this selection.</p>`;
+                 channelsList.innerHTML = `<p class="text-[var(--text-gray)] text-center col-span-full">No channels found for this category or search.</p>`;
+                 currentFocusedIndex = -1;
                  return;
             }
 
-            channelsToRender.forEach(channel => {
-                const card = createChannelCard(channel);
-                channelsList.appendChild(card);
-                observer.observe(card); // Start observing for lazy loading
-            });
+            channelsToRender.forEach((channel, index) => {
+                const isFavorite = favorites.has(channel.id);
+                const isFocused = currentFocusedIndex === index && focusedSection === 'channels';
+                
+                const channelCard = document.createElement('div');
+                channelCard.className = `channel-card-container p-2 md:p-4 rounded-lg shadow-lg relative cursor-pointer ${isFocused ? 'selected-card' : ''}`;
+                channelCard.dataset.index = index;
+                channelCard.dataset.id = channel.id;
+                channelCard.dataset.stream = channel.stream;
+                channelCard.dataset.name = channel.name;
 
-            // Set initial focus for keyboard navigation
-            currentFocusedIndex = channelsToRender.length > 0 ? 0 : -1;
-            focusedSection = 'categories';
-            updateFocus(currentFocusedIndex);
-        }
-        
-        // Creates a single channel card element
-        function createChannelCard(channel) {
-            const isFavorite = favorites.has(channel.id);
-            const card = document.createElement('div');
-            card.className = "channel-card channel-card-container bg-[var(--bg-medium)] p-4 sm:p-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col items-center justify-center space-y-2 relative";
-            card.dataset.stream = channel.stream;
-            card.dataset.name = channel.name;
-            card.dataset.id = channel.id;
-            card.setAttribute('tabindex', '0');
+                channelCard.innerHTML = `
+                    <div class="channel-card bg-[var(--bg-medium)] rounded-xl flex flex-col items-center justify-center p-4 h-full text-center">
+                        <img class="w-20 h-20 mb-2 rounded-full object-contain" src="https://placehold.co/80x80/000000/FFFFFF?text=Loading..." data-src="${channel.logo}" alt="${channel.name} logo">
+                        <h3 class="text-sm md:text-md font-semibold mt-2">${channel.name}</h3>
+                        <p class="text-xs md:text-sm text-[var(--text-gray)] mt-1">${channel.category}</p>
+                        <button class="favorite-btn absolute top-2 right-2 p-1 text-xl text-yellow-400 opacity-80 hover:opacity-100 transition-opacity">
+                            <i class="${isFavorite ? 'fas' : 'far'} fa-star"></i>
+                        </button>
+                    </div>
+                `;
 
-            const logo = document.createElement('img');
-            logo.dataset.src = channel.logo; // Use data-src for lazy loading
-            logo.alt = `${channel.name} logo`;
-            logo.className = "w-24 h-24 object-contain rounded-full border-2 border-gray-600 mb-2";
-
-            const name = document.createElement('h3');
-            name.textContent = channel.name;
-            name.className = "text-center text-md font-semibold text-[var(--text-light)] truncate w-full";
-
-            const category = document.createElement('p');
-            category.textContent = channel.category;
-            category.className = "text-center text-sm text-[var(--text-gray)]";
-            
-            // Favorite button
-            const favButton = document.createElement('button');
-            favButton.className = `absolute top-2 right-2 p-2 rounded-full transition-colors duration-200 text-xl ${isFavorite ? 'text-red-500 hover:text-red-400' : 'text-gray-400 hover:text-white'}`;
-            favButton.innerHTML = `<i class="${isFavorite ? 'fas fa-heart' : 'far fa-heart'}"></i>`;
-            favButton.onclick = (e) => {
-                e.stopPropagation(); // Prevent card from being clicked
-                toggleFavorite(channel.id);
-            };
-
-            card.appendChild(logo);
-            card.appendChild(favButton);
-            card.appendChild(name);
-            card.appendChild(category);
-
-            card.addEventListener('click', (e) => {
-                if (e.target.closest('.channel-card')) {
-                    // Save the ID of the channel that was just played
-                    lastSelectedChannelId = channel.id;
+                // Add event listeners
+                channelCard.querySelector('.channel-card').addEventListener('click', () => {
                     playVideo(channel.stream);
-                }
+                    lastSelectedChannelId = channel.id;
+                });
+
+                channelCard.querySelector('.favorite-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent the parent card click event
+                    toggleFavorite(channel.id);
+                });
+
+                channelsList.appendChild(channelCard);
+                observer.observe(channelCard); // Attach lazy loading observer
             });
 
-            return card;
-        }
-
-        // Handles loading and playing a video stream using hls.js
-        function playVideo(streamUrl) {
-            videoModal.style.display = 'flex';
-            loadingSpinner.classList.remove('hidden');
-            videoContent.classList.add('hidden');
-            videoPlayer.pause();
-            
-            // Check if HLS is supported by the browser
-            if (Hls.isSupported()) {
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                }
-                hlsInstance = new Hls();
-                hlsInstance.loadSource(streamUrl);
-                hlsInstance.attachMedia(videoPlayer);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    videoPlayer.play().catch(error => {
-                        console.error('Autoplay prevented:', error);
-                    });
-                    loadingSpinner.classList.add('hidden');
-                    videoContent.classList.remove('hidden');
-                });
-                hlsInstance.on(Hls.Events.ERROR, function(event, data) {
-                    console.error('HLS.js error:', data);
-                    loadingSpinner.classList.add('hidden');
-                    videoContent.classList.remove('hidden');
-                    const message = `Error playing video: ${data.details}. The stream might be offline or an unsupported format.`;
-                    showCustomMessage(message);
-                    videoPlayer.pause();
-                });
-            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                // Fallback for native HLS support (Safari)
-                videoPlayer.src = streamUrl;
-                videoPlayer.addEventListener('loadedmetadata', () => {
-                    videoPlayer.play().catch(error => {
-                        console.error('Autoplay prevented:', error);
-                    });
-                    loadingSpinner.classList.add('hidden');
-                    videoContent.classList.remove('hidden');
-                });
-            } else {
-                loadingSpinner.classList.add('hidden');
-                showCustomMessage('HLS is not supported by your browser.');
-            }
-        }
-        
-        // Stops the video and hides the player modal
-        function exitVideoPlayer() {
-            videoPlayer.pause();
-            if (hlsInstance) {
-                hlsInstance.destroy();
-                hlsInstance = null;
-            }
-            videoModal.style.display = 'none';
-            
-            // Find the last selected channel card and highlight it
-            const cardToHighlight = document.querySelector(`.channel-card[data-id="${lastSelectedChannelId}"]`);
-            if (cardToHighlight) {
-                const allCards = Array.from(channelsList.querySelectorAll('.channel-card'));
-                const lastFocusedIndex = allCards.indexOf(cardToHighlight);
-                currentFocusedIndex = lastFocusedIndex;
-                updateFocus(lastFocusedIndex);
-                cardToHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                cardToHighlight.focus();
+            // Set the focus on the first item if none is focused
+            if (currentFocusedIndex === -1 && channelsToRender.length > 0) {
+                currentFocusedIndex = 0;
+                updateFocus();
             }
         }
 
-        // Toggles a channel's favorite status
+        // Toggle favorite status and save to Firestore
         function toggleFavorite(channelId) {
             if (favorites.has(channelId)) {
                 favorites.delete(channelId);
@@ -834,175 +752,218 @@
                 favorites.add(channelId);
             }
             saveFavorites();
+            // Re-render to update the star icon and favorite count
+            filterChannels();
         }
 
-        // Handles keyboard navigation (D-pad/remote control)
+        // Play the video stream using HLS.js
+        function playVideo(streamUrl) {
+            videoModal.style.display = 'flex';
+            loadingSpinner.style.display = 'flex';
+            videoContent.style.display = 'none';
+
+            if (Hls.isSupported()) {
+                if (hlsInstance) {
+                    hlsInstance.destroy();
+                }
+                hlsInstance = new Hls();
+                hlsInstance.attachMedia(videoPlayer);
+                
+                hlsInstance.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    hlsInstance.loadSource(streamUrl);
+                });
+
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                    console.log('Manifest parsed. Loading stream...');
+                    loadingSpinner.style.display = 'none';
+                    videoContent.style.display = 'block';
+                    videoPlayer.play();
+                });
+
+                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error('Network error. Retrying...', data);
+                                hlsInstance.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error('Media error. Trying to recover...', data);
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                console.error('HLS fatal error. Destroying instance.', data);
+                                exitVideoPlayer();
+                                break;
+                        }
+                    }
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                videoPlayer.src = streamUrl;
+                videoPlayer.addEventListener('loadedmetadata', function() {
+                    loadingSpinner.style.display = 'none';
+                    videoContent.style.display = 'block';
+                    videoPlayer.play();
+                });
+            } else {
+                console.error("This browser does not support HLS playback.");
+                exitVideoPlayer();
+            }
+        }
+        
+        // Exit the video player
+        function exitVideoPlayer() {
+            videoPlayer.pause();
+            videoPlayer.src = '';
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            videoModal.style.display = 'none';
+        }
+
+        // Keyboard navigation and event handler
         function handleKeyNavigation(e) {
-            const isVideoModalVisible = videoModal.style.display === 'flex';
-            if (isVideoModalVisible) {
-                // In video player mode, only handle Exit
-                if (e.key === 'Backspace' || e.key === 'Escape') {
-                    exitVideoPlayer();
-                }
-                return;
-            }
-
-            const activeElement = document.activeElement;
-            const cards = Array.from(channelsList.querySelectorAll('.channel-card'));
-            const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
-
-            // Check if search input has focus and a keyboard is active (or presumed active)
-            if (activeElement.id === 'search-input' && isSearchKeyboardVisible) {
-                // When a virtual keyboard is visible, we need to handle navigation differently
-                if (e.key === 'ArrowDown') {
-                    // This is the keypress that will take the user out of the search bar
+            // Do nothing if a modal is visible or search is active
+            if (videoModal.style.display === 'flex' || exitModal.style.display === 'flex') {
+                if (e.key === 'Escape' || e.key === 'Backspace') {
                     e.preventDefault();
-                    isSearchKeyboardVisible = false; // "Hide" the virtual keyboard
-                    searchInput.blur(); // Remove focus from search bar
-                    focusedSection = 'categories';
-                    currentFocusedIndex = 0;
-                    if (categoryButtons[currentFocusedIndex]) {
-                        updateFocus(-1); // Clear search bar focus
-                        updateFocus(currentFocusedIndex);
-                        categoryButtons[currentFocusedIndex].focus();
+                    if (videoModal.style.display === 'flex') {
+                        exitModal.style.display = 'flex';
+                    } else if (exitModal.style.display === 'flex') {
+                        exitModal.style.display = 'none';
                     }
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    isSearchKeyboardVisible = false;
-                    searchInput.blur();
-                    focusedSection = 'channels';
-                    currentFocusedIndex = 0;
-                    if (cards[currentFocusedIndex]) {
-                        updateFocus(-1);
-                        updateFocus(currentFocusedIndex);
-                        cards[currentFocusedIndex].focus();
+                } else if (exitModal.style.display === 'flex') {
+                    if (e.key === 'Enter') {
+                         e.preventDefault();
+                         confirmExitBtn.click();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        const buttons = [confirmExitBtn, cancelExitBtn];
+                        const currentIndex = buttons.indexOf(document.activeElement);
+                        const nextIndex = (currentIndex + 1) % buttons.length;
+                        buttons[nextIndex].focus();
                     }
                 }
                 return;
             }
+
+            const currentChannelCards = Array.from(channelsList.querySelectorAll('.channel-card-container'));
+            const currentCategoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
             
-            // Normal navigation based on the current section
-            let newIndex = currentFocusedIndex;
-            
-            // Handle switching sections with left/right arrows
-            if (focusedSection === 'channels' && e.key === 'ArrowLeft') {
-                e.preventDefault();
-                focusedSection = 'categories';
-                updateFocus(-1); // Clear channel focus
-                currentFocusedIndex = 0; // Set to the first category
-                updateFocus(currentFocusedIndex);
-                categoryButtons[currentFocusedIndex].focus();
-                return;
-            } else if (focusedSection === 'categories' && e.key === 'ArrowRight') {
-                e.preventDefault();
-                focusedSection = 'channels';
-                updateFocus(-1); // Clear category focus
-                currentFocusedIndex = 0;
-                updateFocus(currentFocusedIndex);
-                if (cards[currentFocusedIndex]) {
-                    cards[currentFocusedIndex].focus();
+            // Handle arrow keys
+            const handleMovement = (dx, dy) => {
+                const totalChannels = currentChannelCards.length;
+                const totalCategories = currentCategoryButtons.length;
+                
+                if (focusedSection === 'categories') {
+                    let nextIndex = currentFocusedIndex + dy;
+                    if (nextIndex >= 0 && nextIndex < totalCategories) {
+                        currentFocusedIndex = nextIndex;
+                        updateFocus();
+                    }
+                } else if (focusedSection === 'channels' && totalChannels > 0) {
+                    const gridWidth = channelsList.offsetWidth;
+                    const cardWidth = currentChannelCards[0]?.offsetWidth;
+                    const gap = 16; // md:gap-4 is 16px, sm:gap-6 is 24px
+                    const cardWithGap = cardWidth + gap;
+                    const itemsPerRow = Math.round(gridWidth / cardWithGap);
+
+                    let nextIndex = currentFocusedIndex;
+
+                    if (dx !== 0) { // Left/Right
+                        nextIndex += dx;
+                        if (nextIndex < 0) nextIndex = 0;
+                        if (nextIndex >= totalChannels) nextIndex = totalChannels - 1;
+                    } else if (dy !== 0) { // Up/Down
+                        nextIndex += dy * itemsPerRow;
+                        if (nextIndex < 0) nextIndex = 0;
+                        if (nextIndex >= totalChannels) nextIndex = totalChannels - 1;
+                    }
+
+                    currentFocusedIndex = nextIndex;
+                    updateFocus();
                 }
-                return;
+            };
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    handleMovement(0, -1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    handleMovement(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (focusedSection === 'channels') {
+                        handleMovement(-1, 0);
+                    } else {
+                        focusedSection = 'channels';
+                        currentFocusedIndex = 0;
+                        updateFocus();
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (focusedSection === 'channels') {
+                        handleMovement(1, 0);
+                    } else {
+                        focusedSection = 'channels';
+                        currentFocusedIndex = 0;
+                        updateFocus();
+                    }
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (focusedSection === 'categories' && currentCategoryButtons[currentFocusedIndex]) {
+                        currentCategoryButtons[currentFocusedIndex].click();
+                        focusedSection = 'channels';
+                        currentFocusedIndex = 0;
+                    } else if (focusedSection === 'channels' && currentChannelCards[currentFocusedIndex]) {
+                        currentChannelCards[currentFocusedIndex].querySelector('.channel-card').click();
+                    }
+                    break;
+                case 'Escape':
+                case 'Backspace':
+                    e.preventDefault();
+                    exitModal.style.display = 'flex';
+                    confirmExitBtn.focus(); // Focus the exit button
+                    break;
+                case 'Menu': // For TV remotes
+                    e.preventDefault();
+                    if (focusedSection === 'channels') {
+                        focusedSection = 'categories';
+                        currentFocusedIndex = 0;
+                        updateFocus();
+                    }
+                    break;
             }
-            
-            // Handle navigation within the current section
+        }
+        
+        // Update the visual focus indicator
+        function updateFocus() {
+            document.querySelectorAll('.selected-card').forEach(card => card.classList.remove('selected-card'));
+            document.querySelectorAll('.category-button.active').forEach(btn => btn.classList.remove('active'));
+
             if (focusedSection === 'categories') {
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    newIndex = Math.max(0, currentFocusedIndex - 1);
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    newIndex = Math.min(categoryButtons.length - 1, currentFocusedIndex + 1);
-                }
-                if (newIndex !== currentFocusedIndex) {
-                    currentFocusedIndex = newIndex;
-                    updateFocus(newIndex);
-                    categoryButtons[newIndex].focus();
+                const buttons = document.querySelectorAll('.category-button');
+                if (buttons[currentFocusedIndex]) {
+                    buttons[currentFocusedIndex].classList.add('active');
+                    buttons[currentFocusedIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
                 }
             } else if (focusedSection === 'channels') {
-                const numCols = window.innerWidth >= 1280 ? 5 : window.innerWidth >= 1024 ? 4 : window.innerWidth >= 768 ? 3 : window.innerWidth >= 640 ? 3 : 2;
-                
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    newIndex = Math.max(0, currentFocusedIndex - numCols);
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    newIndex = Math.min(cards.length - 1, currentFocusedIndex + numCols);
-                } else if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    newIndex = Math.max(0, currentFocusedIndex - 1);
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    newIndex = Math.min(cards.length - 1, currentFocusedIndex + 1);
+                const cards = document.querySelectorAll('.channel-card-container');
+                if (cards[currentFocusedIndex]) {
+                    cards[currentFocusedIndex].classList.add('selected-card');
+                    cards[currentFocusedIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
                 }
-                
-                if (newIndex !== currentFocusedIndex) {
-                    currentFocusedIndex = newIndex;
-                    updateFocus(newIndex);
-                    cards[newIndex].focus();
-                }
-            }
-            
-            // Handle Enter/OK button press
-            if (e.key === 'Enter') {
-                if (focusedSection === 'categories') {
-                    const focusedButton = categoryButtons[currentFocusedIndex];
-                    if (focusedButton) {
-                         focusedButton.click();
-                    }
-                } else if (focusedSection === 'channels') {
-                    const focusedCard = cards[currentFocusedIndex];
-                    if (focusedCard) {
-                        focusedCard.click();
-                    }
-                }
-            } else if (e.key === 'Backspace' || e.key === 'Escape') {
-                e.preventDefault();
-                exitModal.style.display = 'flex';
             }
         }
 
-        // Updates the visual focus highlight for a given index
-        function updateFocus(index) {
-            const elements = focusedSection === 'categories' ?
-                document.querySelectorAll('.category-button') :
-                document.querySelectorAll('.channel-card');
-            
-            elements.forEach((el, i) => {
-                el.classList.remove('selected-card');
-            });
-
-            if (index >= 0 && index < elements.length) {
-                 elements[index].classList.add('selected-card');
-            }
-        }
-
-        // Function to show a custom message modal instead of alert()
-        function showCustomMessage(message) {
-            const modalHtml = `
-                <div id="custom-message-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[1002]">
-                    <div class="bg-[var(--bg-medium)] p-8 rounded-xl shadow-2xl text-center flex flex-col items-center space-y-6 max-w-sm w-full">
-                        <h3 class="text-xl font-bold text-[var(--accent-blue)]">Message</h3>
-                        <p class="text-[var(--text-gray)]">${message}</p>
-                        <button id="close-message-btn" class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-gray-700">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-            document.getElementById('close-message-btn').addEventListener('click', () => {
-                const modal = document.getElementById('custom-message-modal');
-                modal.remove();
-            });
-        }
-
-        // Start the application when the window loads
-        window.onload = () => {
-            initApp();
-        };
-
+        // Call the main initialization function on window load
+        window.addEventListener('load', initApp);
     </script>
 </body>
 </html>
