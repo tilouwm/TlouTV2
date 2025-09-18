@@ -815,21 +815,21 @@
             }
         }
         
-        // --- UPDATED ONLY THIS FUNCTION to normalize Fire TV DPAD + keyboard arrows ---
         function handleKeyNavigation(e) {
-            // Normalize Fire TV / Android TV DPAD and standard keyboard events
+            // --- Normalize Fire TV / Android TV DPAD + keyboard arrows ---
             const code = typeof e.keyCode === 'number' ? e.keyCode : null;
             const k = (e.key || '').toLowerCase();
 
+            // Map everything to unified tokens
             const key =
                 k === 'arrowleft'  || k === 'left'  || code === 37 || code === 21 ? 'ArrowLeft'  :
                 k === 'arrowright' || k === 'right' || code === 39 || code === 22 ? 'ArrowRight' :
                 k === 'arrowup'    || k === 'up'    || code === 38 || code === 19 ? 'ArrowUp'    :
                 k === 'arrowdown'  || k === 'down'  || code === 40 || code === 20 ? 'ArrowDown'  :
-                k === 'escape'     || k === 'esc'   || code === 27                       ? 'Escape'     :
-                k === 'backspace'  || code === 8                                         ? 'Backspace'  :
-                k === 'enter'      || code === 13                                        ? 'Enter'      :
-                k === 'p'          || k === 'P'      || code === 80                       ? 'P'          :
+                k === 'escape'     || k === 'esc'   || code === 27               ? 'Escape'     :
+                k === 'backspace'  || code === 8                                 ? 'Backspace'  :
+                k === 'enter'      || code === 13                                 ? 'Enter'      :
+                k === 'p'          || k === 'P'     || code === 80               ? 'P'          :
                 null;
 
             const channelCards = Array.from(channelsList.querySelectorAll('.channel-card'));
@@ -844,7 +844,7 @@
                 }
                 return;
             }
-            
+
             // Handle keys when exit modal is open
             if (exitModal.style.display === 'flex') {
                 if (key === 'ArrowRight' || key === 'ArrowLeft') {
@@ -874,8 +874,10 @@
                 }
             } else if (focusedElement && focusedElement.classList.contains('channel-card')) {
                 const focusedIndex = channelCards.indexOf(focusedElement);
-                const columns = getComputedStyle(channelsList).getPropertyValue("grid-template-columns").split(" ").length;
-                
+                const columns = getComputedStyle(channelsList)
+                    .getPropertyValue("grid-template-columns")
+                    .split(" ").length;
+
                 if (key === 'ArrowRight') {
                     nextElement = channelCards[focusedIndex + 1];
                 } else if (key === 'ArrowLeft') {
@@ -896,9 +898,18 @@
                     nextElement = document.querySelector('.category-button.active');
                 }
             }
-            
+
             if (key === 'Enter' && focusedElement) {
-                focusedElement.click();
+                // Special handling for category buttons to fix Firestick issue
+                if (focusedElement.classList.contains('category-button')) {
+                    const filterValue = focusedElement.getAttribute('data-filter');
+                    document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
+                    focusedElement.classList.add('active');
+                    currentCategory = filterValue;
+                    filterChannels();
+                } else {
+                    focusedElement.click();
+                }
                 e.preventDefault();
             } else if (key === 'Backspace' || key === 'Escape') {
                 showExitModal();
@@ -943,5 +954,3 @@
     </script>
 </body>
 </html>
-
-
