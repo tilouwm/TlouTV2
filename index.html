@@ -37,7 +37,7 @@
             --text-gray: #B0B0B0;
             --accent-blue: #4a90e2; /* Bright blue accent */
             --card-border: 2px solid #283e74; /* Darker blue border */
-            --card-focus-border: 2px solid var(--accent-blue);
+            --card-focus-border: 3px solid var(--accent-blue);
         }
 
         body {
@@ -94,7 +94,7 @@
         .video-player {
             width: 100%;
             height: 100%;
-            display: block.
+            display: block;
         }
 
         .channel-card-container {
@@ -106,12 +106,22 @@
             animation: fadeIn 0.5s ease-out forwards;
             border: var(--card-border);
             transition: all 0.3s ease;
+            outline: none;
         }
 
+        /* Enhanced focus styles for TV remotes */
+        .channel-card:focus,
         .selected-card {
             border: var(--card-focus-border);
-            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+            box-shadow: 0 0 25px rgba(74, 144, 226, 0.7);
             transform: scale(1.05);
+            outline: none;
+        }
+
+        .category-button:focus {
+            background-color: var(--accent-blue);
+            outline: none;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
         }
         
         .loader {
@@ -136,6 +146,7 @@
         .category-button {
             transition: all 0.2s;
             border: 2px solid transparent;
+            outline: none;
         }
         
         .category-button:hover {
@@ -146,6 +157,27 @@
             background-color: var(--accent-blue);
             font-weight: 600;
             border-color: transparent;
+        }
+
+        /* TV-specific focus management */
+        .tv-focused {
+            outline: 3px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
+        /* Hide default focus outline on buttons for TV */
+        button:focus {
+            outline: none;
+        }
+
+        /* Enhanced button focus for TV */
+        #exit-btn:focus,
+        #confirm-exit-btn:focus,
+        #cancel-exit-btn:focus {
+            background-color: var(--accent-blue);
+            transform: scale(1.1);
+            outline: none;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.7);
         }
     </style>
 </head>
@@ -533,6 +565,7 @@
         let lastSelectedChannelId = null;
         let allChannelsCount = 0;
         let currentFocusedElement = null;
+        let isInVideoMode = false;
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -554,6 +587,169 @@
         const categoriesList = document.getElementById('categories-list');
         const allCountSpan = document.getElementById('all-count');
         const favoritesCountSpan = document.getElementById('favorites-count');
+        
+        // TV Remote Navigation Functions
+        function getAllFocusableElements() {
+            if (isInVideoMode) {
+                return Array.from(document.querySelectorAll('#exit-btn'));
+            }
+            
+            const categories = Array.from(document.querySelectorAll('.category-button'));
+            const channels = Array.from(document.querySelectorAll('.channel-card'));
+            return [...categories, ...channels];
+        }
+        
+        function getCurrentFocusedIndex() {
+            const focusableElements = getAllFocusableElements();
+            const currentElement = document.activeElement;
+            return focusableElements.indexOf(currentElement);
+        }
+        
+        function setFocusToElement(element) {
+            if (element) {
+                // Remove focus from all elements first
+                document.querySelectorAll('.selected-card, .tv-focused').forEach(el => {
+                    el.classList.remove('selected-card', 'tv-focused');
+                });
+                
+                // Set focus and visual indicator
+                element.focus();
+                if (element.classList.contains('channel-card')) {
+                    element.classList.add('selected-card');
+                } else {
+                    element.classList.add('tv-focused');
+                }
+                
+                // Ensure element is visible
+                element.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center', 
+                    inline: 'center' 
+                });
+                
+                currentFocusedElement = element;
+            }
+        }
+        
+        function findNearestElement(currentElement, direction) {
+            const allElements = getAllFocusableElements();
+            const currentRect = currentElement.getBoundingClientRect();
+            let bestElement = null;
+            let bestDistance = Infinity;
+            
+            allElements.forEach(element => {
+                if (element === currentElement) return;
+                
+                const rect = element.getBoundingClientRect();
+                let isInDirection = false;
+                let distance = 0;
+                
+                switch (direction) {
+                    case 'ArrowLeft':
+                        isInDirection = rect.right <= currentRect.left + 10;
+                        distance = Math.abs(rect.top - currentRect.top) + (currentRect.left - rect.right);
+                        break;
+                    case 'ArrowRight':
+                        isInDirection = rect.left >= currentRect.right - 10;
+                        distance = Math.abs(rect.top - currentRect.top) + (rect.left - currentRect.right);
+                        break;
+                    case 'ArrowUp':
+                        isInDirection = rect.bottom <= currentRect.top + 10;
+                        distance = Math.abs(rect.left - currentRect.left) + (currentRect.top - rect.bottom);
+                        break;
+                    case 'ArrowDown':
+                        isInDirection = rect.top >= currentRect.bottom - 10;
+                        distance = Math.abs(rect.left - currentRect.left) + (rect.top - currentRect.bottom);
+                        break;
+                }
+                
+                if (isInDirection && distance < bestDistance) {
+                    bestDistance = distance;
+                    bestElement = element;
+                }
+            });
+            
+            return bestElement;
+        }
+        
+        function handleTVNavigation(event) {
+            // Allow default behavior for video player controls
+            if (isInVideoMode && event.target.tagName === 'VIDEO') {
+                return;
+            }
+            
+            const currentElement = document.activeElement;
+            let targetElement = null;
+            
+            switch (event.key) {
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    event.preventDefault();
+                    
+                    if (isInVideoMode) {
+                        // In video mode, only handle back navigation
+                        if (event.key === 'ArrowLeft' || event.key === 'Escape') {
+                            exitVideoPlayer();
+                        }
+                        return;
+                    }
+                    
+                    // Special handling for category to channel navigation
+                    if (event.key === 'ArrowRight' && currentElement.classList.contains('category-button')) {
+                        const firstChannel = channelsList.querySelector('.channel-card');
+                        if (firstChannel) {
+                            setFocusToElement(firstChannel);
+                            return;
+                        }
+                    }
+                    
+                    // Find nearest element in the direction
+                    targetElement = findNearestElement(currentElement, event.key);
+                    if (targetElement) {
+                        setFocusToElement(targetElement);
+                    }
+                    break;
+                    
+                case 'Enter':
+                    event.preventDefault();
+                    
+                    if (currentElement.classList.contains('channel-card')) {
+                        const channelId = currentElement.getAttribute('data-id');
+                        playChannel(channelId);
+                    } else if (currentElement.classList.contains('category-button')) {
+                        currentElement.click();
+                    } else if (currentElement.id === 'exit-btn') {
+                        exitVideoPlayer();
+                    }
+                    break;
+                    
+                case 'Escape':
+                case 'Backspace':
+                    event.preventDefault();
+                    
+                    if (isInVideoMode) {
+                        exitVideoPlayer();
+                    } else {
+                        showExitModal();
+                    }
+                    break;
+            }
+        }
+        
+        function showExitModal() {
+            exitModal.style.display = 'flex';
+            confirmExitBtn.focus();
+        }
+        
+        function hideExitModal() {
+            exitModal.style.display = 'none';
+            // Return focus to previously focused element
+            if (currentFocusedElement) {
+                setFocusToElement(currentFocusedElement);
+            }
+        }
         
         // Main app initialization function
         async function initApp() {
@@ -584,11 +780,12 @@
                 }
             });
 
+            // Event Listeners
             confirmExitBtn.addEventListener('click', () => window.history.back());
-            cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
+            cancelExitBtn.addEventListener('click', hideExitModal);
             exitPlayerBtn.addEventListener('click', exitVideoPlayer);
             
-            // category click (existing)
+            // Category click handler
             categoriesList.addEventListener('click', (e) => {
                 if (e.target.closest('.category-button')) {
                     const button = e.target.closest('.category-button');
@@ -596,22 +793,39 @@
                     document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
                     button.classList.add('active');
                     filterChannels();
+                    setFocusToElement(button);
                 }
             });
 
-            // ===== Old-version remote behavior: ArrowRight on category => focus first channel =====
-            categoriesList.addEventListener('keydown', (e) => {
-                const btn = e.target.closest('.category-button');
-                if (!btn) return;
-                if (e.key === 'ArrowRight') {
-                    const firstCard = channelsList.querySelector('.channel-card');
-                    if (firstCard) firstCard.focus();
+            // TV Remote Navigation - Global key handler
+            document.addEventListener('keydown', handleTVNavigation);
+            
+            // Modal key handlers
+            exitModal.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const focused = document.activeElement;
+                    if (focused === confirmExitBtn) {
+                        cancelExitBtn.focus();
+                    } else {
+                        confirmExitBtn.focus();
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.activeElement.click();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideExitModal();
                 }
             });
-
-            // (Removed global custom key handler to allow native DPAD spatial navigation)
-            // document.addEventListener('keydown', handleKeyNavigation);
-            // window.addEventListener('keydown', handleKeyNavigation);
+            
+            // Initialize focus on first category
+            setTimeout(() => {
+                const firstCategory = document.querySelector('.category-button');
+                if (firstCategory) {
+                    setFocusToElement(firstCategory);
+                }
+            }, 500);
         }
         
         function filterChannels() {
@@ -624,7 +838,14 @@
             }
             
             renderChannels(filtered);
-            updateFocus(document.querySelector('.category-button.active'));
+            
+            // Reset focus to first channel after filter
+            setTimeout(() => {
+                const firstChannel = channelsList.querySelector('.channel-card');
+                if (firstChannel && !document.querySelector('.category-button:focus')) {
+                    setFocusToElement(firstChannel);
+                }
+            }, 100);
         }
 
         function fetchChannels() {
@@ -717,7 +938,7 @@
                 card.setAttribute('data-id', channel.id);
                 card.setAttribute('data-index', index);
                 card.setAttribute('tabindex', '0');
-                card.setAttribute('role', 'button'); // from old version
+                card.setAttribute('role', 'button');
 
                 const isFavorite = favorites.has(channel.id);
                 
@@ -733,13 +954,6 @@
                         <p class="text-sm text-[var(--text-gray)] text-center mt-1 truncate">${channel.category}</p>
                     </div>
                 `;
-                
-                // old version: Enter-to-play on the card itself
-                card.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        playChannel(channel.id);
-                    }
-                });
 
                 card.addEventListener('click', () => playChannel(channel.id));
                 const favoriteBtn = card.querySelector('.favorite-btn');
@@ -778,9 +992,15 @@
             }
 
             lastSelectedChannelId = channelId;
+            isInVideoMode = true;
             videoModal.style.display = 'flex';
             loadingSpinner.style.display = 'flex';
             videoContent.classList.add('hidden');
+            
+            // Focus on exit button immediately
+            setTimeout(() => {
+                exitPlayerBtn.focus();
+            }, 100);
             
             if (hlsInstance) {
                 hlsInstance.destroy();
@@ -821,6 +1041,8 @@
         }
         
         function exitVideoPlayer() {
+            isInVideoMode = false;
+            
             if (hlsInstance) {
                 hlsInstance.stopLoad();
                 hlsInstance.detachMedia();
@@ -828,26 +1050,17 @@
             videoPlayer.pause();
             videoPlayer.src = '';
             videoModal.style.display = 'none';
+            
+            // Return focus to the last selected channel
             if (lastSelectedChannelId) {
                 const lastCard = document.querySelector(`[data-id="${lastSelectedChannelId}"]`);
                 if (lastCard) {
-                    updateFocus(lastCard);
+                    setTimeout(() => {
+                        setFocusToElement(lastCard);
+                    }, 100);
                 }
             }
         }
-        
-        function updateFocus(newElement) {
-            const allFocusable = Array.from(document.querySelectorAll('.selected-card'));
-            allFocusable.forEach(el => el.classList.remove('selected-card'));
-            
-            if (newElement) {
-                newElement.classList.add('selected-card');
-                newElement.focus();
-                newElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            }
-        }
-
-        // (No showExitModal/hideExitModal or global key handlers — relying on native TV spatial navigation)
 
         window.onload = () => {
              initApp();
