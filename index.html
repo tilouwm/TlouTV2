@@ -193,8 +193,8 @@
         <!-- This container now handles its own vertical scrolling -->
         <div class="channel-grid-container flex-grow flex flex-col">
             <div class="flex items-baseline mb-4 space-x-2">
-                <h2 id="main-title" class="text-2xl font-semibold text-[var(--text-light)]">All Channels</h2>
-                <span id="channel-count" class="text-[var(--text-gray)] text-lg">(0)</span>
+                 <h2 id="main-title" class="text-2xl font-semibold text-[var(--text-light)]">All Channels</h2>
+                 <span id="channel-count" class="text-[var(--text-gray)] text-lg">(0)</span>
             </div>
             
             <div id="channels-list" class="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -206,8 +206,8 @@
     <!-- Video Player Modal -->
     <div id="video-modal" class="video-player-container">
         <!-- Exit Button -->
-        <button id="exit-btn" class="absolute top-6 right-6 text-white text-3xl font-bold bg-black bg-opacity-50 p-2 rounded-full w-14 h-14 flex items-center justify-center transition-transform transform hover:scale-110 focus:outline-none z-50" tabindex="0">
-            <i class="fas fa-times"></i>
+        <button id="exit-btn" class="absolute top-6 right-6 text-white text-base font-bold bg-black bg-opacity-50 px-6 py-3 rounded-full transition-transform transform hover:scale-110 focus:outline-none z-50" tabindex="0">
+            Close
         </button>
         <!-- Loading Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center space-y-4 text-white">
@@ -246,25 +246,11 @@
                 "category": "News"
             },
             {
-                "id": "channel2",
-                "name": "Tele Ginen",
-                "logo": "https://static.wikia.nocookie.net/logopedia/images/0/09/RTG_Logo_%28With_Full_Name%29.png",
-                "stream": "http://teleginen.srfms.com:1935/teleginen/livestream/chunklist_w531595620.m3u8",
-                "category": "News"
-            },
-            {
                 "id": "channel3",
                 "name": "Haiti News",
                 "logo": "https://m.media-amazon.com/images/I/611Ffvky5yL.png",
                 "stream": "https://haititivi.com/website/haitinews/index.m3u8",
                 "category": "News"
-            },
-            {
-                "id": "channel4",
-                "name": "Ayiti TV",
-                "logo": "https://m.media-amazon.com/images/I/61k8Qk5j9-L.png",
-                "stream": "http://fuego-iptv.net:80/play/live.php?mac=00:1A:79:7d:b0:58&stream=276315&extension=ts&play_token=G01xkhIy81",
-                "category": "General"
             },
             {
                 "id": "channel5",
@@ -277,7 +263,7 @@
                 "id": "channel6",
                 "name": "SNL",
                 "logo": "https://i.ibb.co/2NW7kFM/images.jpg",
-                "stream": "https://haititivi.com/haititv/tvs/mono.m3u8",
+                "stream": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
                 "category": "General"
             },
             {
@@ -318,7 +304,7 @@
             {
                 "id": "channel12",
                 "name": "Tele Pam",
-                "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabRikF9IncQwcgdXkg3Xu2TwVwrnIHbZdjA&s",
+                "logo": "https://i.imgur.com/zfnFVqQ.png",
                 "stream": "https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8",
                 "category": "General"
             },
@@ -340,8 +326,8 @@
                 "id": "channel15",
                 "name": "Fidele TV",
                 "logo": "https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg",
-                "stream": "https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1712363388.m3d8",
-                "category": "Religious"
+                "stream": "https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8",
+                "category": "General"
             },
             {
                 "id": "channel16",
@@ -367,7 +353,7 @@
             {
                 "id": "channel19",
                 "name": "Tele Louange",
-                "logo": "https://images.givelively.org/nonprofits/cb2020c9-71c2-4920-ad32-36f63bd7aef6/logos/christian-multi-media-network_processed_96612ebe1aaa555d1ff9fcfdde6a3ca3be40c8313_logo.png",
+                "logo": "https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png",
                 "stream": "https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8",
                 "category": "Religious"
             },
@@ -437,7 +423,7 @@
             {
                 "id": "channel29",
                 "name": "Tele Pam",
-                "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTabRikF9IncQwcgdXkg3Xu2TwVwrnIHbZdjA&s",
+                "logo": "https://i.imgur.com/zfnFVqQ.png",
                 "stream": "https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8",
                 "category": "General"
             },
@@ -452,7 +438,14 @@
                 "id": "channel31",
                 "name": "TVA 30",
                 "logo": "https://televariete.com/tva30/logo.png",
-                "stream": "https://lakay.online/web/tva30/tracks-v1a1/mono.m3u8",
+                "stream": "https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8",
+                "category": "General"
+            },
+            {
+                "id": "channel35",
+                "name": "PVS",
+                "logo": "https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png",
+                "stream": "https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8",
                 "category": "General"
             },
             {
@@ -468,10 +461,58 @@
                 "logo": "https://www.rezoboul.com/uploads/images/logo_site_1714115779.png",
                 "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8",
                 "category": "Sports"
+            },
+            {
+                "id": "channel34",
+                "name": "Tele Miracle",
+                "logo": "https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk",
+                "stream": "https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8",
+                "category": "Religious"
+            },
+            {
+                "id": "channel36",
+                "name": "Radio Tele Hit",
+                "logo": "https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg",
+                "stream": "https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8",
+                "category": "Music"
+            },
+            {
+                "id": "channel37",
+                "name": "Radio Tele Sentinel",
+                "logo": "https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png",
+                "stream": "https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8",
+                "category": "Religious"
+            },
+            {
+                "id": "channel38",
+                "name": "VA Studio",
+                "logo": "https://i.imgur.com/bIQjQo1.jpeg",
+                "stream": "https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8",
+                "category": "Music"
+            },
+            {
+                "id": "channel39",
+                "name": "Dream In TV",
+                "logo": "https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png",
+                "stream": "https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8",
+                "category": "Music"
             }
+            
         ]
     </script>
-
+    
+    <!--
+    !!! Firestore Security Rules !!!
+    To ensure your app works correctly and securely, please apply the following security rules in your Firebase project.
+    
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        match /artifacts/{appId}/users/{userId}/{collection=**} {
+          allow read, write: if request.auth.uid == userId;
+        }
+      }
+    }
+    -->
     <script type="module">
         // Global variables for Firebase services
         let db;
@@ -596,6 +637,8 @@
             }
             
             renderChannels(filtered);
+            currentFocusedIndex = -1;
+            updateFocus(focusedSection);
         }
 
         // Fetch channel data from JSON file
@@ -639,7 +682,6 @@
         
         // Render categories list and counts
         function renderCategories() {
-            // Do not clear the list, just add to it.
             const existingCategories = Array.from(categoriesList.querySelectorAll('.dynamic-category-button'));
             existingCategories.forEach(btn => btn.remove());
 
@@ -695,276 +737,282 @@
             channelCountSpan.textContent = `(${channelsToRender.length})`;
             
             if (channelsToRender.length === 0) {
-                 channelsList.innerHTML = `<p class="text-[var(--text-gray)] text-center col-span-full">No channels found for this category or search.</p>`;
-                 currentFocusedIndex = -1;
-                 return;
+                channelsList.innerHTML = `<p class="text-gray-400 text-center col-span-full">No channels found for this selection.</p>`;
+                return;
             }
-
+            
             channelsToRender.forEach((channel, index) => {
-                const isFavorite = favorites.has(channel.id);
-                const isFocused = currentFocusedIndex === index && focusedSection === 'channels';
+                const card = document.createElement('div');
+                card.className = `channel-card bg-[var(--bg-medium)] rounded-lg shadow-xl overflow-hidden cursor-pointer flex flex-col items-center justify-between transition-all duration-300 transform hover:scale-105`;
+                card.setAttribute('data-id', channel.id);
+                card.setAttribute('data-index', index);
                 
-                const channelCard = document.createElement('div');
-                channelCard.className = `channel-card-container p-2 md:p-4 rounded-lg shadow-lg relative cursor-pointer ${isFocused ? 'selected-card' : ''}`;
-                channelCard.dataset.index = index;
-                channelCard.dataset.id = channel.id;
-                channelCard.dataset.stream = channel.stream;
-                channelCard.dataset.name = channel.name;
-
-                channelCard.innerHTML = `
-                    <div class="channel-card bg-[var(--bg-medium)] rounded-xl flex flex-col items-center justify-center p-4 h-full text-center">
-                        <img class="w-20 h-20 mb-2 rounded-full object-contain" src="https://placehold.co/80x80/000000/FFFFFF?text=Loading..." data-src="${channel.logo}" alt="${channel.name} logo">
-                        <h3 class="text-sm md:text-md font-semibold mt-2">${channel.name}</h3>
-                        <p class="text-xs md:text-sm text-[var(--text-gray)] mt-1">${channel.category}</p>
-                        <button class="favorite-btn absolute top-2 right-2 p-1 text-xl text-yellow-400 opacity-80 hover:opacity-100 transition-opacity">
-                            <i class="${isFavorite ? 'fas' : 'far'} fa-star"></i>
+                const isFavorite = favorites.has(channel.id);
+                
+                card.innerHTML = `
+                    <div class="relative w-full h-36 bg-[var(--bg-medium)] overflow-hidden flex items-center justify-center">
+                        <img data-src="${channel.logo}" alt="${channel.name} logo" class="w-full h-full object-contain p-2">
+                        <button class="favorite-btn absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:text-yellow-400 transition-colors duration-200">
+                            <i class="fa-star ${isFavorite ? 'fas text-yellow-400' : 'far'}"></i>
                         </button>
                     </div>
+                    <div class="p-4 w-full">
+                        <h3 class="text-lg font-semibold text-center truncate">${channel.name}</h3>
+                        <p class="text-sm text-[var(--text-gray)] text-center mt-1 truncate">${channel.category}</p>
+                    </div>
                 `;
-
+                
                 // Add event listeners
-                channelCard.querySelector('.channel-card').addEventListener('click', () => {
-                    playVideo(channel.stream);
-                    lastSelectedChannelId = channel.id;
+                card.addEventListener('click', () => playChannel(channel.id));
+                const favoriteBtn = card.querySelector('.favorite-btn');
+                favoriteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent the card click from firing
+                    addFavoriteToggle(channel.id, favoriteBtn.querySelector('i'));
                 });
-
-                channelCard.querySelector('.favorite-btn').addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent the parent card click event
-                    toggleFavorite(channel.id);
-                });
-
-                channelsList.appendChild(channelCard);
-                observer.observe(channelCard); // Attach lazy loading observer
+                
+                channelsList.appendChild(card);
+                observer.observe(card); // Start observing for lazy loading
             });
-
-            // Set the focus on the first item if none is focused
-            if (currentFocusedIndex === -1 && channelsToRender.length > 0) {
-                currentFocusedIndex = 0;
-                updateFocus();
-            }
         }
-
-        // Toggle favorite status and save to Firestore
-        function toggleFavorite(channelId) {
-            if (favorites.has(channelId)) {
+        
+        // Toggles a channel as a favorite and saves to Firestore
+        function addFavoriteToggle(channelId, iconElement) {
+            const isFavorite = favorites.has(channelId);
+            if (isFavorite) {
                 favorites.delete(channelId);
+                iconElement.classList.remove('fas', 'text-yellow-400');
+                iconElement.classList.add('far');
             } else {
                 favorites.add(channelId);
+                iconElement.classList.remove('far');
+                iconElement.classList.add('fas', 'text-yellow-400');
             }
             saveFavorites();
-            // Re-render to update the star icon and favorite count
-            filterChannels();
-        }
-
-        // Play the video stream using HLS.js
-        function playVideo(streamUrl) {
-            videoModal.style.display = 'flex';
-            loadingSpinner.style.display = 'flex';
-            videoContent.style.display = 'none';
-
-            if (Hls.isSupported()) {
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                }
-                hlsInstance = new Hls();
-                hlsInstance.attachMedia(videoPlayer);
-                
-                hlsInstance.on(Hls.Events.MEDIA_ATTACHED, function () {
-                    hlsInstance.loadSource(streamUrl);
-                });
-
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                    console.log('Manifest parsed. Loading stream...');
-                    loadingSpinner.style.display = 'none';
-                    videoContent.style.display = 'block';
-                    videoPlayer.play();
-                });
-
-                hlsInstance.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.error('Network error. Retrying...', data);
-                                hlsInstance.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.error('Media error. Trying to recover...', data);
-                                hlsInstance.recoverMediaError();
-                                break;
-                            default:
-                                console.error('HLS fatal error. Destroying instance.', data);
-                                exitVideoPlayer();
-                                break;
-                        }
-                    }
-                });
-            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                videoPlayer.src = streamUrl;
-                videoPlayer.addEventListener('loadedmetadata', function() {
-                    loadingSpinner.style.display = 'none';
-                    videoContent.style.display = 'block';
-                    videoPlayer.play();
-                });
-            } else {
-                console.error("This browser does not support HLS playback.");
-                exitVideoPlayer();
+            if (currentCategory === 'Favorites') {
+                filterChannels(); // Re-filter if we are in the favorites view
             }
         }
         
-        // Exit the video player
-        function exitVideoPlayer() {
-            videoPlayer.pause();
-            videoPlayer.src = '';
+        // Plays the selected video channel
+        function playChannel(channelId) {
+            const channel = channelData.find(c => c.id === channelId);
+            if (!channel) {
+                console.error("Channel not found:", channelId);
+                return;
+            }
+
+            lastSelectedChannelId = channelId;
+            videoModal.style.display = 'flex';
+            loadingSpinner.style.display = 'flex';
+            videoContent.classList.add('hidden');
+            
+            // Cleanup previous HLS instance if it exists
             if (hlsInstance) {
                 hlsInstance.destroy();
-                hlsInstance = null;
             }
-            videoModal.style.display = 'none';
+            
+            const videoSource = channel.stream;
+            
+            // Check for HLS support
+            if (Hls.isSupported()) {
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(videoSource);
+                hlsInstance.attachMedia(videoPlayer);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoPlayer.play();
+                    loadingSpinner.style.display = 'none';
+                    videoContent.classList.remove('hidden');
+                });
+                hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        console.error('HLS.js fatal error:', data);
+                        loadingSpinner.style.display = 'none';
+                        videoContent.classList.remove('hidden');
+                        videoPlayer.src = "https://placehold.co/1280x720/000000/FFFFFF?text=Stream+Error";
+                    }
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                // For native HLS support (iOS, Safari)
+                videoPlayer.src = videoSource;
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.play();
+                    loadingSpinner.style.display = 'none';
+                    videoContent.classList.remove('hidden');
+                });
+            } else {
+                console.error('HLS not supported on this browser.');
+                loadingSpinner.style.display = 'none';
+                videoContent.classList.remove('hidden');
+                videoPlayer.src = "https://placehold.co/1280x720/000000/FFFFFF?text=HLS+Not+Supported";
+            }
         }
-
-        // Keyboard navigation and event handler
+        
+        // Exits the video player modal
+        function exitVideoPlayer() {
+            if (hlsInstance) {
+                hlsInstance.stopLoad();
+                hlsInstance.detachMedia();
+            }
+            videoPlayer.pause();
+            videoPlayer.src = '';
+            videoModal.style.display = 'none';
+            // Restore focus to the last selected channel
+            if (lastSelectedChannelId) {
+                const lastCard = document.querySelector(`[data-id="${lastSelectedChannelId}"]`);
+                if (lastCard) {
+                    const lastIndex = parseInt(lastCard.dataset.index);
+                    if (!isNaN(lastIndex)) {
+                        focusedSection = 'channels';
+                        currentFocusedIndex = lastIndex;
+                        updateFocus(focusedSection);
+                    }
+                }
+            }
+        }
+        
+        // Keyboard and remote control navigation handler
         function handleKeyNavigation(e) {
-            // Do nothing if a modal is visible or search is active
-            if (videoModal.style.display === 'flex' || exitModal.style.display === 'flex') {
-                if (e.key === 'Escape' || e.key === 'Backspace') {
-                    e.preventDefault();
-                    if (videoModal.style.display === 'flex') {
-                        exitModal.style.display = 'flex';
-                    } else if (exitModal.style.display === 'flex') {
-                        exitModal.style.display = 'none';
-                    }
-                } else if (exitModal.style.display === 'flex') {
-                    if (e.key === 'Enter') {
-                         e.preventDefault();
-                         confirmExitBtn.click();
-                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                        e.preventDefault();
-                        const buttons = [confirmExitBtn, cancelExitBtn];
-                        const currentIndex = buttons.indexOf(document.activeElement);
-                        const nextIndex = (currentIndex + 1) % buttons.length;
-                        buttons[nextIndex].focus();
-                    }
+            const channelCards = Array.from(channelsList.querySelectorAll('.channel-card'));
+            const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
+            
+            // If the video modal is open, only handle specific keys
+            if (videoModal.style.display === 'flex') {
+                if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'p') {
+                    exitVideoPlayer();
+                }
+                return;
+            }
+            
+            // If the exit modal is open, handle its buttons
+            if (exitModal.style.display === 'flex') {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    confirmExitBtn.focus();
+                    cancelExitBtn.focus();
+                } else if (e.key === 'Enter') {
+                    document.activeElement.click();
+                } else if (e.key === 'Escape') {
+                    hideExitModal();
                 }
                 return;
             }
 
-            const currentChannelCards = Array.from(channelsList.querySelectorAll('.channel-card-container'));
-            const currentCategoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
-            
-            // Handle arrow keys
-            const handleMovement = (dx, dy) => {
-                const totalChannels = currentChannelCards.length;
-                const totalCategories = currentCategoryButtons.length;
-                
-                if (focusedSection === 'categories') {
-                    let nextIndex = currentFocusedIndex + dy;
-                    if (nextIndex >= 0 && nextIndex < totalCategories) {
-                        currentFocusedIndex = nextIndex;
-                        updateFocus();
+            // Keyboard input for search bar
+            if (document.activeElement === searchInput) {
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowRight':
+                    if (focusedSection === 'categories') {
+                        if (channelCards.length > 0) {
+                            focusedSection = 'channels';
+                            currentFocusedIndex = 0;
+                            updateFocus(focusedSection);
+                        }
+                    } else if (focusedSection === 'channels' && currentFocusedIndex < channelCards.length - 1) {
+                        currentFocusedIndex++;
+                        updateFocus(focusedSection);
                     }
-                } else if (focusedSection === 'channels' && totalChannels > 0) {
-                    const gridWidth = channelsList.offsetWidth;
-                    const cardWidth = currentChannelCards[0]?.offsetWidth;
-                    const gap = 16; // md:gap-4 is 16px, sm:gap-6 is 24px
-                    const cardWithGap = cardWidth + gap;
-                    const itemsPerRow = Math.round(gridWidth / cardWithGap);
-
-                    let nextIndex = currentFocusedIndex;
-
-                    if (dx !== 0) { // Left/Right
-                        nextIndex += dx;
-                        if (nextIndex < 0) nextIndex = 0;
-                        if (nextIndex >= totalChannels) nextIndex = totalChannels - 1;
-                    } else if (dy !== 0) { // Up/Down
-                        nextIndex += dy * itemsPerRow;
-                        if (nextIndex < 0) nextIndex = 0;
-                        if (nextIndex >= totalChannels) nextIndex = totalChannels - 1;
-                    }
-
-                    currentFocusedIndex = nextIndex;
-                    updateFocus();
-                }
-            };
-
-            switch (e.key) {
-                case 'ArrowUp':
-                    e.preventDefault();
-                    handleMovement(0, -1);
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    handleMovement(0, 1);
                     break;
                 case 'ArrowLeft':
-                    e.preventDefault();
-                    if (focusedSection === 'channels') {
-                        handleMovement(-1, 0);
-                    } else {
-                        focusedSection = 'channels';
-                        currentFocusedIndex = 0;
-                        updateFocus();
+                    if (focusedSection === 'channels' && currentFocusedIndex > 0) {
+                        currentFocusedIndex--;
+                        updateFocus(focusedSection);
+                    } else if (focusedSection === 'channels' && currentFocusedIndex <= 0) {
+                         focusedSection = 'categories';
+                         currentFocusedIndex = -1;
+                         updateFocus(focusedSection);
                     }
                     break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    if (focusedSection === 'channels') {
-                        handleMovement(1, 0);
-                    } else {
-                        focusedSection = 'channels';
-                        currentFocusedIndex = 0;
-                        updateFocus();
+                case 'ArrowDown':
+                    if (focusedSection === 'categories') {
+                        let newIndex = currentFocusedIndex + 1;
+                        if (newIndex >= categoryButtons.length) newIndex = 0;
+                        currentFocusedIndex = newIndex;
+                        updateFocus(focusedSection);
+                    } else { // Channels grid
+                        const columns = getComputedStyle(channelsList).getPropertyValue("grid-template-columns").split(" ").length;
+                        let newIndex = currentFocusedIndex + columns;
+                        if (newIndex >= channelCards.length) {
+                             newIndex = currentFocusedIndex;
+                        }
+                        currentFocusedIndex = newIndex;
+                        updateFocus(focusedSection);
+                    }
+                    break;
+                case 'ArrowUp':
+                    if (focusedSection === 'categories') {
+                        let newIndex = currentFocusedIndex - 1;
+                        if (newIndex < 0) newIndex = categoryButtons.length - 1;
+                        currentFocusedIndex = newIndex;
+                        updateFocus(focusedSection);
+                    } else { // Channels grid
+                        const columns = getComputedStyle(channelsList).getPropertyValue("grid-template-columns").split(" ").length;
+                        let newIndex = currentFocusedIndex - columns;
+                        if (newIndex < 0) {
+                            newIndex = 0;
+                        }
+                        currentFocusedIndex = newIndex;
+                        updateFocus(focusedSection);
                     }
                     break;
                 case 'Enter':
-                    e.preventDefault();
-                    if (focusedSection === 'categories' && currentCategoryButtons[currentFocusedIndex]) {
-                        currentCategoryButtons[currentFocusedIndex].click();
-                        focusedSection = 'channels';
-                        currentFocusedIndex = 0;
-                    } else if (focusedSection === 'channels' && currentChannelCards[currentFocusedIndex]) {
-                        currentChannelCards[currentFocusedIndex].querySelector('.channel-card').click();
+                    if (focusedSection === 'categories' && currentFocusedIndex >= 0) {
+                        categoryButtons[currentFocusedIndex].click();
+                    } else if (focusedSection === 'channels' && currentFocusedIndex >= 0) {
+                        channelCards[currentFocusedIndex].click();
                     }
                     break;
-                case 'Escape':
                 case 'Backspace':
-                    e.preventDefault();
-                    exitModal.style.display = 'flex';
-                    confirmExitBtn.focus(); // Focus the exit button
+                case 'Escape':
+                    showExitModal();
                     break;
-                case 'Menu': // For TV remotes
-                    e.preventDefault();
-                    if (focusedSection === 'channels') {
-                        focusedSection = 'categories';
-                        currentFocusedIndex = 0;
-                        updateFocus();
+                case 'p':
+                case 'P':
+                    if (lastSelectedChannelId) {
+                        playChannel(lastSelectedChannelId);
                     }
                     break;
             }
         }
         
-        // Update the visual focus indicator
-        function updateFocus() {
-            document.querySelectorAll('.selected-card').forEach(card => card.classList.remove('selected-card'));
-            document.querySelectorAll('.category-button.active').forEach(btn => btn.classList.remove('active'));
-
-            if (focusedSection === 'categories') {
-                const buttons = document.querySelectorAll('.category-button');
-                if (buttons[currentFocusedIndex]) {
-                    buttons[currentFocusedIndex].classList.add('active');
-                    buttons[currentFocusedIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        // Updates the visual focus based on currentFocusedIndex and focusedSection
+        function updateFocus(section) {
+            const allElements = document.querySelectorAll('.category-button, .channel-card');
+            allElements.forEach(el => el.classList.remove('selected-card'));
+            
+            if (section === 'categories') {
+                const categoryButtons = document.querySelectorAll('.category-button');
+                if (currentFocusedIndex >= 0) {
+                    if (categoryButtons[currentFocusedIndex]) {
+                        categoryButtons[currentFocusedIndex].classList.add('selected-card');
+                        categoryButtons[currentFocusedIndex].focus();
+                    }
                 }
-            } else if (focusedSection === 'channels') {
-                const cards = document.querySelectorAll('.channel-card-container');
-                if (cards[currentFocusedIndex]) {
-                    cards[currentFocusedIndex].classList.add('selected-card');
-                    cards[currentFocusedIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+            } else if (section === 'channels') {
+                const channelCards = document.querySelectorAll('.channel-card');
+                if (currentFocusedIndex >= 0 && channelCards[currentFocusedIndex]) {
+                    channelCards[currentFocusedIndex].classList.add('selected-card');
+                    channelCards[currentFocusedIndex].focus();
+                    channelCards[currentFocusedIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         }
+        
+        // Show the exit confirmation modal
+        function showExitModal() {
+            exitModal.style.display = 'flex';
+            confirmExitBtn.focus();
+        }
+        
+        // Hide the exit confirmation modal
+        function hideExitModal() {
+            exitModal.style.display = 'none';
+        }
 
-        // Call the main initialization function on window load
-        window.addEventListener('load', initApp);
+        // Initialize the app on page load
+        window.onload = initApp;
+
     </script>
 </body>
 </html>
-
