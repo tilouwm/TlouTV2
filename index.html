@@ -37,7 +37,7 @@
             --text-gray: #B0B0B0;
             --accent-blue: #4a90e2; /* Bright blue accent */
             --card-border: 2px solid #283e74; /* Darker blue border */
-            --card-focus-border: 3px solid var(--accent-blue);
+            --card-focus-border: 4px solid var(--accent-blue);
         }
 
         body {
@@ -87,18 +87,12 @@
             position: relative;
             width: 100%;
             height: 100%;
-            max-width: 1280px;
-            max-height: 720px;
         }
 
         .video-player {
             width: 100%;
             height: 100%;
             display: block;
-        }
-
-        .channel-card-container {
-            position: relative;
         }
 
         .channel-card {
@@ -111,19 +105,21 @@
 
         /* Enhanced focus styles for TV remotes */
         .channel-card:focus,
-        .selected-card {
+        .channel-card.selected-card {
             border: var(--card-focus-border);
-            box-shadow: 0 0 25px rgba(74, 144, 226, 0.7);
-            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.8);
+            transform: scale(1.08);
             outline: none;
+            z-index: 10;
         }
 
         .category-button:focus,
         .category-button.tv-focused {
-            background-color: var(--accent-blue);
+            background-color: var(--accent-blue) !important;
             outline: none;
-            box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
-            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+            transform: scale(1.05);
+            border: 2px solid white;
         }
         
         .loader {
@@ -146,7 +142,7 @@
         }
 
         .category-button {
-            transition: all 0.2s;
+            transition: all 0.3s;
             border: 2px solid transparent;
             outline: none;
         }
@@ -161,22 +157,11 @@
             border-color: transparent;
         }
 
-        /* TV-specific focus management */
-        .tv-focused {
-            outline: 3px solid var(--accent-blue);
-            outline-offset: 2px;
-        }
-
-        /* Hide default focus outline on buttons for TV */
-        button:focus {
-            outline: none;
-        }
-
-        /* Enhanced button focus for TV - Auto-hide close button */
+        /* Video controls - Auto-hide */
         .video-controls {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 30px;
+            right: 30px;
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: 1001;
@@ -187,12 +172,12 @@
         }
 
         #exit-btn {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: white;
-            border: 2px solid transparent;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
+            border: 3px solid transparent;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -201,12 +186,13 @@
         #exit-btn:focus,
         #exit-btn.tv-focused {
             background-color: var(--accent-blue);
-            transform: scale(1.1);
+            transform: scale(1.15);
             outline: none;
-            box-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+            box-shadow: 0 0 25px rgba(74, 144, 226, 0.9);
             border-color: white;
         }
 
+        /* Modal button focus */
         #confirm-exit-btn:focus,
         #cancel-exit-btn:focus {
             background-color: var(--accent-blue);
@@ -215,9 +201,15 @@
             box-shadow: 0 0 15px rgba(74, 144, 226, 0.7);
         }
 
-        /* Improve video player positioning */
+        /* Show video player */
         .video-player-container.active {
             display: flex;
+        }
+
+        /* Better visual feedback */
+        .tv-focused {
+            outline: 4px solid var(--accent-blue);
+            outline-offset: 3px;
         }
     </style>
 </head>
@@ -395,7 +387,7 @@
                 "id": "channel16",
                 "name": "BPX",
                 "logo": "https://i.ibb.co/SvGYHS7/images-1.jpg",
-                "stream": "https://video1.getstreamhosting.com/1936/8212/8212/playlist.m3u8",
+                "stream": "https://video1.getstreamhosting.com:1936/8212/8212/playlist.m3u8",
                 "category": "General"
             },
             {
@@ -450,7 +442,7 @@
             {
                 "id": "channel24",
                 "name": "Afrobeats",
-                "logo": "https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg",
+                "logo": "https://www.shutterstock.com/image-vector/afro-beat-text-african-drugs-260nw-1741803605.jpg",
                 "stream": "https://stream.ecable.tv/afrobeats/index.m3u8",
                 "category": "Music"
             },
@@ -583,18 +575,6 @@
         ]
     </script>
     
-    <!--
-    !!! Firestore Security Rules !!!
-    To ensure your app works correctly and securely, please apply the following security rules in your Firebase project.
-    
-    service cloud.firestore {
-      match /databases/{database}/documents {
-        match /artifacts/{appId}/users/{userId}/{collection=**} {
-          allow read, write: if request.auth.uid == userId;
-        }
-      }
-    }
-    -->
     <script type="module">
         // Global variables for Firebase services
         let db;
@@ -610,6 +590,8 @@
         let currentFocusedElement = null;
         let isInVideoMode = false;
         let controlsTimeout = null;
+        let backPressCount = 0;
+        let backPressTimeout = null;
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -633,10 +615,39 @@
         const allCountSpan = document.getElementById('all-count');
         const favoritesCountSpan = document.getElementById('favorites-count');
         
-        // TV Remote Navigation Functions
+        // Fixed Focus Management
+        function setFocusToElement(element) {
+            if (!element) return;
+            
+            console.log('Setting focus to:', element.className, element.textContent || element.dataset.id);
+            
+            // Remove all focus classes
+            document.querySelectorAll('.selected-card, .tv-focused').forEach(el => {
+                el.classList.remove('selected-card', 'tv-focused');
+            });
+            
+            // Set focus and visual indicator
+            element.focus();
+            if (element.classList.contains('channel-card')) {
+                element.classList.add('selected-card');
+            } else {
+                element.classList.add('tv-focused');
+            }
+            
+            // Ensure element is visible
+            element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center', 
+                inline: 'center' 
+            });
+            
+            currentFocusedElement = element;
+        }
+        
+        // Fixed Navigation - Get all focusable elements properly
         function getAllFocusableElements() {
             if (isInVideoMode) {
-                return Array.from(document.querySelectorAll('#exit-btn'));
+                return [exitPlayerBtn];
             }
             
             const categories = Array.from(document.querySelectorAll('.category-button'));
@@ -644,45 +655,41 @@
             return [...categories, ...channels];
         }
         
-        function getCurrentFocusedIndex() {
-            const focusableElements = getAllFocusableElements();
-            const currentElement = document.activeElement;
-            return focusableElements.indexOf(currentElement);
-        }
-        
-        function setFocusToElement(element) {
-            if (element) {
-                // Remove focus from all elements first
-                document.querySelectorAll('.selected-card, .tv-focused').forEach(el => {
-                    el.classList.remove('selected-card', 'tv-focused');
-                });
-                
-                // Set focus and visual indicator
-                element.focus();
-                if (element.classList.contains('channel-card')) {
-                    element.classList.add('selected-card');
-                } else {
-                    element.classList.add('tv-focused');
-                }
-                
-                // Ensure element is visible
-                element.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center', 
-                    inline: 'center' 
-                });
-                
-                currentFocusedElement = element;
-            }
-        }
-        
+        // Fixed Spatial Navigation
         function findNearestElement(currentElement, direction) {
-            const allElements = getAllFocusableElements();
             const currentRect = currentElement.getBoundingClientRect();
+            const categories = Array.from(document.querySelectorAll('.category-button'));
+            const channels = Array.from(document.querySelectorAll('.channel-card'));
+            
+            console.log('Finding nearest element from:', currentElement.className, 'direction:', direction);
+            
+            // Handle special case: Right arrow from categories to channels
+            if (direction === 'ArrowRight' && currentElement.classList.contains('category-button')) {
+                const firstChannel = channels[0];
+                console.log('Moving right from category to first channel:', firstChannel?.dataset.id);
+                return firstChannel;
+            }
+            
+            // Handle special case: Left arrow from channels to categories
+            if (direction === 'ArrowLeft' && currentElement.classList.contains('channel-card')) {
+                // Find the currently active category or first category
+                const activeCategory = document.querySelector('.category-button.active') || categories[0];
+                console.log('Moving left from channel to active category:', activeCategory?.textContent);
+                return activeCategory;
+            }
+            
+            // Normal spatial navigation within same section
+            let targetElements;
+            if (currentElement.classList.contains('category-button')) {
+                targetElements = categories;
+            } else {
+                targetElements = channels;
+            }
+            
             let bestElement = null;
             let bestDistance = Infinity;
             
-            allElements.forEach(element => {
+            targetElements.forEach(element => {
                 if (element === currentElement) return;
                 
                 const rect = element.getBoundingClientRect();
@@ -690,14 +697,6 @@
                 let distance = 0;
                 
                 switch (direction) {
-                    case 'ArrowLeft':
-                        isInDirection = rect.right <= currentRect.left + 10;
-                        distance = Math.abs(rect.top - currentRect.top) + (currentRect.left - rect.right);
-                        break;
-                    case 'ArrowRight':
-                        isInDirection = rect.left >= currentRect.right - 10;
-                        distance = Math.abs(rect.top - currentRect.top) + (rect.left - currentRect.right);
-                        break;
                     case 'ArrowUp':
                         isInDirection = rect.bottom <= currentRect.top + 10;
                         distance = Math.abs(rect.left - currentRect.left) + (currentRect.top - rect.bottom);
@@ -705,6 +704,18 @@
                     case 'ArrowDown':
                         isInDirection = rect.top >= currentRect.bottom - 10;
                         distance = Math.abs(rect.left - currentRect.left) + (rect.top - currentRect.bottom);
+                        break;
+                    case 'ArrowLeft':
+                        if (currentElement.classList.contains('channel-card')) {
+                            isInDirection = rect.right <= currentRect.left + 10;
+                            distance = Math.abs(rect.top - currentRect.top) + (currentRect.left - rect.right);
+                        }
+                        break;
+                    case 'ArrowRight':
+                        if (currentElement.classList.contains('channel-card')) {
+                            isInDirection = rect.left >= currentRect.right - 10;
+                            distance = Math.abs(rect.top - currentRect.top) + (rect.left - currentRect.right);
+                        }
                         break;
                 }
                 
@@ -714,20 +725,42 @@
                 }
             });
             
+            console.log('Found nearest element:', bestElement?.className, bestElement?.textContent || bestElement?.dataset.id);
             return bestElement;
+        }
+        
+        // Fixed Back Button - Double Press Logic
+        function handleBackButton() {
+            if (isInVideoMode) {
+                // In video mode, back button exits video
+                exitVideoPlayer();
+                return;
+            }
+            
+            backPressCount++;
+            console.log('Back pressed count:', backPressCount);
+            
+            if (backPressCount === 1) {
+                // First press - set timeout
+                backPressTimeout = setTimeout(() => {
+                    backPressCount = 0; // Reset if no second press within 1 second
+                }, 1000);
+            } else if (backPressCount === 2) {
+                // Second press within 1 second - show exit modal
+                clearTimeout(backPressTimeout);
+                backPressCount = 0;
+                showExitModal();
+            }
         }
         
         // Video controls auto-hide functionality
         function showVideoControls() {
             if (isInVideoMode) {
                 videoControls.classList.add('show');
+                setFocusToElement(exitPlayerBtn);
                 
-                // Clear existing timeout
-                if (controlsTimeout) {
-                    clearTimeout(controlsTimeout);
-                }
-                
-                // Hide controls after 3 seconds of inactivity
+                // Hide controls after 3 seconds
+                if (controlsTimeout) clearTimeout(controlsTimeout);
                 controlsTimeout = setTimeout(() => {
                     videoControls.classList.remove('show');
                 }, 3000);
@@ -736,25 +769,17 @@
         
         function hideVideoControls() {
             videoControls.classList.remove('show');
-            if (controlsTimeout) {
-                clearTimeout(controlsTimeout);
-            }
+            if (controlsTimeout) clearTimeout(controlsTimeout);
         }
         
+        // Fixed TV Navigation Handler
         function handleTVNavigation(event) {
+            console.log('Key pressed:', event.key, 'In video mode:', isInVideoMode);
+            
             // Show video controls on any key press when in video mode
             if (isInVideoMode) {
                 showVideoControls();
-                
-                // Focus exit button if not already focused
-                if (document.activeElement !== exitPlayerBtn) {
-                    setFocusToElement(exitPlayerBtn);
-                }
-            }
-            
-            // Allow default behavior for video player controls
-            if (isInVideoMode && event.target.tagName === 'VIDEO') {
-                return;
+                return; // Don't handle other navigation in video mode
             }
             
             const currentElement = document.activeElement;
@@ -766,25 +791,6 @@
                 case 'ArrowUp':
                 case 'ArrowDown':
                     event.preventDefault();
-                    
-                    if (isInVideoMode) {
-                        // In video mode, only handle back navigation
-                        if (event.key === 'ArrowLeft' || event.key === 'Escape') {
-                            exitVideoPlayer();
-                        }
-                        return;
-                    }
-                    
-                    // Special handling for category to channel navigation
-                    if (event.key === 'ArrowRight' && currentElement.classList.contains('category-button')) {
-                        const firstChannel = channelsList.querySelector('.channel-card');
-                        if (firstChannel) {
-                            setFocusToElement(firstChannel);
-                            return;
-                        }
-                    }
-                    
-                    // Find nearest element in the direction
                     targetElement = findNearestElement(currentElement, event.key);
                     if (targetElement) {
                         setFocusToElement(targetElement);
@@ -796,11 +802,13 @@
                     
                     if (currentElement.classList.contains('channel-card')) {
                         const channelId = currentElement.getAttribute('data-id');
+                        console.log('Playing channel:', channelId);
                         playChannel(channelId);
                     } else if (currentElement.classList.contains('category-button')) {
-                        // Fixed: Properly trigger category selection
+                        console.log('Selecting category:', currentElement.dataset.filter);
                         selectCategory(currentElement);
                     } else if (currentElement.id === 'exit-btn') {
+                        console.log('Exiting video player');
                         exitVideoPlayer();
                     }
                     break;
@@ -808,32 +816,28 @@
                 case 'Escape':
                 case 'Backspace':
                     event.preventDefault();
-                    
-                    if (isInVideoMode) {
-                        exitVideoPlayer();
-                    } else {
-                        showExitModal();
-                    }
+                    handleBackButton();
                     break;
             }
         }
         
-        // Fixed: Category selection function
+        // Fixed Category Selection
         function selectCategory(button) {
-            const categoryFilter = button.dataset.filter;
+            console.log('Selecting category:', button.dataset.filter);
             
-            // Update current category
+            const categoryFilter = button.dataset.filter;
             currentCategory = categoryFilter;
             
             // Update visual active state
-            document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-            
-            // Update category count spans
-            document.querySelectorAll('.category-button .bg-white').forEach(span => {
-                span.className = span.className.replace('bg-white text-black', 'bg-gray-600');
+            document.querySelectorAll('.category-button').forEach(b => {
+                b.classList.remove('active');
+                const span = b.querySelector('span:last-child');
+                if (span) {
+                    span.className = span.className.replace('bg-white text-black', 'bg-gray-600');
+                }
             });
             
+            button.classList.add('active');
             const activeSpan = button.querySelector('span:last-child');
             if (activeSpan) {
                 activeSpan.className = activeSpan.className.replace('bg-gray-600', 'bg-white text-black');
@@ -848,7 +852,7 @@
         
         function showExitModal() {
             exitModal.style.display = 'flex';
-            confirmExitBtn.focus();
+            setFocusToElement(confirmExitBtn);
         }
         
         function hideExitModal() {
@@ -861,6 +865,7 @@
         
         // Main app initialization function
         async function initApp() {
+            console.log('Initializing app...');
             fetchChannels();
 
             const app = initializeApp(firebaseConfig);
@@ -893,7 +898,7 @@
             cancelExitBtn.addEventListener('click', hideExitModal);
             exitPlayerBtn.addEventListener('click', exitVideoPlayer);
             
-            // Category click handler - Fixed to use new selectCategory function
+            // Category click handler
             categoriesList.addEventListener('click', (e) => {
                 if (e.target.closest('.category-button')) {
                     const button = e.target.closest('.category-button');
@@ -914,9 +919,9 @@
                     e.preventDefault();
                     const focused = document.activeElement;
                     if (focused === confirmExitBtn) {
-                        cancelExitBtn.focus();
+                        setFocusToElement(cancelExitBtn);
                     } else {
-                        confirmExitBtn.focus();
+                        setFocusToElement(confirmExitBtn);
                     }
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
@@ -927,13 +932,14 @@
                 }
             });
             
-            // Initialize focus on first category
+            // Initialize focus on first channel (as requested)
             setTimeout(() => {
-                const firstCategory = document.querySelector('.category-button');
-                if (firstCategory) {
-                    setFocusToElement(firstCategory);
+                const firstChannel = document.querySelector('.channel-card');
+                if (firstChannel) {
+                    console.log('Setting initial focus to first channel');
+                    setFocusToElement(firstChannel);
                 }
-            }, 500);
+            }, 1000);
         }
         
         function filterChannels() {
@@ -946,14 +952,6 @@
             }
             
             renderChannels(filtered);
-            
-            // Reset focus to first channel after filter
-            setTimeout(() => {
-                const firstChannel = channelsList.querySelector('.channel-card');
-                if (firstChannel && !document.querySelector('.category-button:focus')) {
-                    setFocusToElement(firstChannel);
-                }
-            }, 100);
         }
 
         function fetchChannels() {
@@ -1092,7 +1090,9 @@
             }
         }
         
+        // Fixed Video Player
         function playChannel(channelId) {
+            console.log('Playing channel:', channelId);
             const channel = channelData.find(c => c.id === channelId);
             if (!channel) {
                 console.error("Channel not found:", channelId);
@@ -1113,6 +1113,7 @@
             }
             
             const videoSource = channel.stream;
+            console.log('Loading video source:', videoSource);
             
             if (Hls.isSupported()) {
                 hlsInstance = new Hls();
@@ -1122,9 +1123,7 @@
                     videoPlayer.play();
                     loadingSpinner.style.display = 'none';
                     videoContent.classList.remove('hidden');
-                    
-                    // Show controls briefly when video starts
-                    showVideoControls();
+                    console.log('Video loaded and playing');
                 });
                 hlsInstance.on(Hls.Events.ERROR, function(event, data) {
                     if (data.fatal) {
@@ -1140,9 +1139,7 @@
                     videoPlayer.play();
                     loadingSpinner.style.display = 'none';
                     videoContent.classList.remove('hidden');
-                    
-                    // Show controls briefly when video starts
-                    showVideoControls();
+                    console.log('Video loaded and playing (native HLS)');
                 });
             } else {
                 console.error('HLS not supported on this browser.');
@@ -1152,35 +1149,47 @@
             }
         }
         
+        // Fixed Exit Video Player
         function exitVideoPlayer() {
+            console.log('Exiting video player');
             isInVideoMode = false;
             
             if (hlsInstance) {
                 hlsInstance.stopLoad();
                 hlsInstance.detachMedia();
+                hlsInstance.destroy();
+                hlsInstance = null;
             }
+            
             videoPlayer.pause();
             videoPlayer.src = '';
             videoModal.classList.remove('active');
             hideVideoControls();
             
             // Return focus to the last selected channel with proper highlighting
-            if (lastSelectedChannelId) {
-                const lastCard = document.querySelector(`[data-id="${lastSelectedChannelId}"]`);
-                if (lastCard) {
-                    setTimeout(() => {
+            setTimeout(() => {
+                if (lastSelectedChannelId) {
+                    const lastCard = document.querySelector(`[data-id="${lastSelectedChannelId}"]`);
+                    if (lastCard) {
+                        console.log('Returning focus to channel:', lastSelectedChannelId);
                         setFocusToElement(lastCard);
-                    }, 100);
-                } else {
-                    // If channel is not visible (different category), focus on first channel
-                    const firstChannel = channelsList.querySelector('.channel-card');
-                    if (firstChannel) {
-                        setTimeout(() => {
+                    } else {
+                        // If channel is not visible, focus on first available channel
+                        const firstChannel = document.querySelector('.channel-card');
+                        if (firstChannel) {
+                            console.log('Channel not visible, focusing first channel');
                             setFocusToElement(firstChannel);
-                        }, 100);
+                        }
+                    }
+                } else {
+                    // Fallback to first channel
+                    const firstChannel = document.querySelector('.channel-card');
+                    if (firstChannel) {
+                        console.log('No last channel, focusing first channel');
+                        setFocusToElement(firstChannel);
                     }
                 }
-            }
+            }, 200);
         }
 
         window.onload = () => {
