@@ -76,7 +76,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
+            background-color: rgba(0, 0, 0, 1);
             display: none;
             justify-content: center;
             align-items: center;
@@ -118,10 +118,12 @@
             outline: none;
         }
 
-        .category-button:focus {
+        .category-button:focus,
+        .category-button.tv-focused {
             background-color: var(--accent-blue);
             outline: none;
             box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+            transform: scale(1.02);
         }
         
         .loader {
@@ -170,14 +172,52 @@
             outline: none;
         }
 
-        /* Enhanced button focus for TV */
+        /* Enhanced button focus for TV - Auto-hide close button */
+        .video-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1001;
+        }
+
+        .video-controls.show {
+            opacity: 1;
+        }
+
+        #exit-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid transparent;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
         #exit-btn:focus,
+        #exit-btn.tv-focused {
+            background-color: var(--accent-blue);
+            transform: scale(1.1);
+            outline: none;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.8);
+            border-color: white;
+        }
+
         #confirm-exit-btn:focus,
         #cancel-exit-btn:focus {
             background-color: var(--accent-blue);
             transform: scale(1.1);
             outline: none;
             box-shadow: 0 0 15px rgba(74, 144, 226, 0.7);
+        }
+
+        /* Improve video player positioning */
+        .video-player-container.active {
+            display: flex;
         }
     </style>
 </head>
@@ -224,10 +264,13 @@
 
     <!-- Video Player Modal -->
     <div id="video-modal" class="video-player-container">
-        <!-- Exit Button -->
-        <button id="exit-btn" class="absolute top-6 right-6 text-white text-base font-bold bg-black bg-opacity-50 px-6 py-3 rounded-full transition-transform transform hover:scale-110 focus:outline-none z-50" tabindex="0">
-            Close
-        </button>
+        <!-- Auto-hide Video Controls -->
+        <div id="video-controls" class="video-controls">
+            <button id="exit-btn" tabindex="0">
+                <i class="fas fa-times mr-2"></i>Close
+            </button>
+        </div>
+        
         <!-- Loading Spinner -->
         <div id="loading-spinner" class="flex flex-col items-center justify-center space-y-4 text-white">
             <div class="loader"></div>
@@ -352,7 +395,7 @@
                 "id": "channel16",
                 "name": "BPX",
                 "logo": "https://i.ibb.co/SvGYHS7/images-1.jpg",
-                "stream": "https://video1.getstreamhosting.com:1936/8212/8212/playlist.m3u8",
+                "stream": "https://video1.getstreamhosting.com/1936/8212/8212/playlist.m3u8",
                 "category": "General"
             },
             {
@@ -566,6 +609,7 @@
         let allChannelsCount = 0;
         let currentFocusedElement = null;
         let isInVideoMode = false;
+        let controlsTimeout = null;
         
         // Get global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -584,6 +628,7 @@
         const confirmExitBtn = document.getElementById('confirm-exit-btn');
         const cancelExitBtn = document.getElementById('cancel-exit-btn');
         const exitPlayerBtn = document.getElementById('exit-btn');
+        const videoControls = document.getElementById('video-controls');
         const categoriesList = document.getElementById('categories-list');
         const allCountSpan = document.getElementById('all-count');
         const favoritesCountSpan = document.getElementById('favorites-count');
@@ -672,7 +717,41 @@
             return bestElement;
         }
         
+        // Video controls auto-hide functionality
+        function showVideoControls() {
+            if (isInVideoMode) {
+                videoControls.classList.add('show');
+                
+                // Clear existing timeout
+                if (controlsTimeout) {
+                    clearTimeout(controlsTimeout);
+                }
+                
+                // Hide controls after 3 seconds of inactivity
+                controlsTimeout = setTimeout(() => {
+                    videoControls.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+        function hideVideoControls() {
+            videoControls.classList.remove('show');
+            if (controlsTimeout) {
+                clearTimeout(controlsTimeout);
+            }
+        }
+        
         function handleTVNavigation(event) {
+            // Show video controls on any key press when in video mode
+            if (isInVideoMode) {
+                showVideoControls();
+                
+                // Focus exit button if not already focused
+                if (document.activeElement !== exitPlayerBtn) {
+                    setFocusToElement(exitPlayerBtn);
+                }
+            }
+            
             // Allow default behavior for video player controls
             if (isInVideoMode && event.target.tagName === 'VIDEO') {
                 return;
@@ -719,7 +798,8 @@
                         const channelId = currentElement.getAttribute('data-id');
                         playChannel(channelId);
                     } else if (currentElement.classList.contains('category-button')) {
-                        currentElement.click();
+                        // Fixed: Properly trigger category selection
+                        selectCategory(currentElement);
                     } else if (currentElement.id === 'exit-btn') {
                         exitVideoPlayer();
                     }
@@ -736,6 +816,34 @@
                     }
                     break;
             }
+        }
+        
+        // Fixed: Category selection function
+        function selectCategory(button) {
+            const categoryFilter = button.dataset.filter;
+            
+            // Update current category
+            currentCategory = categoryFilter;
+            
+            // Update visual active state
+            document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update category count spans
+            document.querySelectorAll('.category-button .bg-white').forEach(span => {
+                span.className = span.className.replace('bg-white text-black', 'bg-gray-600');
+            });
+            
+            const activeSpan = button.querySelector('span:last-child');
+            if (activeSpan) {
+                activeSpan.className = activeSpan.className.replace('bg-gray-600', 'bg-white text-black');
+            }
+            
+            // Filter and render channels
+            filterChannels();
+            
+            // Keep focus on the selected category
+            setFocusToElement(button);
         }
         
         function showExitModal() {
@@ -785,20 +893,20 @@
             cancelExitBtn.addEventListener('click', hideExitModal);
             exitPlayerBtn.addEventListener('click', exitVideoPlayer);
             
-            // Category click handler
+            // Category click handler - Fixed to use new selectCategory function
             categoriesList.addEventListener('click', (e) => {
                 if (e.target.closest('.category-button')) {
                     const button = e.target.closest('.category-button');
-                    currentCategory = button.dataset.filter;
-                    document.querySelectorAll('.category-button').forEach(b => b.classList.remove('active'));
-                    button.classList.add('active');
-                    filterChannels();
-                    setFocusToElement(button);
+                    selectCategory(button);
                 }
             });
 
             // TV Remote Navigation - Global key handler
             document.addEventListener('keydown', handleTVNavigation);
+            
+            // Video player mouse/touch events for showing controls
+            videoModal.addEventListener('mousemove', showVideoControls);
+            videoModal.addEventListener('touchstart', showVideoControls);
             
             // Modal key handlers
             exitModal.addEventListener('keydown', (e) => {
@@ -993,14 +1101,12 @@
 
             lastSelectedChannelId = channelId;
             isInVideoMode = true;
-            videoModal.style.display = 'flex';
+            videoModal.classList.add('active');
             loadingSpinner.style.display = 'flex';
             videoContent.classList.add('hidden');
             
-            // Focus on exit button immediately
-            setTimeout(() => {
-                exitPlayerBtn.focus();
-            }, 100);
+            // Hide controls initially
+            hideVideoControls();
             
             if (hlsInstance) {
                 hlsInstance.destroy();
@@ -1016,6 +1122,9 @@
                     videoPlayer.play();
                     loadingSpinner.style.display = 'none';
                     videoContent.classList.remove('hidden');
+                    
+                    // Show controls briefly when video starts
+                    showVideoControls();
                 });
                 hlsInstance.on(Hls.Events.ERROR, function(event, data) {
                     if (data.fatal) {
@@ -1031,6 +1140,9 @@
                     videoPlayer.play();
                     loadingSpinner.style.display = 'none';
                     videoContent.classList.remove('hidden');
+                    
+                    // Show controls briefly when video starts
+                    showVideoControls();
                 });
             } else {
                 console.error('HLS not supported on this browser.');
@@ -1049,15 +1161,24 @@
             }
             videoPlayer.pause();
             videoPlayer.src = '';
-            videoModal.style.display = 'none';
+            videoModal.classList.remove('active');
+            hideVideoControls();
             
-            // Return focus to the last selected channel
+            // Return focus to the last selected channel with proper highlighting
             if (lastSelectedChannelId) {
                 const lastCard = document.querySelector(`[data-id="${lastSelectedChannelId}"]`);
                 if (lastCard) {
                     setTimeout(() => {
                         setFocusToElement(lastCard);
                     }, 100);
+                } else {
+                    // If channel is not visible (different category), focus on first channel
+                    const firstChannel = channelsList.querySelector('.channel-card');
+                    if (firstChannel) {
+                        setTimeout(() => {
+                            setFocusToElement(firstChannel);
+                        }, 100);
+                    }
                 }
             }
         }
