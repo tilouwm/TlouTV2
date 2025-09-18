@@ -150,10 +150,6 @@
             font-weight: 600;
             border-color: transparent;
         }
-
-        .search-bar-focused {
-            border: 2px solid var(--accent-blue);
-        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -161,10 +157,6 @@
     <!-- Top Navigation Bar -->
     <header class="bg-black p-4 md:p-6 flex flex-col md:flex-row items-center justify-between shadow-xl space-y-4 md:space-y-0">
         <h1 class="text-3xl font-bold tracking-wide text-[var(--accent-blue)]">TlouTV</h1>
-        <div class="flex items-center space-x-2 bg-[var(--bg-medium)] rounded-full p-2 px-4 w-full md:w-96 focus-within:ring-2 focus-within:ring-[var(--accent-blue)] transition-all">
-            <i class="fas fa-search text-[var(--text-gray)] text-xl"></i>
-            <input type="text" id="search-input" placeholder="Search channels..." class="p-1 bg-transparent text-white focus:outline-none w-full">
-        </div>
     </header>
 
     <!-- Main Content Area with two columns -->
@@ -496,8 +488,28 @@
                 "logo": "https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png",
                 "stream": "https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8",
                 "category": "Music"
+            },
+            {
+                "id": "channel40",
+                "name": "Fusion TV",
+                "logo": "https://fusionplus.s3.eu-west-2.amazonaws.com/uploads/Fusion-Logo-v2-wht.webp",
+                "stream": "https://live.5centscdn.com/fusionplustv/d0dbe915091d400bd8ee7f27f0791303.sdp/chunks.m3u8",
+                "category": "Music"
+            },
+            {
+                "id": "channel41",
+                "name": "France 5",
+                "logo": "https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/0022/5801/brand.gif?itok=y-h0OU6A",
+                "stream": "https://list.iptvcat.com/my_list/s/ee2693927b3e77b4e9970be9e13c58c9.m3u8",
+                "category": "General"
+            },
+            {
+                "id": "channel42",
+                "name": "France 3",
+                "logo": "https://seriescheries.com/wp-content/uploads/2015/09/france_3_logoactuel.jpg",
+                "stream": "https://list.iptvcat.com/my_list/s/26d2e5ba8a979f5ad40daf28bcb47dc6.m3u8",
+                "category": "General"
             }
-            
         ]
     </script>
     
@@ -545,15 +557,10 @@
         const confirmExitBtn = document.getElementById('confirm-exit-btn');
         const cancelExitBtn = document.getElementById('cancel-exit-btn');
         const exitPlayerBtn = document.getElementById('exit-btn');
-        const searchInput = document.getElementById('search-input');
-        const searchInputWrapper = searchInput.parentElement;
         const filterButtons = document.querySelectorAll('.category-button'); // Now all sidebar buttons are categories
         const categoriesList = document.getElementById('categories-list');
         const allCountSpan = document.getElementById('all-count');
         const favoritesCountSpan = document.getElementById('favorites-count');
-
-        // State for search keyboard
-        let isSearchKeyboardVisible = false;
         
         // Main app initialization function
         async function initApp() {
@@ -592,7 +599,6 @@
             confirmExitBtn.addEventListener('click', () => window.history.back());
             cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             exitPlayerBtn.addEventListener('click', exitVideoPlayer);
-            searchInput.addEventListener('input', (e) => filterChannels());
             
             // Add category listeners
             filterButtons.forEach(btn => {
@@ -606,34 +612,18 @@
                 });
             });
 
-            // Set up search bar focus and blur events
-            searchInput.addEventListener('focus', () => {
-                isSearchKeyboardVisible = true;
-                searchInputWrapper.classList.add('search-bar-focused');
-            });
-
-            searchInput.addEventListener('blur', () => {
-                isSearchKeyboardVisible = false;
-                searchInputWrapper.classList.remove('search-bar-focused');
-            });
-
             // Add global keydown listener for remote control navigation
             document.addEventListener('keydown', handleKeyNavigation);
         }
         
         // Filter and search channels
         function filterChannels() {
-            const query = searchInput.value.toLowerCase();
             let filtered = channelData;
             
             if (currentCategory === 'Favorites') {
                 filtered = filtered.filter(channel => favorites.has(channel.id));
             } else if (currentCategory !== 'All') {
                 filtered = filtered.filter(channel => channel.category === currentCategory);
-            }
-            
-            if (query) {
-                filtered = filtered.filter(channel => channel.name.toLowerCase().includes(query));
             }
             
             renderChannels(filtered);
@@ -893,11 +883,6 @@
                 } else if (e.key === 'Escape') {
                     hideExitModal();
                 }
-                return;
-            }
-
-            // Keyboard input for search bar
-            if (document.activeElement === searchInput) {
                 return;
             }
 
