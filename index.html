@@ -94,7 +94,7 @@
         .video-player {
             width: 100%;
             height: 100%;
-            display: block;
+            display: block.
         }
 
         .channel-card-container {
@@ -588,6 +588,7 @@
             cancelExitBtn.addEventListener('click', () => exitModal.style.display = 'none');
             exitPlayerBtn.addEventListener('click', exitVideoPlayer);
             
+            // category click (existing)
             categoriesList.addEventListener('click', (e) => {
                 if (e.target.closest('.category-button')) {
                     const button = e.target.closest('.category-button');
@@ -598,8 +599,19 @@
                 }
             });
 
-            document.addEventListener('keydown', handleKeyNavigation);
-            window.addEventListener('keydown', handleKeyNavigation); // added to catch TVs that dispatch to window
+            // ===== Old-version remote behavior: ArrowRight on category => focus first channel =====
+            categoriesList.addEventListener('keydown', (e) => {
+                const btn = e.target.closest('.category-button');
+                if (!btn) return;
+                if (e.key === 'ArrowRight') {
+                    const firstCard = channelsList.querySelector('.channel-card');
+                    if (firstCard) firstCard.focus();
+                }
+            });
+
+            // (Removed global custom key handler to allow native DPAD spatial navigation)
+            // document.addEventListener('keydown', handleKeyNavigation);
+            // window.addEventListener('keydown', handleKeyNavigation);
         }
         
         function filterChannels() {
@@ -705,7 +717,8 @@
                 card.setAttribute('data-id', channel.id);
                 card.setAttribute('data-index', index);
                 card.setAttribute('tabindex', '0');
-                
+                card.setAttribute('role', 'button'); // from old version
+
                 const isFavorite = favorites.has(channel.id);
                 
                 card.innerHTML = `
@@ -721,6 +734,13 @@
                     </div>
                 `;
                 
+                // old version: Enter-to-play on the card itself
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        playChannel(channel.id);
+                    }
+                });
+
                 card.addEventListener('click', () => playChannel(channel.id));
                 const favoriteBtn = card.querySelector('.favorite-btn');
                 favoriteBtn.addEventListener('click', (e) => {
@@ -815,123 +835,6 @@
                 }
             }
         }
-
-        // ---- Added helper for robust grid column detection ----
-        function getGridColumnsCount() {
-          const style = getComputedStyle(channelsList).getPropertyValue('grid-template-columns').trim();
-          const repeatMatch = style.match(/repeat\(\s*(\d+)/i);
-          if (repeatMatch) return parseInt(repeatMatch[1], 10);
-
-          const parts = style.split(/\s+/).filter(Boolean);
-          if (parts.length > 1) return parts.length;
-
-          const first = channelsList.querySelector('.channel-card');
-          if (first) {
-            const total = channelsList.clientWidth;
-            const w = first.getBoundingClientRect().width || 0;
-            if (w > 0) return Math.max(1, Math.floor(total / w));
-          }
-          return 1;
-        }
-        
-        // --- UPDATED handleKeyNavigation: DPAD + codes + safe columns + enter/back codes ---
-        function handleKeyNavigation(e) {
-            // Normalize Fire TV / Android TV DPAD, keyboard arrows, and codes
-            const codeNum = typeof e.keyCode === 'number' ? e.keyCode : null;
-            const k = (e.key || '').toLowerCase();
-            const c = (e.code || '').toLowerCase();
-
-            const isLeft  = k === 'arrowleft'  || k === 'left'  || c === 'arrowleft'  || c === 'numpad4' || k === 'dpad_left'  || codeNum === 37 || codeNum === 21;
-            const isRight = k === 'arrowright' || k === 'right' || c === 'arrowright' || c === 'numpad6' || k === 'dpad_right' || codeNum === 39 || codeNum === 22;
-            const isUp    = k === 'arrowup'    || k === 'up'    || c === 'arrowup'    || c === 'numpad8' || k === 'dpad_up'    || codeNum === 38 || codeNum === 19;
-            const isDown  = k === 'arrowdown'  || k === 'down'  || c === 'arrowdown'  || c === 'numpad2' || k === 'dpad_down'  || codeNum === 40 || codeNum === 20;
-            const isEsc   = k === 'escape' || k === 'esc' || codeNum === 27;
-            const isBack  = k === 'backspace' || codeNum === 8 || codeNum === 4;   // include Android BACK (4)
-            const isEnter = k === 'enter' || codeNum === 13 || codeNum === 23;     // include DPAD_CENTER (23)
-            const isP     = k === 'p' || codeNum === 80;
-
-            const isNavKey = isLeft || isRight || isUp || isDown || isEsc || isBack || isEnter || isP;
-            if (isNavKey) e.preventDefault(); // stop default scroll/hover behavior on TVs
-
-            const channelCards = Array.from(channelsList.querySelectorAll('.channel-card'));
-            const categoryButtons = Array.from(categoriesList.querySelectorAll('.category-button'));
-            const focusedElement = document.activeElement;
-            let nextElement = null;
-
-            // Player open
-            if (videoModal.style.display === 'flex') {
-                if (isEsc || isBack || isP) exitVideoPlayer();
-                return;
-            }
-            
-            // Exit modal open
-            if (exitModal.style.display === 'flex') {
-                if (isRight || isLeft) {
-                    const focused = document.activeElement;
-                    if (focused === confirmExitBtn) {
-                        cancelExitBtn.focus();
-                    } else if (focused === cancelExitBtn) {
-                        confirmExitBtn.focus();
-                    }
-                } else if (isEnter) {
-                    document.activeElement.click();
-                } else if (isEsc || isBack) {
-                    hideExitModal();
-                }
-                return;
-            }
-
-            if (focusedElement && focusedElement.classList.contains('category-button')) {
-                const focusedIndex = categoryButtons.indexOf(focusedElement);
-                if (isDown) {
-                    nextElement = categoryButtons[focusedIndex + 1];
-                } else if (isUp) {
-                    nextElement = categoryButtons[focusedIndex - 1];
-                } else if (isRight && channelCards.length > 0) {
-                    nextElement = channelCards[0];
-                }
-            } else if (focusedElement && focusedElement.classList.contains('channel-card')) {
-                const focusedIndex = channelCards.indexOf(focusedElement);
-                const columns = getGridColumnsCount();
-                
-                if (isRight) {
-                    nextElement = channelCards[focusedIndex + 1];
-                } else if (isLeft) {
-                    if (focusedIndex % columns === 0) {
-                        nextElement = document.querySelector('.category-button.active');
-                    } else {
-                        nextElement = channelCards[focusedIndex - 1];
-                    }
-                } else if (isDown) {
-                    nextElement = channelCards[focusedIndex + columns];
-                } else if (isUp) {
-                    nextElement = channelCards[focusedIndex - columns];
-                }
-            } else {
-                if (isRight && channelCards.length > 0) {
-                    nextElement = channelCards[0];
-                } else if (isLeft || isUp || isDown) {
-                    nextElement = document.querySelector('.category-button.active');
-                }
-            }
-            
-            if (isEnter && focusedElement) {
-                focusedElement.click();
-                return;
-            } else if (isBack || isEsc) {
-                showExitModal();
-                return;
-            } else if (isP) {
-                if (lastSelectedChannelId) {
-                    playChannel(lastSelectedChannelId);
-                }
-                return;
-            }
-
-            if (nextElement) {
-                updateFocus(nextElement);
-            }
-        }
         
         function updateFocus(newElement) {
             const allFocusable = Array.from(document.querySelectorAll('.selected-card'));
@@ -943,15 +846,8 @@
                 newElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
             }
         }
-        
-        function showExitModal() {
-            exitModal.style.display = 'flex';
-            confirmExitBtn.focus();
-        }
-        
-        function hideExitModal() {
-            exitModal.style.display = 'none';
-        }
+
+        // (No showExitModal/hideExitModal or global key handlers — relying on native TV spatial navigation)
 
         window.onload = () => {
              initApp();
@@ -960,5 +856,3 @@
     </script>
 </body>
 </html>
-
-
