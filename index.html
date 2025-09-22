@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TlouTV — TV Friendly + Fullscreen Player</title>
+<title>TlouTV — Fire TV Smooth + Fullscreen</title>
 <meta name="theme-color" content="#0ea5e9" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
 <style>
@@ -21,6 +21,7 @@
       radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.22), transparent 40%),
       radial-gradient(900px 600px at 110% 0%, rgba(34,211,238,.16), transparent 45%),
       var(--bg);
+    overscroll-behavior: contain;
   }
   .app{
     display:grid; grid-template-columns: 220px 1fr; gap:0; height:100%;
@@ -35,7 +36,6 @@
   .brand-badge{
     width:36px; height:36px; border-radius:12px; background:#0000002a; display:grid; place-items:center;
   }
-  .brand svg{ display:block }
   .brand .title{ font: 800 18px/1 Outfit,Inter,sans-serif; letter-spacing:.3px }
   .brand .sub{ font-size:10px; letter-spacing:2px; color:#a9f0ff; text-transform:uppercase }
 
@@ -51,16 +51,14 @@
     width:100%; border:1px solid rgba(255,255,255,.07);
     background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     color:var(--text); padding:12px; margin:8px 4px; border-radius:12px;
-    text-align:left; cursor:pointer;
+    text-align:left; cursor:pointer; outline: none;
   }
   .mitem .dot{ width:8px; height:8px; border-radius:50%; background:var(--cy1); opacity:.7 }
   .mitem.active{ outline:var(--ring); border-color:rgba(34,211,238,.55) }
-  .mitem:focus{ outline:var(--ring); }
-  .mitem[data-menu]{ outline: none }
   .focused-menu{ outline:var(--ring); border-color:rgba(34,211,238,.65) }
 
   /* Grid */
-  .content{ overflow:auto; padding:14px 16px 24px }
+  .content{ overflow:auto; padding:14px 16px 24px; scroll-behavior:smooth }
   .search-row{ display:flex; gap:10px; align-items:center; margin:6px 0 14px }
   .search{
     flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
@@ -82,24 +80,30 @@
   .card .logo img{ width:100%; height:100%; object-fit:contain }
   .card .name{ font-weight:700 }
   .card .meta{ font-size:12px; color:var(--muted) }
-  .card:focus, .focused-card{ outline:var(--ring); border-color:rgba(34,211,238,.55) }
+  .focused-card{ outline:var(--ring); border-color:rgba(34,211,238,.55) }
 
   /* Player overlay */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
   .overlay.show{ display:block }
-  .shade{ position:absolute; inset:0; background:rgba(0,0,0,.85) }
-  .player-wrap{
-    position:absolute; inset:0; display:grid; place-items:center; padding:0;
-  }
-  video{
-    width:100vw; height:100vh; background:#000; outline:none;
-  }
+  .shade{ position:absolute; inset:0; background:rgba(0,0,0,.86) }
+  .player-wrap{ position:absolute; inset:0; display:grid; place-items:center; padding:0; }
+  video{ width:100vw; height:100vh; background:#000; outline:none; }
+
   .close-btn{
     position:absolute; top:14px; right:14px; z-index:60;
-    padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.25);
-    background:rgba(255,255,255,.08); color:#fff; font-weight:700; cursor:pointer;
+    padding:10px 12px; border-radius:12px;
+    border:1px solid rgba(255,255,255,.28);
+    background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+    color:#fff; font-weight:800; cursor:pointer; transition:transform .08s ease;
+    outline: none;
   }
-  .close-btn:focus{ outline:var(--ring) }
+  /* BIG highlight when selected */
+  .close-btn:focus-visible,
+  .close-btn.focused {
+    outline: 4px solid var(--cy2);
+    box-shadow: 0 0 0 6px rgba(34,211,238,.35), 0 10px 28px rgba(0,0,0,.5);
+    transform: scale(1.05);
+  }
 </style>
 </head>
 <body>
@@ -120,7 +124,7 @@
   <!-- LEFT MENU -->
   <aside class="menu" id="leftMenu">
     <h3>Browse</h3>
-    <button class="mitem" data-menu data-cat="all" id="mi-all"><span class="dot"></span><span>All Channels</span></button>
+    <button class="mitem focused-menu" data-menu data-cat="all" id="mi-all"><span class="dot"></span><span>All Channels</span></button>
     <button class="mitem" data-menu data-cat="news" id="mi-news"><span class="dot"></span><span>News</span></button>
     <button class="mitem" data-menu data-cat="general" id="mi-general"><span class="dot"></span><span>General</span></button>
     <button class="mitem" data-menu data-cat="music" id="mi-music"><span class="dot"></span><span>Music</span></button>
@@ -145,10 +149,10 @@
   <div class="player-wrap">
     <video id="player" playsinline webkit-playsinline controls preload="metadata"></video>
   </div>
-  <button class="close-btn" id="closeBtn" title="Close (Back/Esc)">✕ Close</button>
+  <button class="close-btn" id="closeBtn" title="Close (Back/Left+Enter)">✕ Close</button>
 </div>
 
-<!-- Hls.js for browsers that need it -->
+<!-- Hls.js -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
 <script>
 /* ---------- Data ---------- */
@@ -158,7 +162,7 @@ const CHANNELS = [
   {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News"},
   {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General entertainment from Telemix"},
   {"id":"channel6","name":"SNL","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL"},
-  {"id":"channel7","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general","description":"Watch a variety of programs from Kajou TV"},
+  {"id":"channel7","name":"Kajou TV","logo":"https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general","description":"Watch a variety of programs from Kajou TV"},
   {"id":"channel8","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b3500000.m3u8"),"genre":"general","description":"Tune in for a mix of shows from RTH 2000"},
   {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8"),"genre":"general","description":"Another great channel from the RTH 2000 network"},
   {"id":"channel10","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious","description":"Religious programming and broadcasts"},
@@ -194,12 +198,12 @@ const CHANNELS = [
 ];
 
 /* ---------- State ---------- */
-const NS='tloutv:v2';
-let CURRENT_CAT='all';        // all | news | general | music | religious | sports | favorites
-let lastFocus = null;         // element to restore focus after closing player
+const NS='tloutv:tv-smooth';
+let CURRENT_CAT='all';
+let lastFocus = null;
+
 function favorites(){ try{return JSON.parse(localStorage.getItem(NS+':fav')||'[]')}catch{return[]} }
 function setFavorites(x){ localStorage.setItem(NS+':fav', JSON.stringify([...new Set(x)]) ) }
-function toggleFavorite(id){ const s=new Set(favorites()); s.has(id)?s.delete(id):s.add(id); setFavorites([...s]); render(); }
 
 /* ---------- Rendering ---------- */
 const gridEl = document.getElementById('grid');
@@ -219,14 +223,14 @@ function filterChannels(){
 }
 function card(c,i){
   return `
-  <div class="card" data-card data-idx="${i}" tabindex="0">
+  <div class="card" data-card data-idx="${i}" tabindex="0" aria-label="${c.name}">
     <div class="logo">${c.logo?`<img src="${c.logo}" alt="${c.name}">`:'📺'}</div>
     <div class="info">
       <div class="name">${c.name}</div>
       <div class="meta">${c.genre||''}</div>
     </div>
     <div style="margin-left:auto">
-      <button title="Favorite" style="background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer" onclick="event.stopPropagation();toggleFavorite('${c.id}')">
+      <button aria-label="Favorite" style="background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer" onclick="event.stopPropagation();toggleFavorite('${c.id}', this)">
         ${favorites().includes(c.id)?'❤️':'🤍'}
       </button>
     </div>
@@ -242,13 +246,19 @@ function render(){
   if(first && !document.querySelector('.focused-card') && document.activeElement.tagName!=='INPUT'){ focusCard(0); }
 }
 
+/* ---------- Favorites (no full re-render for smoothness) ---------- */
+function toggleFavorite(id, btn){
+  const s=new Set(favorites());
+  if(s.has(id)){ s.delete(id); if(btn) btn.textContent='🤍'; }
+  else{ s.add(id); if(btn) btn.textContent='❤️'; }
+  setFavorites([...s]);
+}
+
 /* ---------- Menu ---------- */
 const menuItems = Array.from(document.querySelectorAll('[data-menu]'));
 function selectMenu(cat){
   CURRENT_CAT = cat;
-  menuItems.forEach(b=>{
-    b.classList.toggle('active', b.dataset.cat===cat);
-  });
+  menuItems.forEach(b=>b.classList.toggle('active', b.dataset.cat===cat));
   render();
 }
 menuItems.forEach(btn=>{
@@ -259,8 +269,12 @@ function focusMenu(el){
   el.classList.add('focused-menu'); el.focus();
 }
 
-/* ---------- D-Pad Navigation ---------- */
+/* ---------- D-Pad Navigation (throttled) ---------- */
 let focusedIndex=0;
+let lastNavTs = 0;
+const NAV_GAP = 90; // ms between nav actions for smooth stepping
+
+function navAllowed(){ const now=Date.now(); if(now-lastNavTs<NAV_GAP) return false; lastNavTs=now; return true; }
 function gridCols(){ const w=window.innerWidth; return w>=1024?3:(w>=640?2:1); }
 function focusCard(idx){
   const prev = document.querySelector('.focused-card'); if(prev) prev.classList.remove('focused-card');
@@ -271,7 +285,7 @@ function focusCard(idx){
 document.addEventListener('keydown', (e)=>{
   const ae=document.activeElement;
 
-  // If overlay is open, let its handler manage keys
+  // If overlay is open, handled elsewhere
   if(overlay.classList.contains('show')) return;
 
   const onMenu = ae && ae.hasAttribute('data-menu');
@@ -280,10 +294,10 @@ document.addEventListener('keydown', (e)=>{
 
   // Grid navigation
   if(onGrid){
+    if(!navAllowed()) return;
     const total = rendered.length; const cols = gridCols();
     if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+1)); return; }
     if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault();
-      // move to menu if on first column
       if(focusedIndex%cols===0){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); return; }
       focusCard(Math.max(0, focusedIndex-1)); return;
     }
@@ -294,6 +308,7 @@ document.addEventListener('keydown', (e)=>{
 
   // Menu navigation
   if(onMenu){
+    if(!navAllowed()) return;
     const i = menuItems.indexOf(ae);
     if(['ArrowDown','Down'].includes(e.key)){ e.preventDefault(); focusMenu(menuItems[Math.min(menuItems.length-1,i+1)]); return; }
     if(['ArrowUp','Up'].includes(e.key)){ e.preventDefault(); focusMenu(menuItems[Math.max(0,i-1)]); return; }
@@ -307,7 +322,7 @@ document.addEventListener('keydown', (e)=>{
     return;
   }
 
-  // Nothing focused: put focus on menu first
+  // Nothing focused yet: put focus on current menu item
   if(['ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','ArrowRight','Right'].includes(e.key)){
     if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); }
   }
@@ -325,31 +340,27 @@ async function requestFS(el){
     else if(el.webkitEnterFullscreen) el.webkitEnterFullscreen();
     else if(el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
     else if(el.msRequestFullscreen) await el.msRequestFullscreen();
-  }catch(e){ /* some TV browsers ignore */ }
+  }catch(e){}
 }
-function exitFS(){
-  if(document.fullscreenElement){ document.exitFullscreen?.(); }
-}
+function exitFS(){ if(document.fullscreenElement){ document.exitFullscreen?.(); } }
 
 function showOverlay(){
   overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
   lastFocus = document.querySelector('.focused-card') || document.activeElement;
-  // push a history state so FireTV "Back" can close overlay
   try { history.pushState({p:'player'}, '', '#player'); } catch(e){}
+  // Start with video focused; Left on the remote will jump to Close with a big highlight
   player.focus();
 }
 function hideOverlay(){
   overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true');
   try{ if(hls){ hls.destroy(); hls=null; } player.pause(); player.removeAttribute('src'); player.load(); }catch(e){}
   exitFS();
-  // restore focus
   lastFocus?.focus();
 }
 
 function openPlayer(ch){
   showOverlay();
   const url = ch.url;
-  // load
   if (window.Hls && Hls.isSupported()){
     hls = new Hls({lowLatencyMode:true, enableWorker:true, liveSyncDurationCount:3});
     hls.attachMedia(player);
@@ -367,29 +378,31 @@ function openPlayer(ch){
       requestFS(player);
     }, {once:true});
   } else {
-    // If no support at all, navigate to the URL (device/native player)
     location.href = url; return;
   }
 }
 
-/* Close controls & keys inside overlay */
-closeBtn.addEventListener('click', hideOverlay);
-overlay.addEventListener('click', (e)=>{ if(e.target===overlay || e.target.classList.contains('shade')) hideOverlay(); });
+/* Overlay keyboard: Left/Right switch focus; Enter on Close; Back/Esc close */
 document.addEventListener('keydown', (e)=>{
   if(!overlay.classList.contains('show')) return;
-  if(e.key==='Escape'){ e.preventDefault(); hideOverlay(); }
+  const ae=document.activeElement;
+  if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); closeBtn.classList.add('focused'); closeBtn.focus(); return; }
+  if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); closeBtn.classList.remove('focused'); player.focus(); return; }
+  if(e.key==='Enter' && ae===closeBtn){ e.preventDefault(); hideOverlay(); return; }
+  if(e.key==='Backspace' || e.key==='Escape'){ e.preventDefault(); hideOverlay(); return; }
 });
-// Handle Fire TV Back button via history pop
-window.addEventListener('popstate', ()=>{
-  if(overlay.classList.contains('show')) hideOverlay();
-});
+closeBtn.addEventListener('focus', ()=>closeBtn.classList.add('focused'));
+closeBtn.addEventListener('blur',  ()=>closeBtn.classList.remove('focused'));
+closeBtn.addEventListener('click', hideOverlay);
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay || e.target.classList.contains('shade')) hideOverlay(); });
+window.addEventListener('popstate', ()=>{ if(overlay.classList.contains('show')) hideOverlay(); });
 
-/* ---------- Wiring ---------- */
-qEl.addEventListener('input', ()=>render());
+/* ---------- Wire up ---------- */
+qEl.addEventListener('input', render);
 selectMenu('all'); // initial
 render();
 
-/* click to open */
+/* Click to play */
 gridEl.addEventListener('click', (e)=>{
   const card = e.target.closest('[data-card]'); if(!card) return;
   const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
