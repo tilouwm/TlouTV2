@@ -1,1059 +1,331 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ht">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TlouTV</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #2b3e50 0%, #000000 100%);
-            color: #ecf0f1;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar {
-            width: 280px;
-            background: rgba(189, 195, 199, 0.1);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-
-        .app-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .app-title {
-            font-size: 24px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #1abc9c, #2ecc71);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 5px;
-        }
-
-        .app-subtitle {
-            font-size: 12px;
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .categories {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-        }
-
-        .category-item {
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            outline: none; /* Remove default outline */
-        }
-
-        .category-item:hover, .category-item:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: #1abc9c;
-            outline: 2px solid #1abc9c; /* Add a clear focus outline */
-        }
-
-        .category-item.active {
-            background: rgba(26, 188, 156, 0.2);
-            border-left-color: #1abc9c;
-        }
-
-        .category-icon {
-            font-size: 18px;
-        }
-
-        .category-name {
-            font-weight: 500;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .content-header {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .content-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .channels-grid {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            align-content: start;
-        }
-
-        .channel-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            outline: none; /* Remove default outline */
-        }
-
-        .channel-card:hover, .channel-card:focus {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            outline: 2px solid #1abc9c; /* Add a clear focus outline */
-        }
-        
-        .channel-logo {
-            width: 100%;
-            max-width: 120px;
-            height: auto;
-            object-fit: contain;
-            margin-bottom: 15px;
-        }
-
-        .channel-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .channel-description {
-            font-size: 14px;
-            opacity: 0.8;
-            line-height: 1.4;
-        }
-
-        .channel-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 10px;
-            height: 10px;
-            background: #27ae60;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .fullscreen-player {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-        }
-
-        .player-header {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1001;
-            transition: opacity 0.3s ease;
-        }
-
-        .channel-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .live-indicator {
-            background: #c0392b;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .close-button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-        }
-        
-        .close-button:hover, .close-button:focus {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-            outline: 2px solid #1abc9c;
-        }
-
-        .video-player {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .loading-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #3498db;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .message-box {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            text-align: center;
-        }
-
-        .message-box-content {
-            margin-bottom: 15px;
-        }
-
-        .message-box-close {
-            background: #3498db;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s ease;
-            outline: none;
-        }
-
-        .message-box-close:hover, .message-box-close:focus {
-            background: #2980b9;
-            outline: 2px solid #2980b9;
-        }
-
-        /* Scrollbar Styling */
-        .categories::-webkit-scrollbar,
-        .channels-grid::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .categories::-webkit-scrollbar-track,
-        .channels-grid::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .categories::-webkit-scrollbar-thumb,
-        .channels-grid::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        .categories::-webkit-scrollbar-thumb:hover,
-        .channels-grid::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-            }
-            
-            .channels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 15px;
-                padding: 15px;
-            }
-            
-            .channel-card {
-                padding: 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .channels-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                padding: 10px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TlouTV — External Player</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect width='100%25' height='100%25' rx='28' fill='%231a2233'/%3E%3Cpath d='M44 32l52 32-52 32z' fill='%2306b6d4'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: { bg:'#070b17', surface:'#0e162b', accent:'#06b6d4', accent2:'#22d3ee' },
+        fontFamily:{ heading:['Outfit','Inter','system-ui','sans-serif'], body:['Inter','system-ui','sans-serif'] }
+      }}
+    }
+  </script>
+  <style>
+    :root { --bg:#070b17 }
+    html,body { height:100% }
+    body {
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.25), transparent 40%),
+        radial-gradient(900px 600px at 110% 0%, rgba(34,211,238,.18), transparent 45%),
+        var(--bg);
+      color:#e5e7eb; font-family:Inter, system-ui, sans-serif
+    }
+    .glass { backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08) }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.07) }
+    .grid-ch { display:grid; grid-template-columns:repeat(1,minmax(0,1fr)); gap:1rem }
+    @media (min-width:640px){ .grid-ch { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (min-width:1024px){ .grid-ch { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    .hide { display:none !important }
+    .tab { opacity:.85 } .tab-active { opacity:1; background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.18)}
+    .ring-focus:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(34,211,238,.45) }
+    .focused-card { outline:3px solid rgba(34,211,238,.7); outline-offset:2px; border-color: rgba(34,211,238,.7) !important; }
+    .btn { transition: all .2s ease } .btn:hover { transform: translateY(-1px) }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="app-header">
-                <h1 class="app-title">TlouTV</h1>
-                <p class="app-subtitle">Streaming Now</p>
-            </div>
-            
-            <div class="categories" id="categories">
-                <div class="category-item active" data-category="all" tabindex="0">
-                    <span class="category-icon">📺</span>
-                    <span class="category-name">All Channels</span>
-                </div>
-                <div class="category-item" data-category="news" tabindex="0">
-                    <span class="category-icon">📰</span>
-                    <span class="category-name">News</span>
-                </div>
-                <div class="category-item" data-category="music" tabindex="0">
-                    <span class="category-icon">🎵</span>
-                    <span class="category-name">Music</span>
-                </div>
-                <div class="category-item" data-category="general" tabindex="0">
-                    <span class="category-icon">🎬</span>
-                    <span class="category-name">General</span>
-                </div>
-                <div class="category-item" data-category="sports" tabindex="0">
-                    <span class="category-icon">⚽</span>
-                    <span class="category-name">Sports</span>
-                </div>
-                <div class="category-item" data-category="religious" tabindex="0">
-                    <span class="category-icon">⛪</span>
-                    <span class="category-name">Religious</span>
-                </div>
-            </div>
+  <!-- Top Bar -->
+  <header class="sticky top-0 z-40 glass">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center gap-3">
+      <a href="#home" onclick="navigate('home')" class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-2xl bg-black/20 grid place-items-center">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z" fill="#06b6d4"/></svg>
         </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="content-header">
-                <h2 class="content-title">All Channels</h2>
-                <div class="live-indicator">● LIVE</div>
-            </div>
-            
-            <div class="channels-grid" id="channelsGrid">
-                <!-- Channels will be rendered here dynamically by JavaScript -->
-            </div>
+        <div class="leading-none">
+          <div class="font-heading text-lg font-extrabold tracking-wide">TlouTV</div>
+          <div class="text-[10px] uppercase tracking-widest text-accent2/70">Live Haitian TV</div>
         </div>
+      </a>
+      <div class="ml-auto flex items-center gap-2">
+        <input id="quick-search" placeholder="Search…" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-3 py-2 w-48 md:w-64"
+               onkeydown="if(event.key==='Enter'){navigate('channels'); document.getElementById('channels-q').value=this.value; renderChannels(); focusFirstCard();}" />
+        <select id="lang" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-sm" onchange="setLang(this.value)">
+          <option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option>
+        </select>
+      </div>
     </div>
+  </header>
 
-    <!-- Fullscreen Video Player -->
-    <div class="fullscreen-player" id="fullscreenPlayer">
-        <div class="player-header" id="playerHeader">
-            <div class="channel-info">
-                <div class="live-indicator">● LIVE</div>
-                <h3 id="currentChannelName">Channel Name</h3>
+  <!-- Main -->
+  <main class="mx-auto w-full max-w-6xl px-4 py-6 space-y-8">
+    <!-- HOME -->
+    <section id="view-home" class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading text-2xl">Chèn Popilè</h2>
+        <button class="btn ring-focus px-3 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm"
+                onclick="navigate('channels')">Browse all</button>
+      </div>
+      <div id="home-trending" class="grid-ch"></div>
+
+      <div>
+        <h2 class="font-heading text-2xl mb-3">Soti Dènye Ou Gade</h2>
+        <div id="home-recent" class="grid-ch"></div>
+      </div>
+    </section>
+
+    <!-- CHANNELS -->
+    <section id="view-channels" class="space-y-5 hide">
+      <div class="flex flex-col md:flex-row md:items-center gap-3">
+        <input id="channels-q" placeholder="Search channels…" class="ring-focus flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2" oninput="renderChannels()" />
+      </div>
+      <div id="channels-list" class="grid-ch"></div>
+    </section>
+
+    <!-- FAVORITES -->
+    <section id="view-favorites" class="space-y-4 hide">
+      <h1 class="text-2xl font-heading">Pi renmen</h1>
+      <div id="favorites-list" class="grid-ch"></div>
+    </section>
+  </main>
+
+  <!-- Bottom Tabs (with categories) -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[98%] md:w-auto">
+    <div class="glass rounded-2xl px-2 py-2 grid grid-cols-4 md:grid-cols-8 gap-2">
+      <button id="tab-home" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory(null); navigate('home')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9.5z" stroke="#22d3ee" stroke-width="2"/></svg>
+        <span class="text-[11px]">Home</span>
+      </button>
+
+      <button id="tab-all" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory(null); navigate('channels'); focusFirstCard()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="3" stroke="#22d3ee" stroke-width="2"/><path d="M8 20h8" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="text-[11px]">All</span>
+      </button>
+
+      <button id="tab-news" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory('news'); navigate('channels'); focusFirstCard()">📰<span class="text-[11px]">News</span></button>
+      <button id="tab-general" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory('general'); navigate('channels'); focusFirstCard()">📺<span class="text-[11px]">General</span></button>
+      <button id="tab-music" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory('music'); navigate('channels'); focusFirstCard()">🎵<span class="text-[11px]">Music</span></button>
+      <button id="tab-religious" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory('religious'); navigate('channels'); focusFirstCard()">✝️<span class="text-[11px]">Religious</span></button>
+      <button id="tab-sports" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="setCategory('sports'); navigate('channels'); focusFirstCard()">🏟️<span class="text-[11px]">Sports</span></button>
+      <button id="tab-favorites" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+              onclick="navigate('favorites')">❤️<span class="text-[11px]">Favorites</span></button>
+    </div>
+  </nav>
+
+  <!-- Channels data -->
+  <script>
+    const normalizeStream = (u)=> (typeof u==='string' ? u.replace('.m3d8','.m3u8') : u);
+    const CHANNELS = [
+      {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news","description":"Stay informed with the latest news from Tele Pacific","country":"HT","live":"live"},
+      {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News","country":"HT","live":"live"},
+      {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General entertainment from Telemix","country":"HT","live":"live"},
+      {"id":"channel6","name":"SNL","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL","country":"HT","live":"live"},
+      {"id":"channel7","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general","description":"Watch a variety of programs from Kajou TV","country":"HT","live":"live"},
+      {"id":"channel8","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b3500000.m3u8"),"genre":"general","description":"Tune in for a mix of shows from RTH 2000","country":"HT","live":"live"},
+      {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8"),"genre":"general","description":"Another great channel from the RTH 2000 network","country":"HT","live":"live"},
+      {"id":"channel10","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious","description":"Religious programming and broadcasts","country":"HT","live":"live"},
+      {"id":"channel11","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/4DIASPOTV/4DIASPOTV/chunklist_w507710567.m3u8"),"genre":"general","description":"Variety of entertainment for the Haitian diaspora","country":"HT","live":"live"},
+      {"id":"channel12","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Your own TV channel with diverse content","country":"HT","live":"live"},
+      {"id":"channel13","name":"HMI Promz News","logo":"https://i.imgur.com/gwPaw3v.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8"),"genre":"music","description":"Music news and promotions","country":"HT","live":"live"},
+      {"id":"channel14","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":normalizeStream("https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8"),"genre":"religious","description":"Religious programming from Boston","country":"HT","live":"live"},
+      {"id":"channel15","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3d8"),"genre":"general","description":"A general entertainment channel with a variety of content","country":"HT","live":"live"},
+      {"id":"channel16","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":normalizeStream("https://video1.getstreamhosting.com/1936/8212/8212/playlist.m3u8"),"genre":"general","description":"Live stream from BPX","country":"HT","live":"live"},
+      {"id":"channel17","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":normalizeStream("https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8"),"genre":"general","description":"A general channel with diverse content","country":"HT","live":"live"},
+      {"id":"channel18","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":normalizeStream("https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8"),"genre":"religious","description":"Religious broadcasts and programming from Tele 4VEH","country":"HT","live":"live"},
+      {"id":"channel19","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8"),"genre":"religious","description":"A channel dedicated to praise and worship","country":"HT","live":"live"},
+      {"id":"channel20","name":"Adduction Media","logo":"https://dslv9ilpbe7p1.cloudfront.net/nYhAQY37idxm1hlkmP1qPQ_store_logo_image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/rtvboost/rtvboost/chunklist_w115996771.m3u8"),"genre":"general","description":"General entertainment from Adduction Media","country":"HT","live":"live"},
+      {"id":"channel21","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music","description":"Music and entertainment from Madras FM TV","country":"HT","live":"live"},
+      {"id":"channel22","name":"Bblack Caribbean","logo":"https://i1.wp.com/vjdid.com/wp-content/uploads/2017/10/logo-bblackcaribbean-contour-noir.png","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music","description":"Black music from the Caribbean","country":"HT","live":"live"},
+      {"id":"channel23","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music","description":"Black music from Africa","country":"HT","live":"live"},
+      {"id":"channel24","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":normalizeStream("https://stream.ecable.tv/afrobeats/index.m3u8"),"genre":"music","description":"Non-stop Afrobeats music","country":"HT","live":"live"},
+      {"id":"channel25","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music","description":"Urban music and culture from Trace Urban","country":"HT","live":"live"},
+      {"id":"channel26","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music","description":"Latin music and culture from Trace Latina","country":"HT","live":"live"},
+      {"id":"channel27","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general","description":"General programming from DBM","country":"HT","live":"live"},
+      {"id":"channel28","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music","description":"Music and entertainment from TMA","country":"HT","live":"live"},
+      {"id":"channel29","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from Tele Pam","country":"HT","live":"live"},
+      {"id":"channel30","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8"),"genre":"general","description":"Live stream from Tele Eclair","country":"HT","live":"live"},
+      {"id":"channel31","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from TVA 30","country":"HT","live":"live"},
+      {"id":"channel35","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general","description":"Live stream from PVS","country":"HT","live":"live"},
+      {"id":"channel32","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8"),"genre":"sports","description":"Sports and live commentary from Totalmix Radio","country":"HT","live":"live"},
+      {"id":"channel33","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":normalizeStream("https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8"),"genre":"sports","description":"Sports programming and events","country":"HT","live":"live"},
+      {"id":"channel34","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious","description":"Religious broadcasts from Tele Miracle","country":"HT","live":"live"},
+      {"id":"channel36","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8"),"genre":"music","description":"Music hits and entertainment from Radio Tele Hit","country":"HT","live":"live"},
+      {"id":"channel37","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious","description":"Religious programming from Radio Tele Sentinel","country":"HT","live":"live"},
+      {"id":"channel38","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music","description":"Music and shows from VA Studio","country":"HT","live":"live"},
+      {"id":"channel39","name":"Dream In TV","logo":"https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png","url":normalizeStream("https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8"),"genre":"music","description":"Music channel to help you dream in TV","country":"HT","live":"live"}
+    ];
+  </script>
+
+  <!-- State / Prefs -->
+  <script>
+    const NS = 'tloutv:v1';
+    let CURRENT_CATEGORY = null; // null=All
+    function setCategory(cat){ CURRENT_CATEGORY = cat; markCategoryActive(); renderChannels(); }
+
+    function markCategoryActive(){
+      const ids = ['all','news','general','music','religious','sports','home','favorites'];
+      ids.forEach(x=>document.getElementById('tab-'+x)?.classList.remove('tab-active'));
+      if(CURRENT_CATEGORY===null) document.getElementById('tab-all').classList.add('tab-active');
+      else document.getElementById('tab-'+CURRENT_CATEGORY).classList.add('tab-active');
+    }
+    function getFavorites(){ try{return JSON.parse(localStorage.getItem(`${NS}:favorites`)||'[]')}catch{return[]} }
+    function setFavorites(arr){ localStorage.setItem(`${NS}:favorites`, JSON.stringify([...new Set(arr)])); }
+    function toggleFavorite(id){ const set=new Set(getFavorites()); set.has(id)?set.delete(id):set.add(id); setFavorites([...set]); renderFavoritesIfOpen(); }
+    function isFavorite(id){ return getFavorites().includes(id); }
+
+    function getHistory(){ try{return JSON.parse(localStorage.getItem(`${NS}:history`)||'[]')}catch{return[]} }
+    function pushHistory(item){ const arr = getHistory(); const next = [item, ...arr.filter(x=>x.channelId!==item.channelId)].slice(0,100); localStorage.setItem(`${NS}:history`, JSON.stringify(next)); }
+  </script>
+
+  <!-- UI + Rendering + D-Pad focus -->
+  <script>
+    const VIEWS = ['home','channels','favorites'];
+
+    function navigate(view){
+      VIEWS.forEach(v => document.getElementById(`view-${v}`).classList.add('hide'));
+      document.getElementById(`view-${view}`).classList.remove('hide');
+      document.getElementById('tab-home').classList.toggle('tab-active', view==='home');
+      document.getElementById('tab-favorites').classList.toggle('tab-active', view==='favorites');
+      if(view==='channels') markCategoryActive();
+      if(view==='home') renderHome();
+      if(view==='channels') renderChannels();
+      if(view==='favorites') renderFavorites();
+      location.hash = view;
+    }
+
+    function cardHTML(ch, idx){
+      const fav = isFavorite(ch.id);
+      return `
+        <div id="card-${idx}" data-id="${ch.id}" data-idx="${idx}" tabindex="0"
+             class="group card rounded-2xl p-3 flex gap-3 items-center hover:translate-y-[-1px] transition relative">
+          <button title="${fav?'Remove favorite':'Add favorite'}"
+                  onclick="event.stopPropagation(); event.preventDefault(); toggleFavorite('${ch.id}'); this.innerText=this.innerText==='❤️'?'🤍':'❤️';"
+                  class="absolute top-2 right-2 text-lg">${fav?'❤️':'🤍'}</button>
+          <a href="${ch.url}" target="_self" onclick="onOpenExternal('${ch.id}')"
+             class="flex gap-3 items-center w-full">
+            <div class="w-14 h-14 rounded-xl bg-black/40 grid place-items-center overflow-hidden">
+              ${ch.logo?`<img src="${ch.logo}" class="w-full h-full object-contain">`:'<span>📺</span>'}
             </div>
-            <button class="close-button" id="closeButton" tabindex="0">✕</button>
+            <div class="flex-1">
+              <div class="font-semibold">${ch.name}</div>
+              <div class="text-xs text-white/60">${ch.genre||'—'}</div>
+            </div>
+            <div class="text-[10px] px-2 py-1 rounded-md border border-white/10 ${ch.live==='live'?'text-accent2':''}">${ch.live||'—'}</div>
+          </a>
         </div>
-        
-        <video class="video-player" id="videoPlayer" controls autoplay>
-            Your browser does not support the video element.
-        </video>
-        
-        <div class="loading-spinner" id="loadingSpinner"></div>
-    </div>
+      `;
+    }
 
-    <!-- Custom Message Box -->
-    <div class="message-box" id="messageBox">
-        <p class="message-box-content" id="messageBoxContent"></p>
-        <button class="message-box-close" id="messageBoxClose" tabindex="0">Close</button>
-    </div>
+    function onOpenExternal(id){
+      pushHistory({ channelId:id, watchedAt:new Date().toISOString() });
+      // For Android VLC users, uncomment to try VLC first:
+      // const ch = CHANNELS.find(c=>c.id===id); location.href = `vlc://${encodeURI(ch.url)}`;
+    }
 
-    <script>
-        // Channel data
-        const channels = [
-            {
-                "id": "channel1",
-                "name": "Tele Pacific",
-                "logo": "https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png",
-                "stream": "https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8",
-                "category": "news",
-                "description": "Stay informed with the latest news from Tele Pacific"
-            },
-            {
-                "id": "channel3",
-                "name": "Haiti News",
-                "logo": "https://m.media-amazon.com/images/I/611Ffvky5yL.png",
-                "stream": "https://haititivi.com/website/haitinews/index.m3u8",
-                "category": "news",
-                "description": "Breaking news and current events from Haiti News"
-            },
-            {
-                "id": "channel5",
-                "name": "Telemix",
-                "logo": "https://i.ibb.co/RB7dzZq/logo-mix-2.png",
-                "stream": "https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8",
-                "category": "general",
-                "description": "General entertainment from Telemix"
-            },
-            {
-                "id": "channel6",
-                "name": "SNL",
-                "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png",
-                "stream": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                "category": "general",
-                "description": "A mix of shows and general programming from SNL"
-            },
-            {
-                "id": "channel7",
-                "name": "Kajou TV",
-                "logo": "https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png",
-                "stream": "https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8",
-                "category": "general",
-                "description": "Watch a variety of programs from Kajou TV"
-            },
-            {
-                "id": "channel8",
-                "name": "RTH 2000",
-                "logo": "https://i.imgur.com/4z0FiEA.png",
-                "stream": "https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b3500000.m3u8",
-                "category": "general",
-                "description": "Tune in for a mix of shows from RTH 2000"
-            },
-            {
-                "id": "channel9",
-                "name": "RTH 2000 TV2",
-                "logo": "https://i.imgur.com/4z0FiEA.png",
-                "stream": "https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8",
-                "category": "general",
-                "description": "Another great channel from the RTH 2000 network"
-            },
-            {
-                "id": "channel10",
-                "name": "Radio Tele Puissance",
-                "logo": "https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png",
-                "stream": "https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8",
-                "category": "religious",
-                "description": "Religious programming and broadcasts"
-            },
-            {
-                "id": "channel11",
-                "name": "4Diaspo TV",
-                "logo": "https://m.media-amazon.com/images/I/71w9kTfB7xL.png",
-                "stream": "https://59d39900ebfb8.streamlock.net/4DIASPOTV/4DIASPOTV/chunklist_w507710567.m3u8",
-                "category": "general",
-                "description": "Variety of entertainment for the Haitian diaspora"
-            },
-            {
-                "id": "channel12",
-                "name": "Tele Pam",
-                "logo": "https://i.imgur.com/zfnFVqQ.png",
-                "stream": "https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8",
-                "category": "general",
-                "description": "Your own TV channel with diverse content"
-            },
-            {
-                "id": "channel13",
-                "name": "HMI Promz News",
-                "logo": "https://i.imgur.com/gwPaw3v.png",
-                "stream": "https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8",
-                "category": "music",
-                "description": "Music news and promotions"
-            },
-            {
-                "id": "channel14",
-                "name": "Radio Tele Boston",
-                "logo": "https://i.ibb.co/x3Gx3Ps/unnamed.png",
-                "stream": "https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8",
-                "category": "religious",
-                "description": "Religious programming from Boston"
-            },
-            {
-                "id": "channel15",
-                "name": "Fidele TV",
-                "logo": "https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg",
-                "stream": "https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8",
-                "category": "general",
-                "description": "A general entertainment channel with a variety of content"
-            },
-            {
-                "id": "channel16",
-                "name": "BPX",
-                "logo": "https://i.ibb.co/SvGYHS7/images-1.jpg",
-                "stream": "https://video1.getstreamhosting.com/1936/8212/8212/playlist.m3u8",
-                "category": "general",
-                "description": "Live stream from BPX"
-            },
-            {
-                "id": "channel17",
-                "name": "Nago TV",
-                "logo": "https://i.ibb.co/fSnCtJb/nago-tv.png",
-                "stream": "https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8",
-                "category": "general",
-                "description": "A general channel with diverse content"
-            },
-            {
-                "id": "channel18",
-                "name": "Tele 4VEH",
-                "logo": "https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png",
-                "stream": "https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8",
-                "category": "religious",
-                "description": "Religious broadcasts and programming from Tele 4VEH"
-            },
-            {
-                "id": "channel19",
-                "name": "Tele Louange",
-                "logo": "https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png",
-                "stream": "https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8",
-                "category": "religious",
-                "description": "A channel dedicated to praise and worship"
-            },
-            {
-                "id": "channel20",
-                "name": "Adduction Media",
-                "logo": "https://dslv9ilpbe7p1.cloudfront.net/nYhAQY37idxm1hlkmP1qPQ_store_logo_image.png",
-                "stream": "https://5790d294af2dc.streamlock.net/rtvboost/rtvboost/chunklist_w115996771.m3u8",
-                "category": "general",
-                "description": "General entertainment from Adduction Media"
-            },
-            {
-                "id": "channel21",
-                "name": "Madras FM TV",
-                "logo": "https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png",
-                "stream": "https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8",
-                "category": "music",
-                "description": "Music and entertainment from Madras FM TV"
-            },
-            {
-                "id": "channel22",
-                "name": "Bblack Caribbean",
-                "logo": "https://i1.wp.com/vjdid.com/wp-content/uploads/2017/10/logo-bblack-caribbean-contour-noir.png",
-                "stream": "https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8",
-                "category": "music",
-                "description": "Black music from the Caribbean"
-            },
-            {
-                "id": "channel23",
-                "name": "Bblack Africa",
-                "logo": "https://i.ibb.co/mvJc4z0/maxresdefault.jpg",
-                "stream": "https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8",
-                "category": "music",
-                "description": "Black music from Africa"
-            },
-            {
-                "id": "channel24",
-                "name": "Afrobeats",
-                "logo": "https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg",
-                "stream": "https://stream.ecable.tv/afrobeats/index.m3u8",
-                "category": "music",
-                "description": "Non-stop Afrobeats music"
-            },
-            {
-                "id": "channel25",
-                "name": "Trace Urban",
-                "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png",
-                "stream": "https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8",
-                "category": "music",
-                "description": "Urban music and culture from Trace Urban"
-            },
-            {
-                "id": "channel26",
-                "name": "Trace Latina",
-                "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png",
-                "stream": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8",
-                "category": "music",
-                "description": "Latin music and culture from Trace Latina"
-            },
-            {
-                "id": "channel27",
-                "name": "DBM",
-                "logo": "https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png",
-                "stream": "http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8",
-                "category": "general",
-                "description": "General programming from DBM"
-            },
-            {
-                "id": "channel28",
-                "name": "TMA",
-                "logo": "https://i.ibb.co/rtPW6pV/R.png",
-                "stream": "http://hls.tmacaraibes.com/live/index.m3u8",
-                "category": "music",
-                "description": "Music and entertainment from TMA"
-            },
-            {
-                "id": "channel29",
-                "name": "Tele Pam",
-                "logo": "https://i.imgur.com/zfnFVqQ.png",
-                "stream": "https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8",
-                "category": "general",
-                "description": "General programming from Tele Pam"
-            },
-            {
-                "id": "channel30",
-                "name": "Tele Eclair",
-                "logo": "https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png",
-                "stream": "https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8",
-                "category": "general",
-                "description": "Live stream from Tele Eclair"
-            },
-            {
-                "id": "channel31",
-                "name": "TVA 30",
-                "logo": "https://televariete.com/tva30/logo.png",
-                "stream": "https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8",
-                "category": "general",
-                "description": "General programming from TVA 30"
-            },
-            {
-                "id": "channel35",
-                "name": "PVS",
-                "logo": "https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png",
-                "stream": "https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8",
-                "category": "general",
-                "description": "Live stream from PVS"
-            },
-            {
-                "id": "channel32",
-                "name": "Totalmix Radio",
-                "logo": "https://cdn-radiotime-logos.tunein.com/s127273g.png",
-                "stream": "https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8",
-                "category": "sports",
-                "description": "Sports and live commentary from Totalmix Radio"
-            },
-            {
-                "id": "channel33",
-                "name": "Rezo Boul",
-                "logo": "https://www.rezoboul.com/uploads/images/logo_site_1714115779.png",
-                "stream": "https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8",
-                "category": "sports",
-                "description": "Sports programming and events"
-            },
-            {
-                "id": "channel34",
-                "name": "Tele Miracle",
-                "logo": "https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk",
-                "stream": "https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8",
-                "category": "religious",
-                "description": "Religious broadcasts from Tele Miracle"
-            },
-            {
-                "id": "channel36",
-                "name": "Radio Tele Hit",
-                "logo": "https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg",
-                "stream": "https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8",
-                "category": "music",
-                "description": "Music hits and entertainment from Radio Tele Hit"
-            },
-            {
-                "id": "channel37",
-                "name": "Radio Tele Sentinel",
-                "logo": "https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png",
-                "stream": "https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8",
-                "category": "religious",
-                "description": "Religious programming from Radio Tele Sentinel"
-            },
-            {
-                "id": "channel38",
-                "name": "VA Studio",
-                "logo": "https://i.imgur.com/bIQjQo1.jpeg",
-                "stream": "https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8",
-                "category": "music",
-                "description": "Music and shows from VA Studio"
-            },
-            {
-                "id": "channel39",
-                "name": "Dream In TV",
-                "logo": "https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png",
-                "stream": "https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8",
-                "category": "music",
-                "description": "Music channel to help you dream in TV"
-            }
-        ];
+    function renderHome(){
+      const trending = document.getElementById('home-trending');
+      trending.innerHTML = CHANNELS.slice(0,12).map((c,i)=>cardHTML(c,i)).join('');
+      const recentWrap = document.getElementById('home-recent');
+      const hist = getHistory();
+      if(hist.length===0){ recentWrap.innerHTML = `<div class="card rounded-2xl p-4 text-white/60">No recent channels yet.</div>`; return; }
+      const items = hist.map(h => CHANNELS.find(c=>c.id===h.channelId)).filter(Boolean);
+      recentWrap.innerHTML = items.slice(0,12).map((c,i)=>cardHTML(c,i)).join('');
+    }
 
-        // DOM Elements
-        const categoriesContainer = document.getElementById('categories');
-        const channelsGrid = document.getElementById('channelsGrid');
-        const contentTitle = document.querySelector('.content-title');
-        const fullscreenPlayer = document.getElementById('fullscreenPlayer');
-        const videoPlayer = document.getElementById('videoPlayer');
-        const currentChannelName = document.getElementById('currentChannelName');
-        const closeButton = document.getElementById('closeButton');
-        const playerHeader = document.getElementById('playerHeader');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const messageBox = document.getElementById('messageBox');
-        const messageBoxContent = document.getElementById('messageBoxContent');
-        const messageBoxClose = document.getElementById('messageBoxClose');
+    let lastRendered = [];
+    function renderChannels(){
+      const q = (document.getElementById('channels-q').value||'').toLowerCase();
+      const res = CHANNELS.filter(ch =>
+        (!q || ch.name.toLowerCase().includes(q) || (ch.description||'').toLowerCase().includes(q)) &&
+        (CURRENT_CATEGORY? (ch.genre===CURRENT_CATEGORY) : true)
+      );
+      lastRendered = res;
+      const list = document.getElementById('channels-list');
+      list.innerHTML = res.map((c,i)=>cardHTML(c,i)).join('') || `<div class="card rounded-2xl p-4 text-white/60">No results.</div>`;
+    }
 
-        let hls = null;
-        let headerTimeout = null;
-        let focusableElements = [];
-        let currentFocusIndex = 0;
-        const channelGridColumns = 3; // Hardcoded value for grid navigation, adjust if needed
+    function renderFavorites(){
+      const ids = getFavorites();
+      const list = document.getElementById('favorites-list');
+      if(ids.length===0){ list.innerHTML = `<div class="card rounded-2xl p-4 text-white/70">No favorites yet.</div>`; return; }
+      const items = ids.map(id => CHANNELS.find(c=>c.id===id)).filter(Boolean);
+      lastRendered = items;
+      list.innerHTML = items.map((c,i)=>cardHTML(c,i)).join('');
+    }
+    function renderFavoritesIfOpen(){ if(!document.getElementById('view-favorites').classList.contains('hide')) renderFavorites(); }
 
-        // Initialize app
-        function init() {
-            setupEventListeners();
-            renderChannels('all');
-        }
+    // D-Pad navigation across grids
+    let focusedIndex = 0;
+    function focusCard(idx){
+      const prev = document.querySelector('.focused-card');
+      if(prev) prev.classList.remove('focused-card');
+      const el = document.getElementById('card-'+idx);
+      if(el){ el.classList.add('focused-card'); el.focus({preventScroll:false}); focusedIndex = idx; }
+    }
+    function focusFirstCard(){ focusedIndex = 0; focusCard(0); }
+    function gridCols(){ const w = window.innerWidth; return w>=1024?3:(w>=640?2:1); }
 
-        // Setup event listeners
-        function setupEventListeners() {
-            categoriesContainer.addEventListener('click', (e) => {
-                if (e.target.closest('.category-item')) {
-                    const item = e.target.closest('.category-item');
-                    const category = item.dataset.category;
-                    selectCategory(item, category);
-                }
-            });
+    function handleGridKey(e){
+      const inChannels = !document.getElementById('view-channels').classList.contains('hide');
+      const inFavs = !document.getElementById('view-favorites').classList.contains('hide');
+      const inHome = !document.getElementById('view-home').classList.contains('hide');
+      if(!(inChannels||inFavs||inHome)) return;
 
-            channelsGrid.addEventListener('click', (e) => {
-                const channelCard = e.target.closest('.channel-card');
-                if (channelCard) {
-                    const channelId = channelCard.dataset.id;
-                    const channel = channels.find(c => c.id === channelId);
-                    if (channel) {
-                        playChannel(channel);
-                    }
-                }
-            });
+      const total = lastRendered.length || document.querySelectorAll('#home-trending > div, #home-recent > div').length;
+      if(total===0) return;
+      const cols = gridCols();
 
-            closeButton.addEventListener('click', closeFullscreen);
-            videoPlayer.addEventListener('loadstart', showLoading);
-            videoPlayer.addEventListener('canplay', hideLoading);
-            videoPlayer.addEventListener('error', handleVideoError);
-            fullscreenPlayer.addEventListener('mousemove', showPlayerHeader);
-            fullscreenPlayer.addEventListener('mouseleave', hidePlayerHeader);
+      if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+1)); }
+      if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, focusedIndex-1)); }
+      if(['ArrowDown','Down'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+cols)); }
+      if(['ArrowUp','Up'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, focusedIndex-cols)); }
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const el = document.getElementById('card-'+focusedIndex)?.querySelector('a[href]');
+        if(el){ el.click(); }
+      }
+      if(e.key==='Backspace'){ e.preventDefault(); history.back(); }
+    }
+    document.addEventListener('keydown', handleGridKey, false);
+  </script>
 
-            document.addEventListener('keydown', handleKeyNavigation);
+  <!-- PWA SW (for installability; no caching of streams) -->
+  <script>
+    (function registerSW(){
+      if(!('serviceWorker' in navigator)) return;
+      const swCode = `
+        const CACHE='tloutv-onefile-ext-v1';
+        const CORE=['./'];
+        self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE))); self.skipWaiting();});
+        self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
+        self.addEventListener('fetch',e=>{ e.respondWith(fetch(e.request).catch(async()=>{ const c=await caches.open(CACHE); return c.match('./'); })); });
+      `;
+      const blob = new Blob([swCode], {type:'text/javascript'});
+      const url = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url);
+    })();
 
-            messageBoxClose.addEventListener('click', hideMessage);
-        }
+    // Router
+    function handleHash(){ const h = (location.hash||'#home').slice(1); if(!['home','channels','favorites'].includes(h)) return navigate('home'); navigate(h); }
+    window.addEventListener('hashchange', handleHash);
+    navigate('home'); handleHash();
 
-        // Handle remote/keyboard navigation
-        function handleKeyNavigation(e) {
-            const isPlayerVisible = fullscreenPlayer.style.display === 'flex';
-            
-            if (isPlayerVisible) {
-                // Handle navigation within the fullscreen player
-                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-                    e.preventDefault();
-                    closeFullscreen();
-                }
-                return;
-            }
-
-            // Handle navigation in the main view
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                moveFocus(-1);
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                moveFocus(1);
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                moveFocus(getLeftIndex());
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                moveFocus(getRightIndex());
-            } else if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                if (focusableElements[currentFocusIndex]) {
-                    focusableElements[currentFocusIndex].click();
-                }
-            } else if (e.key === 'Escape') {
-                // Focus the first element on escape
-                if (focusableElements.length > 0) {
-                    currentFocusIndex = 0;
-                    focusableElements[currentFocusIndex].focus();
-                }
-            }
-        }
-
-        function getLeftIndex() {
-            if (currentFocusIndex === 0) return 0; // Don't move left from sidebar
-            
-            const numCategories = categoriesContainer.children.length;
-            if (currentFocusIndex < numCategories) {
-                return -1; // No left movement in sidebar
-            }
-            
-            const channelIndex = currentFocusIndex - numCategories;
-            const channelRow = Math.floor(channelIndex / channelGridColumns);
-            const channelCol = channelIndex % channelGridColumns;
-            
-            if (channelCol === 0) {
-                // Move to the last element of the previous row or stay put
-                return -1;
-            }
-            return -1;
-        }
-
-        function getRightIndex() {
-            const numCategories = categoriesContainer.children.length;
-            if (currentFocusIndex < numCategories - 1) {
-                return 1; // Right movement in sidebar
-            }
-            
-            const channelIndex = currentFocusIndex - numCategories;
-            const channelCol = channelIndex % channelGridColumns;
-            
-            if (channelCol === channelGridColumns - 1) {
-                // Cannot move right from last column
-                return 0; 
-            }
-            if (currentFocusIndex < focusableElements.length - 1) {
-                return 1;
-            }
-            return 0; // No more elements to the right
-        }
-
-        // Move the focus to a new element
-        function moveFocus(delta) {
-            let newIndex = currentFocusIndex + delta;
-            if (newIndex < 0) {
-                newIndex = 0; // Wrap around to the start
-            } else if (newIndex >= focusableElements.length) {
-                newIndex = focusableElements.length - 1; // Wrap around to the end
-            }
-
-            if (focusableElements[newIndex]) {
-                focusableElements[newIndex].focus();
-                currentFocusIndex = newIndex;
-            }
-        }
-
-        // Update the list of focusable elements
-        function updateFocusableElements() {
-            const categoryItems = Array.from(document.querySelectorAll('.category-item'));
-            const channelCards = Array.from(document.querySelectorAll('.channel-card'));
-            focusableElements = [...categoryItems, ...channelCards];
-            
-            // Set initial focus
-            if (focusableElements.length > 0) {
-                focusableElements[currentFocusIndex].focus();
-            }
-        }
-
-        // Show a custom message box
-        function showMessage(message) {
-            messageBoxContent.textContent = message;
-            messageBox.style.display = 'block';
-        }
-
-        // Hide the custom message box
-        function hideMessage() {
-            messageBox.style.display = 'none';
-        }
-
-        // Select category
-        function selectCategory(item, category) {
-            document.querySelectorAll('.category-item').forEach(cat => cat.classList.remove('active'));
-            item.classList.add('active');
-            
-            const categoryNames = {
-                all: 'All Channels',
-                news: 'News Channels',
-                music: 'Music Channels', 
-                general: 'General Entertainment',
-                sports: 'Sports Channels',
-                religious: 'Religious Programs'
-            };
-            
-            contentTitle.textContent = categoryNames[category] || 'All Channels';
-            renderChannels(category);
-        }
-
-        // Render channels based on category
-        function renderChannels(category) {
-            const filteredChannels = category === 'all' 
-                ? channels 
-                : channels.filter(channel => channel.category === category);
-
-            channelsGrid.innerHTML = '';
-
-            if (filteredChannels.length === 0) {
-                const noChannelsMessage = document.createElement('div');
-                noChannelsMessage.className = 'text-center text-gray-400 p-8';
-                noChannelsMessage.textContent = 'No channels found in this category.';
-                channelsGrid.appendChild(noChannelsMessage);
-            } else {
-                filteredChannels.forEach(channel => {
-                    const channelCard = document.createElement('div');
-                    channelCard.className = 'channel-card';
-                    channelCard.dataset.id = channel.id;
-                    channelCard.dataset.stream = channel.stream;
-                    channelCard.dataset.name = channel.name;
-                    channelCard.dataset.category = channel.category;
-                    channelCard.tabIndex = 0; // Make channel cards focusable
-
-                    // Updated onerror to show TlouTV text
-                    channelCard.innerHTML = `
-                        <div class="channel-status"></div>
-                        <img src="${channel.logo}" alt="${channel.name} Logo" class="channel-logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/555/fff?text=TlouTV';">
-                        <div class="channel-name">${channel.name}</div>
-                        <div class="channel-description">${channel.description}</div>
-                    `;
-
-                    channelsGrid.appendChild(channelCard);
-                });
-            }
-            updateFocusableElements();
-        }
-
-        // Play channel in fullscreen
-        function playChannel(channel) {
-            currentChannelName.textContent = channel.name;
-            fullscreenPlayer.style.display = 'flex';
-            showLoading();
-            
-            // Set focus to the close button when player opens
-            closeButton.focus();
-
-            if (Hls.isSupported()) {
-                if (hls) {
-                    hls.destroy();
-                }
-                hls = new Hls();
-                hls.loadSource(channel.stream);
-                hls.attachMedia(videoPlayer);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    videoPlayer.play().catch(e => {
-                        console.error("Autoplay was prevented:", e);
-                        showMessage("Autoplay was prevented by the browser. Please tap to play the video.");
-                        hideLoading();
-                    });
-                });
-            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                videoPlayer.src = channel.stream;
-                videoPlayer.play().catch(e => {
-                    console.error("Autoplay was prevented:", e);
-                    showMessage("Autoplay was prevented by the browser. Please tap to play the video.");
-                    hideLoading();
-                });
-            }
-        }
-
-        // Close fullscreen player
-        function closeFullscreen() {
-            fullscreenPlayer.style.display = 'none';
-            videoPlayer.pause();
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
-            // Return focus to the element that was last selected
-            if (focusableElements[currentFocusIndex]) {
-                focusableElements[currentFocusIndex].focus();
-            }
-        }
-
-        // Show/hide loading spinner
-        function showLoading() {
-            loadingSpinner.style.display = 'block';
-        }
-
-        function hideLoading() {
-            loadingSpinner.style.display = 'none';
-        }
-
-        // Handle video errors
-        function handleVideoError() {
-            hideLoading();
-            showMessage('Error loading video stream. Please try another channel.');
-        }
-
-        // Show player header on mouse move
-        function showPlayerHeader() {
-            playerHeader.style.opacity = '1';
-            clearTimeout(headerTimeout);
-            headerTimeout = setTimeout(() => {
-                playerHeader.style.opacity = '0';
-            }, 3000);
-        }
-
-        // Hide player header
-        function hidePlayerHeader() {
-            clearTimeout(headerTimeout);
-            headerTimeout = setTimeout(() => {
-                playerHeader.style.opacity = '0';
-            }, 1000);
-        }
-
-        // Initialize the application
-        init();
-    </script>
+    // Auto-focus first card when entering channels
+    const obs = new MutationObserver(() => {
+      if(!document.getElementById('view-channels').classList.contains('hide')) focusFirstCard();
+    });
+    obs.observe(document.getElementById('view-channels'), { attributes:true });
+  </script>
 </body>
 </html>
-
