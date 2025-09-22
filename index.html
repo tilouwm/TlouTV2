@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TlouTV — External Player</title>
+  <title>TlouTV — TV Remote Friendly</title>
   <meta name="theme-color" content="#0ea5e9" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect width='100%25' height='100%25' rx='28' fill='%231a2233'/%3E%3Cpath d='M44 32l52 32-52 32z' fill='%2306b6d4'/%3E%3C/svg%3E">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -34,7 +34,12 @@
     .hide { display:none !important }
     .tab { opacity:.85 } .tab-active { opacity:1; background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.18)}
     .ring-focus:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(34,211,238,.45) }
-    .focused-card { outline:3px solid rgba(34,211,238,.7); outline-offset:2px; border-color: rgba(34,211,238,.7) !important; }
+    /* TV focus rings */
+    .focused-card, [data-nav].focused, [data-header].focused {
+      outline:3px solid rgba(34,211,238,.9);
+      outline-offset:2px;
+      border-color: rgba(34,211,238,.6) !important;
+    }
     .btn { transition: all .2s ease } .btn:hover { transform: translateY(-1px) }
   </style>
 </head>
@@ -42,7 +47,7 @@
   <!-- Top Bar -->
   <header class="sticky top-0 z-40 glass">
     <div class="mx-auto max-w-6xl px-4 py-3 flex items-center gap-3">
-      <a href="#home" onclick="navigate('home')" class="flex items-center gap-2">
+      <a href="#home" onclick="navigate('home')" class="flex items-center gap-2" aria-label="Home">
         <div class="w-9 h-9 rounded-2xl bg-black/20 grid place-items-center">
           <svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z" fill="#06b6d4"/></svg>
         </div>
@@ -52,9 +57,14 @@
         </div>
       </a>
       <div class="ml-auto flex items-center gap-2">
-        <input id="quick-search" placeholder="Search…" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-3 py-2 w-48 md:w-64"
+        <input id="quick-search" data-header tabindex="0" placeholder="Search…" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-3 py-2 w-44 md:w-64"
                onkeydown="if(event.key==='Enter'){navigate('channels'); document.getElementById('channels-q').value=this.value; renderChannels(); focusFirstCard();}" />
-        <select id="lang" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-sm" onchange="setLang(this.value)">
+        <select id="player-pref" data-header tabindex="0" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-sm" onchange="setPlayerPref(this.value)">
+          <option value="native">Player: Native</option>
+          <option value="vlc">Player: VLC</option>
+          <option value="mpv">Player: MPV</option>
+        </select>
+        <select id="lang" data-header tabindex="0" class="ring-focus bg-white/5 border border-white/10 rounded-xl px-2 py-2 text-sm" onchange="setLang?.(this.value)">
           <option value="ht">Kreyòl</option><option value="fr">Français</option><option value="en">English</option>
         </select>
       </div>
@@ -67,8 +77,9 @@
     <section id="view-home" class="space-y-6">
       <div class="flex items-center justify-between">
         <h2 class="font-heading text-2xl">Chèn Popilè</h2>
-        <button class="btn ring-focus px-3 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm"
-                onclick="navigate('channels')">Browse all</button>
+        <button id="home-browse" data-header tabindex="0"
+          class="btn ring-focus px-3 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm"
+          onclick="navigate('channels'); focusFirstCard()">Browse all</button>
       </div>
       <div id="home-trending" class="grid-ch"></div>
 
@@ -94,31 +105,31 @@
   </main>
 
   <!-- Bottom Tabs (with categories) -->
-  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[98%] md:w-auto">
-    <div class="glass rounded-2xl px-2 py-2 grid grid-cols-4 md:grid-cols-8 gap-2">
-      <button id="tab-home" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[98%] md:w-auto pointer-events-auto">
+    <div id="bottom-bar" class="glass rounded-2xl px-2 py-2 grid grid-cols-4 md:grid-cols-8 gap-2">
+      <button id="tab-home" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory(null); navigate('home')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5l9-7 9 7V20a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2v-9.5z" stroke="#22d3ee" stroke-width="2"/></svg>
         <span class="text-[11px]">Home</span>
       </button>
 
-      <button id="tab-all" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-all" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory(null); navigate('channels'); focusFirstCard()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="3" stroke="#22d3ee" stroke-width="2"/><path d="M8 20h8" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="text-[11px]">All</span>
       </button>
 
-      <button id="tab-news" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-news" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory('news'); navigate('channels'); focusFirstCard()">📰<span class="text-[11px]">News</span></button>
-      <button id="tab-general" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-general" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory('general'); navigate('channels'); focusFirstCard()">📺<span class="text-[11px]">General</span></button>
-      <button id="tab-music" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-music" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory('music'); navigate('channels'); focusFirstCard()">🎵<span class="text-[11px]">Music</span></button>
-      <button id="tab-religious" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-religious" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory('religious'); navigate('channels'); focusFirstCard()">✝️<span class="text-[11px]">Religious</span></button>
-      <button id="tab-sports" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-sports" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="setCategory('sports'); navigate('channels'); focusFirstCard()">🏟️<span class="text-[11px]">Sports</span></button>
-      <button id="tab-favorites" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
+      <button id="tab-favorites" data-nav tabindex="0" class="tab ring-focus flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl"
               onclick="navigate('favorites')">❤️<span class="text-[11px]">Favorites</span></button>
     </div>
   </nav>
@@ -173,6 +184,11 @@
     let CURRENT_CATEGORY = null; // null=All
     function setCategory(cat){ CURRENT_CATEGORY = cat; markCategoryActive(); renderChannels(); }
 
+    // player pref
+    function getPlayerPref(){ return localStorage.getItem(`${NS}:player`) || 'native'; }
+    function setPlayerPref(v){ localStorage.setItem(`${NS}:player`, v); }
+    document.addEventListener('DOMContentLoaded', () => { const sel = document.getElementById('player-pref'); if(sel) sel.value = getPlayerPref(); });
+
     function markCategoryActive(){
       const ids = ['all','news','general','music','religious','sports','home','favorites'];
       ids.forEach(x=>document.getElementById('tab-'+x)?.classList.remove('tab-active'));
@@ -188,10 +204,9 @@
     function pushHistory(item){ const arr = getHistory(); const next = [item, ...arr.filter(x=>x.channelId!==item.channelId)].slice(0,100); localStorage.setItem(`${NS}:history`, JSON.stringify(next)); }
   </script>
 
-  <!-- UI + Rendering + D-Pad focus -->
+  <!-- UI + Rendering + Remote Focus / Deep Links -->
   <script>
     const VIEWS = ['home','channels','favorites'];
-
     function navigate(view){
       VIEWS.forEach(v => document.getElementById(`view-${v}`).classList.add('hide'));
       document.getElementById(`view-${view}`).classList.remove('hide');
@@ -202,18 +217,18 @@
       if(view==='channels') renderChannels();
       if(view==='favorites') renderFavorites();
       location.hash = view;
+      refreshNavButtons(); // ensure nav focus list
     }
 
     function cardHTML(ch, idx){
       const fav = isFavorite(ch.id);
       return `
-        <div id="card-${idx}" data-id="${ch.id}" data-idx="${idx}" tabindex="0"
+        <div id="card-${idx}" data-card tabindex="0"
              class="group card rounded-2xl p-3 flex gap-3 items-center hover:translate-y-[-1px] transition relative">
           <button title="${fav?'Remove favorite':'Add favorite'}"
                   onclick="event.stopPropagation(); event.preventDefault(); toggleFavorite('${ch.id}'); this.innerText=this.innerText==='❤️'?'🤍':'❤️';"
                   class="absolute top-2 right-2 text-lg">${fav?'❤️':'🤍'}</button>
-          <a href="${ch.url}" target="_self" onclick="onOpenExternal('${ch.id}')"
-             class="flex gap-3 items-center w-full">
+          <a href="#" onclick="onOpenExternal('${ch.id}'); return false;" class="flex gap-3 items-center w-full">
             <div class="w-14 h-14 rounded-xl bg-black/40 grid place-items-center overflow-hidden">
               ${ch.logo?`<img src="${ch.logo}" class="w-full h-full object-contain">`:'<span>📺</span>'}
             </div>
@@ -228,14 +243,38 @@
     }
 
     function onOpenExternal(id){
+      const ch = CHANNELS.find(c=>c.id===id); if(!ch) return;
       pushHistory({ channelId:id, watchedAt:new Date().toISOString() });
-      // For Android VLC users, uncomment to try VLC first:
-      // const ch = CHANNELS.find(c=>c.id===id); location.href = `vlc://${encodeURI(ch.url)}`;
+      const pref = getPlayerPref();
+      if(pref==='vlc') { openWithApp(ch.url, 'vlc'); return; }
+      if(pref==='mpv') { openWithApp(ch.url, 'mpv'); return; }
+      location.href = ch.url; // native
+    }
+
+    // Deep-link opener (scheme → intent → fallback)
+    function openWithApp(url, app){
+      const isHttps = /^https:/.test(url);
+      const enc = encodeURI(url);
+      const scheme = app==='vlc' ? `vlc://${enc}` : `mpv://${enc}`;
+      const hostless = url.replace(/^https?:\/\//,'');
+      const pkg = app==='vlc' ? 'org.videolan.vlc' : 'is.xyz.mpv';
+      const intent = `intent://${hostless}#Intent;package=${pkg};scheme=${isHttps?'https':'http'};end`;
+      const start = Date.now();
+      const failSafe = setTimeout(() => {
+        if (Date.now() - start < 1200) {
+          location.href = intent;
+          setTimeout(() => { location.href = url; }, 700);
+        }
+      }, 700);
+      location.href = scheme;
+      const onVis = () => { if(document.hidden){ clearTimeout(failSafe); } document.removeEventListener('visibilitychange', onVis); };
+      document.addEventListener('visibilitychange', onVis);
     }
 
     function renderHome(){
       const trending = document.getElementById('home-trending');
       trending.innerHTML = CHANNELS.slice(0,12).map((c,i)=>cardHTML(c,i)).join('');
+      lastRendered = CHANNELS.slice(0,12); // for focus calc
       const recentWrap = document.getElementById('home-recent');
       const hist = getHistory();
       if(hist.length===0){ recentWrap.innerHTML = `<div class="card rounded-2xl p-4 text-white/60">No recent channels yet.</div>`; return; }
@@ -258,54 +297,117 @@
     function renderFavorites(){
       const ids = getFavorites();
       const list = document.getElementById('favorites-list');
-      if(ids.length===0){ list.innerHTML = `<div class="card rounded-2xl p-4 text-white/70">No favorites yet.</div>`; return; }
+      if(ids.length===0){ list.innerHTML = `<div class="card rounded-2xl p-4 text-white/70">No favorites yet.</div>`; lastRendered=[]; return; }
       const items = ids.map(id => CHANNELS.find(c=>c.id===id)).filter(Boolean);
       lastRendered = items;
       list.innerHTML = items.map((c,i)=>cardHTML(c,i)).join('');
     }
     function renderFavoritesIfOpen(){ if(!document.getElementById('view-favorites').classList.contains('hide')) renderFavorites(); }
 
-    // D-Pad navigation across grids
+    // ===== Remote focus manager =====
     let focusedIndex = 0;
+    let navIndex = 0;
+    let headerIndex = 0;
+
+    function gridCols(){ const w = window.innerWidth; return w>=1024?3:(w>=640?2:1); }
+    function gridTotal(){ return lastRendered.length; }
+
     function focusCard(idx){
-      const prev = document.querySelector('.focused-card');
-      if(prev) prev.classList.remove('focused-card');
+      [...document.querySelectorAll('[data-card].focused-card')].forEach(el=>el.classList.remove('focused-card'));
       const el = document.getElementById('card-'+idx);
       if(el){ el.classList.add('focused-card'); el.focus({preventScroll:false}); focusedIndex = idx; }
     }
     function focusFirstCard(){ focusedIndex = 0; focusCard(0); }
-    function gridCols(){ const w = window.innerWidth; return w>=1024?3:(w>=640?2:1); }
 
-    function handleGridKey(e){
-      const inChannels = !document.getElementById('view-channels').classList.contains('hide');
-      const inFavs = !document.getElementById('view-favorites').classList.contains('hide');
-      const inHome = !document.getElementById('view-home').classList.contains('hide');
-      if(!(inChannels||inFavs||inHome)) return;
-
-      const total = lastRendered.length || document.querySelectorAll('#home-trending > div, #home-recent > div').length;
-      if(total===0) return;
-      const cols = gridCols();
-
-      if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+1)); }
-      if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, focusedIndex-1)); }
-      if(['ArrowDown','Down'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+cols)); }
-      if(['ArrowUp','Up'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, focusedIndex-cols)); }
-      if(e.key==='Enter'){
-        e.preventDefault();
-        const el = document.getElementById('card-'+focusedIndex)?.querySelector('a[href]');
-        if(el){ el.click(); }
+    function headerElems(){
+      const arr = [];
+      // Put "Browse all" first when on Home
+      if(!document.getElementById('view-home').classList.contains('hide')){
+        const b = document.getElementById('home-browse'); if(b) arr.push(b);
       }
-      if(e.key==='Backspace'){ e.preventDefault(); history.back(); }
+      arr.push(document.getElementById('quick-search'), document.getElementById('player-pref'), document.getElementById('lang'));
+      return arr.filter(Boolean);
     }
-    document.addEventListener('keydown', handleGridKey, false);
+    function focusHeader(i){
+      const els = headerElems(); if(!els.length) return;
+      document.querySelectorAll('[data-header].focused').forEach(el=>el.classList.remove('focused'));
+      const t = els[Math.max(0, Math.min(els.length-1, i))];
+      if(t){ t.classList.add('focused'); t.focus(); headerIndex = els.indexOf(t); }
+    }
+
+    let navButtons = [];
+    function refreshNavButtons(){ navButtons = Array.from(document.querySelectorAll('[data-nav]')); }
+    function focusNav(i){
+      if(!navButtons.length) refreshNavButtons();
+      document.querySelectorAll('[data-nav].focused').forEach(el=>el.classList.remove('focused'));
+      const t = navButtons[Math.max(0, Math.min(navButtons.length-1, i))];
+      if(t){ t.classList.add('focused'); t.focus(); navIndex = navButtons.indexOf(t); }
+    }
+
+    // Key handlers (scoped by current focus)
+    function onKeyDown(e){
+      const ae = document.activeElement;
+      const onCard = ae && ae.hasAttribute('data-card');
+      const onNav  = ae && ae.hasAttribute('data-nav');
+      const onHdr  = ae && ae.hasAttribute('data-header');
+
+      if(onCard){
+        const total = gridTotal(); const cols = gridCols();
+        if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusCard(Math.min(total-1, focusedIndex+1)); return; }
+        if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, focusedIndex-1)); return; }
+        if(['ArrowDown','Down'].includes(e.key)){
+          e.preventDefault();
+          // if on last row, jump to bottom nav
+          if(focusedIndex >= Math.max(0, total - cols)){ focusNav(0); return; }
+          focusCard(Math.min(total-1, focusedIndex+cols)); return;
+        }
+        if(['ArrowUp','Up'].includes(e.key)){
+          e.preventDefault();
+          // if on first row, jump to header
+          if(focusedIndex < cols){ focusHeader(0); return; }
+          focusCard(Math.max(0, focusedIndex-cols)); return;
+        }
+        if(e.key==='Enter'){ e.preventDefault(); ae.querySelector('a')?.click(); return; }
+        if(e.key==='Backspace'){ e.preventDefault(); history.back(); return; }
+      }
+
+      if(onNav){
+        if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusNav(navIndex+1); return; }
+        if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); focusNav(navIndex-1); return; }
+        if(['ArrowUp','Up'].includes(e.key)){ e.preventDefault(); focusCard(Math.max(0, gridTotal() - gridCols())); return; }
+        if(['ArrowDown','Down'].includes(e.key)){ e.preventDefault(); return; }
+        if(e.key==='Enter'){ e.preventDefault(); navButtons[navIndex]?.click(); return; }
+      }
+
+      if(onHdr){
+        const els = headerElems();
+        if(['ArrowRight','Right'].includes(e.key)){ e.preventDefault(); focusHeader(headerIndex+1); return; }
+        if(['ArrowLeft','Left'].includes(e.key)){ e.preventDefault(); focusHeader(headerIndex-1); return; }
+        if(['ArrowDown','Down'].includes(e.key)){ e.preventDefault(); focusFirstCard(); return; }
+        if(e.key==='Enter'){ /* let native action happen */ return; }
+      }
+
+      // If nothing focused (rare on TV), force focus to a sensible place
+      if(['ArrowDown','Down','ArrowUp','Up','ArrowLeft','Left','ArrowRight','Right'].includes(e.key)){
+        if(!document.querySelector('[data-card].focused-card') &&
+           !document.querySelector('[data-nav].focused') &&
+           !document.querySelector('[data-header].focused')){
+          // Try grid first, then nav
+          const grid = document.querySelector('[data-card]');
+          if(grid){ focusFirstCard(); }
+          else { focusNav(0); }
+        }
+      }
+    }
+    document.addEventListener('keydown', onKeyDown, false);
   </script>
 
-  <!-- PWA SW (for installability; no caching of streams) -->
+  <!-- PWA SW (installability only) -->
   <script>
     (function registerSW(){
       if(!('serviceWorker' in navigator)) return;
       const swCode = `
-        const CACHE='tloutv-onefile-ext-v1';
+        const CACHE='tloutv-tv-remote-v1';
         const CORE=['./'];
         self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE))); self.skipWaiting();});
         self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
@@ -316,16 +418,18 @@
       navigator.serviceWorker.register(url);
     })();
 
-    // Router
+    // Router + initial focus
     function handleHash(){ const h = (location.hash||'#home').slice(1); if(!['home','channels','favorites'].includes(h)) return navigate('home'); navigate(h); }
     window.addEventListener('hashchange', handleHash);
     navigate('home'); handleHash();
 
-    // Auto-focus first card when entering channels
+    // Auto-focus first card when entering channel/favorites
     const obs = new MutationObserver(() => {
       if(!document.getElementById('view-channels').classList.contains('hide')) focusFirstCard();
+      refreshNavButtons();
     });
     obs.observe(document.getElementById('view-channels'), { attributes:true });
   </script>
 </body>
 </html>
+
