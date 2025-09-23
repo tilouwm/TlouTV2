@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TlouTV — Fire TV Smooth + Fullscreen (Double-Back)</title>
+<title>TlouTV — Live Haitian TV</title>
 <meta name="theme-color" content="#0ea5e9" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
 <style>
@@ -78,7 +78,7 @@
   .card .meta{ font-size:12px; color:var(--muted) }
   .focused-card{ outline:var(--ring); border-color:rgba(34,211,238,.55) }
 
-  /* Player overlay */
+  /* Player overlay (for in-app channels; not used for VLC-only) */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
   .overlay.show{ display:block }
   .overlay.controls-hidden .close-btn,
@@ -101,25 +101,14 @@
     transform: scale(1.05);
   }
 
-  /* Error tray in overlay */
   .error-tray{
     position:absolute; left:16px; bottom:16px; z-index:60;
-    display:flex; gap:10px; flex-wrap:wrap;
-    background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px;
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px;
   }
-  .e-btn{
-    border-radius:10px; border:1px solid rgba(255,255,255,.25); padding:8px 10px; background:rgba(255,255,255,.08); color:#fff; cursor:pointer;
-  }
+  .e-btn{ border-radius:10px; border:1px solid rgba(255,255,255,.25); padding:8px 10px; background:rgba(255,255,255,.08); color:#fff; cursor:pointer; }
   .e-btn:focus-visible{ outline:var(--ring); }
-
-  /* Back toast */
-  .back-toast{
-    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-    z-index:70; padding:10px 14px; border-radius:12px;
-    background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.18);
-    color:#fff; font-weight:700; font-size:13px; letter-spacing:.2px;
-    opacity:0; pointer-events:none; transition:opacity .18s ease;
-  }
+  .back-toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:70; padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.18); color:#fff; font-weight:700; font-size:13px; opacity:0; pointer-events:none; transition:opacity .18s; }
   .back-toast.show{ opacity:1; }
 </style>
 </head>
@@ -160,7 +149,7 @@
   </section>
 </div>
 
-<!-- Player Overlay -->
+<!-- Player Overlay (for in-app playback only) -->
 <div class="overlay" id="overlay" aria-hidden="true">
   <div class="shade"></div>
   <div class="player-wrap">
@@ -168,7 +157,7 @@
   </div>
   <button class="close-btn" id="closeBtn" title="Close (Back ×2 to exit)">✕ Close</button>
   <div class="error-tray" id="errorTray" style="display:none">
-    <span id="errMsg" style="opacity:.9">Playback error.</span>
+    <span id="errMsg" style="opacity:.92">Playback error.</span>
     <button class="e-btn" id="btnRetry">Retry</button>
     <button class="e-btn" id="btnVLC">Open in VLC</button>
     <button class="e-btn" id="btnNative">Open natively</button>
@@ -178,59 +167,71 @@
 <!-- Back toast -->
 <div class="back-toast" id="backToast">Press Back again to exit</div>
 
-<!-- Hls.js -->
+<!-- Players -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
-<script>
-/* ---------- Data ---------- */
-const normalizeStream = u => (typeof u==='string' ? u.replace('.m3d8','.m3u8') : u);
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 
-/* Full channel list + Radio Tele Caraibes */
+<script>
+/* ---------- Helpers ---------- */
+const normalizeStream = u => (typeof u==='string' ? u.replace('.m3d8','.m3u8') : u);
+const isHls = url => /\.m3u8(\?|$)/i.test(url);
+const isTs  = url => /\.ts(\?|$)/i.test(url) || /(?:^|[?&])extension=ts\b/i.test(url);
+const isHttp = url => /^http:\/\//i.test(url);
+
+/* ---------- Channels (full list) ---------- */
+/* Radio Tele Caraibes is vlcOnly:true => ALWAYS opens VLC (no in-app player) */
 const CHANNELS = [
+  {
+    "id":"rtc",
+    "name":"Radio Tele Caraibes",
+    "logo":"https://play-lh.googleusercontent.com/0zXSmxhrP8BV9q7kHWNRhKf0ycn1X4IMiHe_x2GMo95hPS81w4gEFodAt_oMwhqqfOrN",
+    "url":"https://customer-gllhkkbamkskdl1p.cloudflarestream.com/eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIn0.eyJzdWIiOiJjNjU0N2MwMjg5NWI2MGEwZmM5NDBhMjg5MTBmZDg4NyIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIiwiZXhwIjoxNzU4NjkyNjc4LCJhY2Nlc3NSdWxlcyI6W3sidHlwZSI6ImlwLmdlb2lwLmNvdW50cnkiLCJhY3Rpb24iOiJibG9jayIsImNvdW50cnkiOlsiUlUiLCJCWSJdfV19.pzxKHJAjKs3dof6m4pU_J9SKkGT9XK0NmjYFump8R9CmRnOLzwHBHbmzlR8FEEj_nCUIC8ZjhoB87Yusz3MVnX2vPbqdky-cYIXvIfseWyvJfcuW6Jmrm8rIHfR8kFk5Ilyv5mf7SlMnUn-rNY4G3BBLmnz3N2Pvl3dp-TcSLSroD_nFRaWR9x5BC0ne23zujbPOaUneaw9tnhFRBeU-1KbQo3Qsibj-hl83LhxeltDAzslfqrZ7h4qWvTpr0RaAboM6ioiYEy6V2ut3cOdf-SQuGUYAp72xtlCM41bXHPBigzBXxHREUhxOCfTerz-60x-nk01H3mZt-46giHqPkg/manifest/stream_tc19365c359fa7ec7f203e7f8686a3b1b_r1214050470.m3u8?llhlsHBs=0.5",
+    "genre":"news",
+    "description":"News & talk from RTC",
+    "vlcOnly": true
+  },
+
   {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news","description":"Stay informed with the latest news from Tele Pacific"},
   {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News"},
-
-  /* NEW: Radio Tele Caraibes (signed Cloudflare Stream URL) */
-  {"id":"rtc","name":"Radio Tele Caraibes","logo":"https://play-lh.googleusercontent.com/0zXSmxhrP8BV9q7kHWNRhKf0ycn1X4IMiHe_x2GMo95hPS81w4gEFodAt_oMwhqqfOrN","url":"https://customer-gllhkkbamkskdl1p.cloudflarestream.com/eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIn0.eyJzdWIiOiJiZTgzNDM5MWViYmM1MzE2NmNmMzQ1Y2QwN2QwNDg3MiIsImtpZCI6ImI3YmIwODNmMDhkNmQ5NWExZjIzZWE3ZWRhOWY4NTZhIiwiZXhwIjoxNzU4NTUwNTAyLCJhY2Nlc3NSdWxlcyI6W3sidHlwZSI6ImlwLmdlb2lwLmNvdW50cnkiLCJhY3Rpb24iOiJibG9jayIsImNvdW50cnkiOlsiUlUiLCJCWSJdfV19.U1lorQj2Thddfay3BWowLMFihlfYqVndJNUzPlMrX6OHWrTag5Ifj44NVTnVf_y7tnAVO8PLM_AT1IXn-gTdIVGrQPqKKIXl1IhQZ9mTNNGuDhwv0cnKtOq-i6NDANdbte8T61hLbOo1dVtDr90RI8FKMQRKPTVDMKU1PjQ5heBq0kq5uSMec_5YAr9ZcqB-SQeIrumlQYvF62Sy2UhKgDZzSOJcc_KPQQbOWwPZTUllX-BkBowR_s-lGuUeByUSOaVgYuK9nbRcIBSk6EWDmkPA3EgKDJDknfNNXQGZ6y_BmxJo-551IbjiOrp0txzaybL9IP4fR1heRiYCBVYaiw/manifest/stream_t7425cef6a4f31863ae3bf51fb012436c_r1210567689.m3u8?llhlsHBs=0.5","genre":"news","description":"News & talk from Radio Télé Caraïbes"},
-
   {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General entertainment from Telemix"},
   {"id":"channel6","name":"SNL","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL"},
   {"id":"channel7","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general","description":"Watch a variety of programs from Kajou TV"},
   {"id":"channel8","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b3500000.m3u8"),"genre":"general","description":"Tune in for a mix of shows from RTH 2000"},
   {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8"),"genre":"general","description":"Another great channel from the RTH 2000 network"},
   {"id":"channel10","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious","description":"Religious programming and broadcasts"},
-  {"id":"channel11","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/4DIASPOTV/4DIASPOTV/chunklist_w507710567.m3u8"),"genre":"general","description":"Variety for the Haitian diaspora"},
-  {"id":"channel12","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Diverse content"},
+  {"id":"channel11","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/4DIASPOTV/4DIASPOTV/chunklist_w507710567.m3u8"),"genre":"general","description":"Variety of entertainment for the Haitian diaspora"},
+  {"id":"channel12","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Your own TV channel with diverse content"},
   {"id":"channel13","name":"HMI Promz News","logo":"https://i.imgur.com/gwPaw3v.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8"),"genre":"music","description":"Music news and promotions"},
   {"id":"channel14","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":normalizeStream("https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8"),"genre":"religious","description":"Religious programming from Boston"},
-  {"id":"channel15","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8"),"genre":"general","description":"General entertainment"},
+  {"id":"channel15","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3d8"),"genre":"general","description":"A general entertainment channel with a variety of content"},
   {"id":"channel16","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":normalizeStream("https://video1.getstreamhosting.com/1936/8212/8212/playlist.m3u8"),"genre":"general","description":"Live stream from BPX"},
-  {"id":"channel17","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":normalizeStream("https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8"),"genre":"general","description":"Diverse content"},
-  {"id":"channel18","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":normalizeStream("https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8"),"genre":"religious","description":"Religious broadcasts"},
-  {"id":"channel19","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8"),"genre":"religious","description":"Praise & worship"},
-  {"id":"channel20","name":"Adduction Media","logo":"https://dslv9ilpbe7p1.cloudfront.net/nYhAQY37idxm1hlkmP1qPQ_store_logo_image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/rtvboost/rtvboost/chunklist_w115996771.m3u8"),"genre":"general","description":"General entertainment"},
-  {"id":"channel21","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music","description":"Music & entertainment"},
-  {"id":"channel22","name":"Bblack Caribbean","logo":"https://i1.wp.com/vjdid.com/wp-content/uploads/2017/10/logo-bblackcaribbean-contour-noir.png","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music","description":"Caribbean music"},
-  {"id":"channel23","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music","description":"African music"},
-  {"id":"channel24","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":normalizeStream("https://stream.ecable.tv/afrobeats/index.m3u8"),"genre":"music","description":"Non-stop Afrobeats"},
-  {"id":"channel25","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music","description":"Urban music & culture"},
-  {"id":"channel26","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music","description":"Latin music & culture"},
-  {"id":"channel27","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general","description":"General programming"},
-  {"id":"channel28","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music","description":"Music & entertainment"},
-  {"id":"channel29","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming"},
-  {"id":"channel30","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8"),"genre":"general","description":"Live stream"},
-  {"id":"channel31","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming"},
-  {"id":"channel35","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general","description":"Live stream"},
-  {"id":"channel32","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8"),"genre":"sports","description":"Sports & commentary"},
-  {"id":"channel33","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":normalizeStream("https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8"),"genre":"sports","description":"Sports events"},
-  {"id":"channel34","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious","description":"Religious broadcasts"},
-  {"id":"channel36","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8"),"genre":"music","description":"Music hits"},
-  {"id":"channel37","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious","description":"Religious programming"},
-  {"id":"channel38","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music","description":"Music & shows"},
-  {"id":"channel39","name":"Dream In TV","logo":"https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png","url":normalizeStream("https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8"),"genre":"music","description":"Dream in TV"}
+  {"id":"channel17","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":normalizeStream("https://lakay.online/public/nagotv/tracks-v1/index.fmp4.m3u8"),"genre":"general","description":"A general channel with diverse content"},
+  {"id":"channel18","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":normalizeStream("https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8"),"genre":"religious","description":"Religious broadcasts and programming from Tele 4VEH"},
+  {"id":"channel19","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8"),"genre":"religious","description":"A channel dedicated to praise and worship"},
+  {"id":"channel20","name":"Adduction Media","logo":"https://dslv9ilpbe7p1.cloudfront.net/nYhAQY37idxm1hlkmP1qPQ_store_logo_image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/rtvboost/rtvboost/chunklist_w115996771.m3u8"),"genre":"general","description":"General entertainment from Adduction Media"},
+  {"id":"channel21","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music","description":"Music and entertainment from Madras FM TV"},
+  {"id":"channel22","name":"Bblack Caribbean","logo":"https://i1.wp.com/vjdid.com/wp-content/uploads/2017/10/logo-bblack-caribbean-contour-noir.png","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music","description":"Black music from the Caribbean"},
+  {"id":"channel23","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music","description":"Black music from Africa"},
+  {"id":"channel24","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":normalizeStream("https://stream.ecable.tv/afrobeats/index.m3u8"),"genre":"music","description":"Non-stop Afrobeats music"},
+  {"id":"channel25","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music","description":"Urban music and culture from Trace Urban"},
+  {"id":"channel26","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music","description":"Latin music and culture from Trace Latina"},
+  {"id":"channel27","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general","description":"General programming from DBM"},
+  {"id":"channel28","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music","description":"Music and entertainment from TMA"},
+  {"id":"channel29","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from Tele Pam"},
+  {"id":"channel30","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8"),"genre":"general","description":"Live stream from Tele Eclair"},
+  {"id":"channel31","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from TVA 30"},
+  {"id":"channel35","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general","description":"Live stream from PVS"},
+  {"id":"channel32","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_138/205836-2391948-1/chunklist.m3u8"),"genre":"sports","description":"Sports and live commentary from Totalmix Radio"},
+  {"id":"channel33","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":normalizeStream("https://haititivi.com/rezo/boul4/tracks-v1/index.fmp4.m3u8"),"genre":"sports","description":"Sports programming and events"},
+  {"id":"channel34","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious","description":"Religious broadcasts from Tele Miracle"},
+  {"id":"channel36","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8"),"genre":"music","description":"Music hits and entertainment from Radio Tele Hit"},
+  {"id":"channel37","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious","description":"Religious programming from Radio Tele Sentinel"},
+  {"id":"channel38","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music","description":"Music and shows from VA Studio"},
+  {"id":"channel39","name":"Dream In TV","logo":"https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png","url":normalizeStream("https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8"),"genre":"music","description":"Music channel to help you dream in TV"}
 ];
 
 /* ---------- State ---------- */
-const NS='tloutv:tv-smooth';
+const NS='tloutv:stable';
 let CURRENT_CAT='all';
 let lastFocus = null;
 
@@ -277,7 +278,7 @@ function render(){
   if(first && !document.querySelector('.focused-card') && document.activeElement.tagName!=='INPUT'){ focusCard(0); }
 }
 
-/* ---------- Favorites (no full re-render for smoothness) ---------- */
+/* ---------- Favorites ---------- */
 function toggleFavorite(id, btn){
   const s=new Set(favorites());
   if(s.has(id)){ s.delete(id); if(btn) btn.textContent='🤍'; }
@@ -300,11 +301,10 @@ function focusMenu(el){
   el.classList.add('focused-menu'); el.focus();
 }
 
-/* ---------- D-Pad Navigation (throttled) ---------- */
+/* ---------- D-Pad Navigation ---------- */
 let focusedIndex=0;
 let lastNavTs = 0;
-const NAV_GAP = 90; // ms between nav actions for smooth stepping
-
+const NAV_GAP = 90;
 function navAllowed(){ const now=Date.now(); if(now-lastNavTs<NAV_GAP) return false; lastNavTs=now; return true; }
 function gridCols(){ const w=window.innerWidth; return w>=1024?3:(w>=640?2:1); }
 function focusCard(idx){
@@ -315,15 +315,11 @@ function focusCard(idx){
 
 document.addEventListener('keydown', (e)=>{
   const ae=document.activeElement;
-
-  // If overlay is open, handled by overlay key handler
   if(overlay.classList.contains('show')) return;
-
   const onMenu = ae && ae.hasAttribute('data-menu');
   const onGrid = ae && ae.hasAttribute('data-card');
   const onInput = ae && ae.tagName==='INPUT';
 
-  // Grid navigation
   if(onGrid){
     if(!navAllowed()) return;
     const total = rendered.length; const cols = gridCols();
@@ -337,7 +333,6 @@ document.addEventListener('keydown', (e)=>{
     if(e.key==='Enter'){ e.preventDefault(); openPlayer(rendered[focusedIndex]); return; }
   }
 
-  // Menu navigation
   if(onMenu){
     if(!navAllowed()) return;
     const i = menuItems.indexOf(ae);
@@ -347,19 +342,17 @@ document.addEventListener('keydown', (e)=>{
     if(e.key==='Enter'){ e.preventDefault(); ae.click(); return; }
   }
 
-  // Input field
   if(onInput){
     if(e.key==='Escape'){ e.preventDefault(); gridEl.querySelector('[data-card]')?.focus(); }
     return;
   }
 
-  // Nothing focused yet: put focus on current menu item
   if(['ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','ArrowRight','Right'].includes(e.key)){
     if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); }
   }
 });
 
-/* ---------- Player (LL-HLS & fallbacks) ---------- */
+/* ---------- Player (in-app HLS + MPEG-TS) ---------- */
 const overlay = document.getElementById('overlay');
 const player = document.getElementById('player');
 const closeBtn = document.getElementById('closeBtn');
@@ -370,26 +363,17 @@ const btnVLC = document.getElementById('btnVLC');
 const btnNative = document.getElementById('btnNative');
 const backToast = document.getElementById('backToast');
 
-let hls = null, currentURL = null;
-let overlayUIVisible = true;            // whether close/error UI is visible
-let lastBackTs = 0;
-const BACK_DOUBLE_MS = 1200;            // window for double-back
+let hls = null, tsPlayer = null, currentURL = null, currentChannel = null;
 
-function showControls(){
-  overlay.classList.remove('controls-hidden');
-  overlayUIVisible = true;
-}
-function hideControls(){
-  overlay.classList.add('controls-hidden');
-  overlayUIVisible = false;
-  closeBtn.classList.remove('focused');
-}
+let overlayUIVisible = true;
+let lastBackTs = 0;
+const BACK_DOUBLE_MS = 1200;
+
+function showControls(){ overlay.classList.remove('controls-hidden'); overlayUIVisible = true; }
+function hideControls(){ overlay.classList.add('controls-hidden'); overlayUIVisible = false; closeBtn.classList.remove('focused'); }
+
 let toastT=null;
-function showBackToast(){
-  backToast.classList.add('show');
-  clearTimeout(toastT);
-  toastT = setTimeout(()=> backToast.classList.remove('show'), 1100);
-}
+function showBackToast(){ backToast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=> backToast.classList.remove('show'), 1100); }
 
 async function requestFS(el){
   try{
@@ -403,160 +387,144 @@ function exitFS(){ if(document.fullscreenElement){ document.exitFullscreen?.(); 
 
 function showOverlay(){
   overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
-  showControls(); // start with controls visible
+  showControls();
   lastFocus = document.querySelector('.focused-card') || document.activeElement;
-  // push a history entry so physical Back triggers popstate
   try { history.pushState({p:'player'}, '', '#player'); } catch(e){}
-  lastBackTs = 0;
-  player.focus();
+  lastBackTs = 0; player.focus();
+}
+function destroyPlayers(){
+  try{ if(hls){ hls.destroy(); hls=null; } }catch(e){}
+  try{ if(tsPlayer){ tsPlayer.unload(); tsPlayer.detachMediaElement(); tsPlayer.destroy(); tsPlayer=null; } }catch(e){}
+  try{ player.pause(); player.removeAttribute('src'); player.load(); }catch(e){}
 }
 function hideOverlay(){
   overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true');
-  try{ if(hls){ hls.destroy(); hls=null; } player.pause(); player.removeAttribute('src'); player.load(); }catch(e){}
-  exitFS();
-  backToast.classList.remove('show');
-  errorTray.style.display='none';
+  destroyPlayers(); exitFS();
+  backToast.classList.remove('show'); errorTray.style.display='none';
   lastFocus?.focus();
 }
 
-/* unified open */
-function openPlayer(ch){
-  showOverlay();
+function onFatal(msg){ errorTray.style.display='flex'; errMsg.textContent = msg || 'Playback error'; }
+function resetErrors(){ errorTray.style.display='none'; }
+
+/* --------- VLC launcher (for VLC-only channels) ---------- */
+function launchVLC(url){
+  // Try VLC app scheme first
+  const vlcUrl = 'vlc://' + url;
+  try { location.href = vlcUrl; } catch(e) {}
+
+  // Then Android intent fallback targeting VLC package
+  const isHttps = /^https:/.test(url);
+  const hostless = url.replace(/^https?:\/\//,'');
+  const intent = `intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
+
+  // If VLC scheme didn't steal focus quickly, try intent shortly after
+  setTimeout(()=>{
+    try { location.href = intent; } catch(e){}
+  }, 700);
+}
+
+/* ---- In-app playback helpers ---- */
+function playHls(url){
+  hls = new Hls({
+    lowLatencyMode:true, enableWorker:true,
+    liveSyncDurationCount:3, liveMaxLatencyDurationCount:10,
+    backBufferLength:60, progressive:true
+  });
+  hls.attachMedia(player);
+  hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
+  hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); });
+  hls.on(Hls.Events.ERROR, (_evt,data)=>{ if(data?.fatal){ onFatal('Playback error: ' + (data?.details || data?.type || 'HLS')); }});
+}
+function playTs(url){
+  if (!window.mpegts || !mpegts.isSupported()){
+    onFatal('Your device/browser cannot play MPEG-TS directly.');
+    return;
+  }
+  tsPlayer = mpegts.createPlayer(
+    { type: 'mpegts', isLive: true, url },
+    { enableWorker:true, liveBufferLatencyChasing:true }
+  );
+  tsPlayer.attachMediaElement(player);
+  tsPlayer.load();
+  tsPlayer.play().then(()=>requestFS(player)).catch(()=>requestFS(player));
+}
+function playURL(url){
+  resetErrors(); currentURL = url;
+  destroyPlayers(); // clean
+
+  if (location.protocol === 'https:' && isHttp(url)){
+    onFatal('This stream is HTTP on an HTTPS page (blocked by the browser). Try “Open in VLC / Open natively”.');
+    return;
+  }
+  if (isHls(url)){
+    if (window.Hls && Hls.isSupported()) playHls(url);
+    else if (player.canPlayType('application/vnd.apple.mpegurl')){
+      player.src = url;
+      player.addEventListener('loadedmetadata', async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); }, {once:true});
+    } else onFatal('HLS not supported on this device.');
+    return;
+  }
+  if (isTs(url)){ playTs(url); return; }
+  location.href = url;
+}
+
+/* Open a channel */
+async function openPlayer(ch){
+  // VLC-only channels: open VLC directly (no overlay/options)
+  if (ch.vlcOnly){
+    launchVLC(ch.url);
+    return;
+  }
+  // Otherwise, play in-app fullscreen
+  showOverlay(); currentChannel = ch;
   playURL(ch.url);
 }
 
-function onHlsFatal(data){
-  errorTray.style.display='flex';
-  errMsg.textContent = 'Playback error: ' + (data?.details || data?.type || 'unknown');
-}
-function resetErrors(){ errorTray.style.display='none'; }
-
-/* External app open */
-function openWithApp(url, app){
-  const isHttps = /^https:/.test(url);
-  const hostless = url.replace(/^https?:\/\//,'');
-  const pkg = app==='vlc' ? 'org.videolan.vlc' : 'is.xyz.mpv';
-  const intent = `intent://${hostless}#Intent;package=${pkg};scheme=${isHttps?'https':'http'};end`;
-  const scheme = app==='vlc' ? `vlc://${url}` : `mpv://${url}`;
-  const start = Date.now();
-  const t = setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; setTimeout(()=>{ location.href=url; }, 700); }}, 700);
-  location.href = scheme;
-  const vis = ()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange', vis); };
-  document.addEventListener('visibilitychange', vis);
-}
-
-/* hls.js playback */
-function playURL(url){
-  resetErrors();
-  currentURL = url;
-  if (window.Hls && Hls.isSupported()){
-    hls = new Hls({
-      lowLatencyMode:true,
-      enableWorker:true,
-      liveSyncDurationCount:3,
-      liveMaxLatencyDurationCount:10,
-      backBufferLength:60,
-      progressive:true
-    });
-    hls.attachMedia(player);
-    hls.on(Hls.Events.MEDIA_ATTACHED, ()=>{ hls.loadSource(url); });
-    hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); });
-    hls.on(Hls.Events.ERROR, (evt,data)=>{
-      if(data?.fatal){ onHlsFatal(data); }
-    });
-  } else if(player.canPlayType('application/vnd.apple.mpegurl')){
-    player.src = url;
-    player.addEventListener('loadedmetadata', async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); }, {once:true});
-  } else {
-    // last resort: open natively
-    location.href = url;
-  }
-}
-
-/* -------- Overlay controls & Back logic -------- */
-function handleBackPress(fromPopstate=false){
-  const now = Date.now();
-  if(overlayUIVisible){
-    // First Back: hide UI, keep video
-    hideControls();
-    showBackToast();
-    // If came from history back, restore a state so the next Back will exit
-    if(fromPopstate){
-      try { history.pushState({p:'player'}, '', '#player'); } catch(e){}
-    }
-    lastBackTs = now;
-  } else {
-    // Second Back within window exits; else treat as first
-    if(now - lastBackTs <= BACK_DOUBLE_MS){
-      hideOverlay();
-    } else {
-      hideControls(); // already hidden, but ensure
-      showBackToast();
-      lastBackTs = now;
-      if(fromPopstate){
-        try { history.pushState({p:'player'}, '', '#player'); } catch(e){}
-      }
-    }
-  }
-}
-
-/* Show controls when user interacts */
+/* Overlay: show controls when moving (in-app only) */
 let lastPointerTs = 0;
-function maybeShowControls(){
-  const now=Date.now();
-  if(now - lastPointerTs > 150){ showControls(); }
-  lastPointerTs = now;
-}
+function maybeShowControls(){ const now=Date.now(); if(now - lastPointerTs > 150){ showControls(); } lastPointerTs = now; }
 overlay.addEventListener('mousemove', maybeShowControls);
 overlay.addEventListener('pointermove', maybeShowControls);
 overlay.addEventListener('touchstart', maybeShowControls);
 
-/* Keys inside overlay */
+/* Double-Back logic inside overlay (in-app only) */
+function handleBackPress(fromPopstate=false){
+  const now = Date.now();
+  if(overlayUIVisible){
+    hideControls(); showBackToast();
+    if(fromPopstate){ try { history.pushState({p:'player'}, '', '#player'); } catch(e){} }
+    lastBackTs = now;
+  } else {
+    if(now - lastBackTs <= BACK_DOUBLE_MS){ hideOverlay(); }
+    else { hideControls(); showBackToast(); lastBackTs = now; if(fromPopstate){ try { history.pushState({p:'player'}, '', '#player'); } catch(e){} } }
+  }
+}
 document.addEventListener('keydown', (e)=>{
   if(!overlay.classList.contains('show')) return;
   const k=e.key;
-  // Arrow keys bring controls back; Left also moves focus to Close
   if(['ArrowUp','Up','ArrowDown','Down','ArrowRight','Right','ArrowLeft','Left'].includes(k)){
     showControls();
     if(['ArrowLeft','Left'].includes(k)){ e.preventDefault(); closeBtn.classList.add('focused'); closeBtn.focus(); }
     return;
   }
-  // Enter on Close
-  if(k==='Enter' && document.activeElement===closeBtn){
-    e.preventDefault(); hideOverlay(); return;
-  }
-  // Back/Escape: implement double-back behavior (when keydown fires)
-  if(k==='Backspace' || k==='Escape'){
-    e.preventDefault();
-    handleBackPress(false);
-    return;
-  }
+  if(k==='Enter' && document.activeElement===closeBtn){ e.preventDefault(); hideOverlay(); return; }
+  if(k==='Backspace' || k==='Escape'){ e.preventDefault(); handleBackPress(false); return; }
 });
-
-/* Physical/Browser Back (e.g., Fire TV) */
-window.addEventListener('popstate', ()=>{
-  if(overlay.classList.contains('show')){
-    // Treat as a Back press coming from history
-    handleBackPress(true);
-  }
-});
-
-/* Close button & click outsides */
+window.addEventListener('popstate', ()=>{ if(overlay.classList.contains('show')) handleBackPress(true); });
 closeBtn.addEventListener('focus', ()=>closeBtn.classList.add('focused'));
 closeBtn.addEventListener('blur',  ()=>closeBtn.classList.remove('focused'));
 closeBtn.addEventListener('click', hideOverlay);
-overlay.addEventListener('click', (e)=>{ if(e.target===overlay || e.target.classList.contains('shade')) { showControls(); } });
 
-/* Error tray actions */
+/* Error tray actions (in-app only) */
 btnRetry.onclick = ()=>{ if(currentURL){ playURL(currentURL); } };
-btnVLC.onclick   = ()=>{ if(currentURL){ openWithApp(currentURL,'vlc'); } };
+btnVLC.onclick   = ()=>{ if(currentURL){ launchVLC(currentURL); } };
 btnNative.onclick= ()=>{ if(currentURL){ location.href = currentURL; } };
 
 /* ---------- Wire up ---------- */
 qEl.addEventListener('input', render);
-selectMenu('all'); // initial
+selectMenu('all');
 render();
-/* Click to play */
 gridEl.addEventListener('click', (e)=>{
   const card = e.target.closest('[data-card]'); if(!card) return;
   const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
