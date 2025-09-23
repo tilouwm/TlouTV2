@@ -13,13 +13,13 @@
     --menu-bg: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     --ring: 0 0 0 4px rgba(79,140,255,.33);
 
-    /* Grid tile theme to match the screenshot */
-    --tile-bg:#ffffff;                 /* white card */
-    --tile-text:#1e293b;               /* slate-800 */
-    --tile-muted:#475569;              /* slate-600 */
-    --tile-border:#e2e8f0;             /* slate-200 */
-    --tile-border-strong:#4f8cff;      /* blue highlight */
-    --tile-focus-bg:#eaf2ff;           /* light blue fill */
+    /* Dark blue tile theme */
+    --tile-bg-top:#122753;        /* deep blue */
+    --tile-bg-bot:#0d1c3d;        /* deeper blue */
+    --tile-border:#1a3570;        /* subtle border */
+    --tile-border-strong:#4f8cff; /* focus border */
+    --tile-focus-bg:#113167;      /* focus fill */
+    --logo-canvas:#0b1634;        /* square behind logos */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -79,7 +79,7 @@
     background: rgba(255,255,255,.07); color:var(--text); font-size:16px;
   }
 
-  /* GRID like the sample screenshot */
+  /* GRID */
   .grid{
     display:grid; gap:14px;
     grid-template-columns: repeat(3, minmax(0,1fr)); /* phones ~3 */
@@ -87,60 +87,49 @@
   @media(min-width:900px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }   /* tablets/TV mid */
   @media(min-width:1400px){ .grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }  /* big TV */
 
-  /* Tile design: white tiles, subtle border, rounded corners; name under logo */
+  /* Tile design: deep-blue gradient, subtle border; name under logo */
   .card{
     position:relative;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
     gap:10px; padding:14px 12px;
     border-radius:14px;
-    background:var(--tile-bg);
-    color:var(--tile-text);
+    background: linear-gradient(180deg, var(--tile-bg-top), var(--tile-bg-bot));
+    color:#f1f5ff;
     border:2px solid var(--tile-border);
     outline:none; cursor:pointer; touch-action:manipulation;
-    min-height: 168px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.03), 0 2px 5px rgba(0,0,0,.03);
+    min-height: 172px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.14) inset;
   }
-  .card:hover{ border-color:#d7e3f1 }
 
-  /* Square logo area */
   .logo{
     width:100%;
     aspect-ratio: 1/1;
     border-radius:10px;
-    background:#f2f5f9;
+    background:var(--logo-canvas);
     display:grid; place-items:center; overflow:hidden;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 8px 24px rgba(0,0,0,.35);
   }
-  .logo img{ width:86%; height:86%; object-fit:contain }
+  .logo img{ width:86%; height:86%; object-fit:contain; image-rendering:auto }
 
   .title{
     text-align:center; font-weight:800; font-size:14px; line-height:1.1;
     width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .meta{
-    font-size:12px; color:var(--tile-muted); text-align:center;
+    font-size:12px; color:#b9c9ee; text-align:center;
     width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
-  /* Favorite heart bubble in the tile corner */
-  .fav{
-    position:absolute; top:8px; right:8px;
-    background:#ffffffd9;
-    border:1px solid #e2e8f0;
-    border-radius:999px;
-    padding:5px 7px; font-size:16px; line-height:1; cursor:pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,.06);
-  }
-
-  /* Focus/selected highlight — thick blue outline + light fill (like screenshot) */
+  /* Focus/selected highlight — thick blue outline + light fill */
   .focused-card{
     border-color: var(--tile-border-strong);
-    box-shadow: 0 0 0 3px var(--tile-border-strong), 0 6px 18px rgba(79,140,255,.18);
-    background: var(--tile-focus-bg);
-    transform: translateZ(0); /* prevent blur on TV scaling */
+    box-shadow: 0 0 0 3px var(--tile-border-strong), 0 6px 18px rgba(79,140,255,.22);
+    background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot));
+    transform: translateZ(0);
   }
   .card:focus-visible{ outline: none; }
 
-  /* Player overlay (unchanged) */
+  /* Player overlay */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
   .overlay.show{ display:block }
   .overlay.controls-hidden .close-btn,
@@ -180,10 +169,27 @@
   }
   .back-toast.show{ opacity:1; }
 
-  @media (prefers-reduced-motion: reduce){
-    .content{ scroll-behavior:auto }
-    .close-btn{ transition:none }
+  /* Favorites modal */
+  .modal{ position:fixed; inset:0; z-index:80; display:none; }
+  .modal.show{ display:grid; place-items:center; }
+  .modal .shade{ position:absolute; inset:0; background:rgba(0,0,0,.6); }
+  .dialog{
+    position:relative; z-index:81;
+    width:min(92vw, 420px);
+    background: linear-gradient(180deg, #142d5f, #0f2147);
+    border:2px solid #2a58b8;
+    border-radius:16px; padding:18px;
+    color:#eef6ff; box-shadow:0 18px 60px rgba(0,0,0,.55);
   }
+  .dialog h4{ margin:0 0 4px; font:800 18px/1.2 Outfit,Inter }
+  .dialog p{ margin:0 0 14px; color:#cfe2ff; font-size:13.5px }
+  .actions{ display:flex; gap:10px; justify-content:flex-end }
+  .btn{
+    border-radius:12px; padding:10px 14px; cursor:pointer; border:1px solid transparent; background:#1a2f5f; color:#e8f1ff; font-weight:700;
+  }
+  .btn:focus-visible{ outline:var(--ring) }
+  .btn.primary{ background:#4f8cff; color:#041225; border-color:#92b6ff; }
+  .btn.ghost{ background:#0f2045; border:1px solid #294a9d; color:#eaf1ff; }
 </style>
 </head>
 <body>
@@ -238,6 +244,19 @@
   </div>
 </div>
 
+<!-- Favorites Modal -->
+<div class="modal" id="favModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="shade"></div>
+  <div class="dialog">
+    <h4 id="favTitle">Add to Favorites?</h4>
+    <p id="favDesc"></p>
+    <div class="actions">
+      <button class="btn ghost" id="favCancel">Cancel</button>
+      <button class="btn primary" id="favConfirm">Add</button>
+    </div>
+  </div>
+</div>
+
 <!-- Back toast -->
 <div class="back-toast" id="backToast">Press Back again to exit</div>
 
@@ -246,7 +265,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 
 <script>
-/* ---------- Header sizing: prevent overlap ---------- */
+/* ---------- Header sizing ---------- */
 (function(){
   const header = document.getElementById('topHeader');
   function setHeaderH(){
@@ -263,7 +282,7 @@ const isHls = url => /\.m3u8(\?|$)/i.test(url);
 const isTs  = url => /\.ts(\?|$)/i.test(url) || /(?:^|[?&])extension=ts\b/i.test(url);
 const isHttp = url => /^http:\/\//i.test(url);
 
-/* ---------- Channels (RTC removed; Tele 6 Univers & TNH added) ---------- */
+/* ---------- Channels (Tele 6 Univers & TNH added; RTC removed) ---------- */
 const CHANNELS = [
   {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Live from Télé 6 Univers"},
   {"id":"tnh","name":"TNH","logo":"https://yt3.googleusercontent.com/ytc/AIdro_lBzJBBQ1Mc4BVr7u87SMcL3lGU4N6U2WD9-__OgE050a0=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("https://haititivi.com/rezo/boul2/tracks-v1/index.fmp4.m3u8"),"genre":"news","description":"Télévision Nationale d’Haïti"},
@@ -333,10 +352,8 @@ function filterChannels(){
 }
 
 function card(c,i){
-  const fav = favorites().includes(c.id);
   return `
     <div class="card" data-card data-idx="${i}" tabindex="0" role="button" aria-label="${c.name}">
-      <button class="fav" title="Favorite" aria-label="Favorite" onclick="event.stopPropagation();toggleFavorite('${c.id}', this)">${fav?'❤️':'🤍'}</button>
       <div class="logo">${c.logo?`<img src="${c.logo}" alt="${c.name}" loading="lazy" decoding="async">`:'📺'}</div>
       <div class="title">${c.name}</div>
       <div class="meta">${c.genre||''}</div>
@@ -351,14 +368,6 @@ function render(){
   gridEl.innerHTML = list.map((c,i)=>card(c,i)).join('') || `<div style="opacity:.7">No results</div>`;
   const first = gridEl.querySelector('[data-card]');
   if(first && !document.querySelector('.focused-card') && document.activeElement.tagName!=='INPUT'){ focusCard(0,true); }
-}
-
-/* ---------- Favorites ---------- */
-function toggleFavorite(id, btn){
-  const s=new Set(favorites());
-  if(s.has(id)){ s.delete(id); if(btn) btn.textContent='🤍'; }
-  else{ s.add(id); if(btn) btn.textContent='❤️'; }
-  setFavorites([...s]);
 }
 
 /* ---------- Menu ---------- */
@@ -376,7 +385,7 @@ function focusMenu(el){
   el.classList.add('focused-menu'); el.focus();
 }
 
-/* ---------- D-Pad Navigation (matches tile grid) ---------- */
+/* ---------- D-Pad Navigation ---------- */
 let focusedIndex=0;
 let lastNavTs = 0;
 const NAV_GAP = 55;
@@ -409,15 +418,55 @@ function moveRow(deltaRows){
   moveFocus(deltaRows * cols);
 }
 
-document.addEventListener('keydown', (e)=>{
-  const ae=document.activeElement;
-  if(overlay.classList.contains('show')) return;
+/* ---------- Long-press to Favorite (Enter hold or touch hold) ---------- */
+let enterHoldTimer=null, enterHeld=false;
+let pointerTimer=null, pointerHeld=false, pointerIdx=null;
+const HOLD_MS = 600;
 
+function openFavModal(ch){
+  favTarget = ch;
+  const favs = new Set(favorites());
+  const isFav = favs.has(ch.id);
+  favTitle.textContent = isFav ? 'Remove from Favorites?' : 'Add to Favorites?';
+  favDesc.textContent  = ch.name;
+  favConfirm.textContent = isFav ? 'Remove' : 'Add';
+  favModal.classList.add('show'); favModal.setAttribute('aria-hidden','false');
+  favConfirm.focus();
+}
+function closeFavModal(){
+  favModal.classList.remove('show'); favModal.setAttribute('aria-hidden','true');
+  favTarget = null;
+  gridEl.querySelector(`[data-card][data-idx="${focusedIndex}"]`)?.focus();
+}
+function toggleFavorite(id){
+  const s=new Set(favorites());
+  s.has(id) ? s.delete(id) : s.add(id);
+  setFavorites([...s]);
+  if(CURRENT_CAT==='favorites') render();
+}
+
+/* ---------- Keyboard for grid + long press ---------- */
+document.addEventListener('keydown', (e)=>{
+  if(overlay.classList.contains('show')) return;
+  if(favModal.classList.contains('show')){
+    const k=e.key;
+    if(k==='Backspace'||k==='Escape'||k==='BrowserBack'){ e.preventDefault(); closeFavModal(); return; }
+    if(k==='ArrowLeft'||k==='Left'){ e.preventDefault(); favCancel.focus(); return; }
+    if(k==='ArrowRight'||k==='Right'){ e.preventDefault(); favConfirm.focus(); return; }
+    if(k==='Enter'){
+      e.preventDefault();
+      (document.activeElement===favCancel?favCancel:favConfirm).click();
+      return;
+    }
+    return;
+  }
+
+  const ae=document.activeElement;
   const onMenu = ae && ae.hasAttribute('data-menu');
   const onGrid = ae && ae.hasAttribute('data-card');
   const onInput = ae && ae.tagName==='INPUT';
-
   const key = e.key;
+
   const dpad = ['ArrowRight','Right','ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','PageDown','PageUp','Home','End'];
   if(dpad.includes(key)) e.preventDefault();
 
@@ -434,7 +483,14 @@ document.addEventListener('keydown', (e)=>{
     if(key==='PageUp'){ moveRow(-3); return; }
     if(key==='Home'){ schedule(()=>focusCard(0,true)); return; }
     if(key==='End'){ schedule(()=>focusCard(rendered.length-1,true)); return; }
-    if(key==='Enter'){ openPlayer(rendered[focusedIndex]); return; }
+
+    /* Long press Enter for favorites */
+    if(key==='Enter' && !enterHoldTimer){
+      e.preventDefault();
+      enterHeld=false;
+      enterHoldTimer=setTimeout(()=>{ enterHeld=true; openFavModal(rendered[focusedIndex]); }, HOLD_MS);
+      return;
+    }
   }
 
   if(onMenu){
@@ -453,6 +509,37 @@ document.addEventListener('keydown', (e)=>{
   if(['ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','ArrowRight','Right'].includes(key)){
     if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); }
   }
+});
+
+document.addEventListener('keyup', (e)=>{
+  if(overlay.classList.contains('show') || favModal.classList.contains('show')) return;
+  if(e.key==='Enter'){
+    if(enterHoldTimer){
+      clearTimeout(enterHoldTimer); enterHoldTimer=null;
+      if(!enterHeld){ openPlayer(rendered[focusedIndex]); }
+      enterHeld=false;
+    }
+  }
+});
+
+/* ---------- Pointer long press on tiles (mouse/touch/remote pointers) ---------- */
+gridEl.addEventListener('pointerdown', (e)=>{
+  const card = e.target.closest('[data-card]'); if(!card) return;
+  pointerIdx = Number(card.dataset.idx);
+  pointerHeld = false;
+  clearTimeout(pointerTimer);
+  pointerTimer = setTimeout(()=>{ pointerHeld=true; openFavModal(rendered[pointerIdx]); }, HOLD_MS);
+});
+['pointerup','pointerleave','pointercancel'].forEach(evt=>{
+  gridEl.addEventListener(evt, ()=>{
+    clearTimeout(pointerTimer);
+  });
+});
+/* Short click still opens player unless a long press already triggered */
+gridEl.addEventListener('click', (e)=>{
+  const card = e.target.closest('[data-card]'); if(!card) return;
+  if(pointerHeld) { pointerHeld=false; return; }
+  const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
 });
 
 /* ---------- Player (HLS + MPEG-TS) ---------- */
@@ -604,15 +691,25 @@ btnVLC.onclick   = ()=>{ if(currentURL){
 } };
 btnNative.onclick= ()=>{ if(currentURL){ location.href = currentURL; } };
 
+/* ---------- Favorites modal wiring ---------- */
+const favModal  = document.getElementById('favModal');
+const favTitle  = document.getElementById('favTitle');
+const favDesc   = document.getElementById('favDesc');
+const favConfirm= document.getElementById('favConfirm');
+const favCancel = document.getElementById('favCancel');
+let favTarget   = null;
+
+favCancel.addEventListener('click', closeFavModal);
+favConfirm.addEventListener('click', ()=>{
+  if(!favTarget) return;
+  toggleFavorite(favTarget.id);
+  closeFavModal();
+});
+
 /* ---------- Wire up ---------- */
-const gridElClick = (e)=>{
-  const card = e.target.closest('[data-card]'); if(!card) return;
-  const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
-};
 qEl.addEventListener('input', render);
 selectMenu('all');
 render();
-gridEl.addEventListener('click', gridElClick);
 </script>
 </body>
 </html>
