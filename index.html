@@ -13,18 +13,19 @@
     --menu-bg: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     --ring: 0 0 0 4px rgba(79,140,255,.33);
 
-    /* Dark blue tile theme */
-    --tile-bg-top:#122753;        /* deep blue */
-    --tile-bg-bot:#0d1c3d;        /* deeper blue */
-    --tile-border:#1a3570;        /* subtle border */
-    --tile-border-strong:#4f8cff; /* focus border */
-    --tile-focus-bg:#113167;      /* focus fill */
-    --logo-canvas:#0b1634;        /* square behind logos */
+    /* Deep blue tile palette */
+    --tile-bg-top:#153066;
+    --tile-bg-bot:#0e224a;
+    --tile-border:#1b3a7c;
+    --tile-border-strong:#5ba0ff;
+    --tile-focus-bg:#153a73;
+    --logo-canvas:#0b1634;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    margin:0; color:var(--text);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     background:
       radial-gradient(1100px 600px at 5% -10%, rgba(124,58,237,.18), transparent 42%),
       radial-gradient(900px 600px at 110% 0%, rgba(34,211,238,.10), transparent 45%),
@@ -34,22 +35,22 @@
     padding-top: calc(var(--header-h) + env(safe-area-inset-top));
   }
 
-  /* Fixed header (no overlap) */
+  /* Header */
   header{
     position:fixed; top:0; left:0; right:0; z-index:20;
     padding:12px 18px;
-    backdrop-filter: blur(8px);
-    background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.03));
+    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
     border-bottom:1px solid rgba(255,255,255,.08);
   }
   .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-badge{ width:40px; height:40px; border-radius:12px; background:#0000002a; display:grid; place-items:center; }
-  .brand .title{ font:800 18px/1 Outfit,Inter,sans-serif; letter-spacing:.3px }
+  .brand-badge{ width:42px; height:42px; border-radius:12px; background:#0000002a; display:grid; place-items:center; }
+  .brand .title{ font:800 19px/1 Outfit,Inter,sans-serif; letter-spacing:.3px }
   .brand .sub{ font-size:10px; letter-spacing:2px; color:#a9f0ff; text-transform:uppercase }
 
-  /* Layout below header fits viewport */
+  /* Layout */
   .app{
-    display:grid; grid-template-columns: 230px 1fr;
+    display:grid; grid-template-columns: 240px 1fr;
     height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
   }
 
@@ -67,7 +68,7 @@
     color:var(--text); padding:14px; margin:10px 6px; border-radius:14px;
     text-align:left; cursor:pointer; outline:none; touch-action:manipulation;
   }
-  .mitem .dot{ width:8px; height:8px; border-radius:50%; background:#22d3ee; opacity:.8 }
+  .mitem .dot{ width:8px; height:8px; border-radius:50%; background:#22d3ee; opacity:.85 }
   .mitem.active{ outline:var(--ring); border-color:rgba(79,140,255,.45) }
   .focused-menu{ outline:var(--ring); border-color:rgba(79,140,255,.55) }
 
@@ -75,59 +76,64 @@
   .content{ overflow:auto; padding:16px 18px 28px; scroll-behavior:auto }
   .search-row{ display:flex; gap:10px; align-items:center; margin:6px 0 16px }
   .search{
-    flex:1; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.1);
-    background: rgba(255,255,255,.07); color:var(--text); font-size:16px;
+    flex:1; padding:13px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.07); color:var(--text); font-size:17px;
   }
 
-  /* GRID */
+  /* Grid — bigger tiles; responsive columns */
   .grid{
-    display:grid; gap:14px;
-    grid-template-columns: repeat(3, minmax(0,1fr)); /* phones ~3 */
+    display:grid; gap:16px;
+    grid-template-columns: repeat(2, minmax(0,1fr)); /* phones default bigger */
   }
-  @media(min-width:900px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }   /* tablets/TV mid */
-  @media(min-width:1400px){ .grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }  /* big TV */
+  @media(min-width:600px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  @media(min-width:960px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+  @media(min-width:1280px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
+  @media(min-width:1600px){ .grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
 
-  /* Tile design: deep-blue gradient, subtle border; name under logo */
+  /* TV / Fire TV — larger tiles and gaps */
+  body.tv .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); gap:22px; }
+  body.tv .card{ min-height: 260px; }
+  body.tv .logo img{ width:94%; height:94%; }
+  body.tv .title{ font-size:17px; }
+  body.tv .meta{ font-size:14px; }
+
   .card{
     position:relative;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    gap:10px; padding:14px 12px;
-    border-radius:14px;
+    gap:12px; padding:16px 14px;
+    border-radius:16px;
     background: linear-gradient(180deg, var(--tile-bg-top), var(--tile-bg-bot));
     color:#f1f5ff;
     border:2px solid var(--tile-border);
     outline:none; cursor:pointer; touch-action:manipulation;
-    min-height: 172px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.14) inset;
+    min-height: 200px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.18);
   }
-
   .logo{
     width:100%;
     aspect-ratio: 1/1;
-    border-radius:10px;
+    border-radius:12px;
     background:var(--logo-canvas);
     display:grid; place-items:center; overflow:hidden;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 8px 24px rgba(0,0,0,.35);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .logo img{ width:86%; height:86%; object-fit:contain; image-rendering:auto }
+  .logo img{ width:92%; height:92%; object-fit:contain }
 
   .title{
-    text-align:center; font-weight:800; font-size:14px; line-height:1.1;
+    text-align:center; font-weight:800; font-size:15px; line-height:1.1;
     width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .meta{
-    font-size:12px; color:#b9c9ee; text-align:center;
+    font-size:12.5px; color:#c4d7ff; text-align:center;
     width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
-  /* Focus/selected highlight — thick blue outline + light fill */
   .focused-card{
     border-color: var(--tile-border-strong);
-    box-shadow: 0 0 0 3px var(--tile-border-strong), 0 6px 18px rgba(79,140,255,.22);
+    box-shadow: 0 0 0 4px var(--tile-border-strong);
     background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot));
-    transform: translateZ(0);
   }
-  .card:focus-visible{ outline: none; }
+  .card:focus-visible{ outline:none }
 
   /* Player overlay */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
@@ -135,60 +141,57 @@
   .overlay.controls-hidden .close-btn,
   .overlay.controls-hidden .error-tray{ display:none !important; }
   .shade{ position:absolute; inset:0; background:rgba(0,0,0,.9) }
-  .player-wrap{ position:absolute; inset:0; display:grid; place-items:center; padding:0; }
+  .player-wrap{ position:absolute; inset:0; display:grid; place-items:center; }
   video{ width:100vw; height:100vh; background:#000; outline:none; }
 
   .close-btn{
     position:absolute; top:16px; right:16px; z-index:60;
-    padding:12px 14px; border-radius:14px;
+    padding:12px 16px; border-radius:14px;
     border:1px solid rgba(255,255,255,.28);
     background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-    color:#fff; font-weight:800; cursor:pointer; transition:transform .08s ease;
+    color:#fff; font-weight:800; cursor:pointer;
     outline:none; touch-action:manipulation;
   }
   .close-btn:focus-visible, .close-btn.focused{
-    outline:4px solid #22d3ee;
-    box-shadow:0 0 0 6px rgba(34,211,238,.35), 0 10px 28px rgba(0,0,0,.5);
-    transform:scale(1.05);
+    outline:4px solid #22d3ee; box-shadow:0 0 0 6px rgba(34,211,238,.35);
   }
 
   .error-tray{
     position:absolute; left:16px; bottom:16px; z-index:60;
-    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px;
+    display:flex; gap:10px; flex-wrap:nowrap; align-items:center;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.2);
+    border-radius:12px; padding:10px 12px;
   }
-  .e-btn{ border-radius:10px; border:1px solid rgba(255,255,255,.25); padding:8px 10px; background:rgba(255,255,255,.08); color:#fff; cursor:pointer; touch-action:manipulation; }
-  .e-btn:focus-visible{ outline:var(--ring); }
+  .e-btn{ border-radius:10px; border:1px solid rgba(255,255,255,.25); padding:9px 12px; background:rgba(255,255,255,.1); color:#fff; cursor:pointer; touch-action:manipulation; }
+  .e-btn:focus-visible, .e-btn.focus{ outline:4px solid rgba(91,160,255,.6) }
 
   .back-toast{
     position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
     z-index:70; padding:10px 14px; border-radius:12px;
-    background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.18);
     color:#fff; font-weight:700; font-size:13px; letter-spacing:.2px;
-    opacity:0; pointer-events:none; transition:opacity .18s ease;
+    opacity:0; pointer-events:none; transition:opacity .15s linear;
   }
   .back-toast.show{ opacity:1; }
 
-  /* Favorites modal */
+  /* Modals (favorites + exit) */
   .modal{ position:fixed; inset:0; z-index:80; display:none; }
   .modal.show{ display:grid; place-items:center; }
   .modal .shade{ position:absolute; inset:0; background:rgba(0,0,0,.6); }
   .dialog{
     position:relative; z-index:81;
-    width:min(92vw, 420px);
-    background: linear-gradient(180deg, #142d5f, #0f2147);
+    width:min(92vw, 440px);
+    background: linear-gradient(180deg, #153468, #0f2147);
     border:2px solid #2a58b8;
     border-radius:16px; padding:18px;
-    color:#eef6ff; box-shadow:0 18px 60px rgba(0,0,0,.55);
+    color:#eef6ff;
   }
-  .dialog h4{ margin:0 0 4px; font:800 18px/1.2 Outfit,Inter }
-  .dialog p{ margin:0 0 14px; color:#cfe2ff; font-size:13.5px }
+  .dialog h4{ margin:0 0 6px; font:800 19px/1.2 Outfit,Inter }
+  .dialog p{ margin:0 0 14px; color:#cfe2ff; font-size:14px }
   .actions{ display:flex; gap:10px; justify-content:flex-end }
-  .btn{
-    border-radius:12px; padding:10px 14px; cursor:pointer; border:1px solid transparent; background:#1a2f5f; color:#e8f1ff; font-weight:700;
-  }
+  .btn{ border-radius:12px; padding:10px 14px; cursor:pointer; border:1px solid transparent; background:#1a2f5f; color:#e8f1ff; font-weight:700; }
   .btn:focus-visible{ outline:var(--ring) }
-  .btn.primary{ background:#4f8cff; color:#041225; border-color:#92b6ff; }
+  .btn.primary{ background:#5ba0ff; color:#041225; border-color:#9fc2ff; }
   .btn.ghost{ background:#0f2045; border:1px solid #294a9d; color:#eaf1ff; }
 </style>
 </head>
@@ -197,7 +200,7 @@
 <header id="topHeader">
   <div class="brand">
     <div class="brand-badge">
-      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z" fill="#22d3ee"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 4l13 8-13 8z" fill="#22d3ee"/></svg>
     </div>
     <div>
       <div class="title">TlouTV</div>
@@ -238,9 +241,9 @@
   <button class="close-btn" id="closeBtn" title="Close (Back ×2 to exit)">✕ Close</button>
   <div class="error-tray" id="errorTray" style="display:none">
     <span id="errMsg" style="opacity:.92">Playback error.</span>
-    <button class="e-btn" id="btnRetry">Retry</button>
-    <button class="e-btn" id="btnVLC">Open in VLC</button>
-    <button class="e-btn" id="btnNative">Open natively</button>
+    <button class="e-btn" id="btnRetry" tabindex="0">Retry</button>
+    <button class="e-btn" id="btnVLC" tabindex="0">Open in VLC</button>
+    <button class="e-btn" id="btnNative" tabindex="0">Open natively</button>
   </div>
 </div>
 
@@ -253,6 +256,19 @@
     <div class="actions">
       <button class="btn ghost" id="favCancel">Cancel</button>
       <button class="btn primary" id="favConfirm">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exit App Modal -->
+<div class="modal" id="exitModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="shade"></div>
+  <div class="dialog">
+    <h4>Exit TlouTV?</h4>
+    <p>Do you want to close the app?</p>
+    <div class="actions">
+      <button class="btn ghost" id="exitCancel">No</button>
+      <button class="btn primary" id="exitConfirm">Yes, Exit</button>
     </div>
   </div>
 </div>
@@ -275,6 +291,12 @@
   window.addEventListener('load', setHeaderH);
   window.addEventListener('resize', ()=>{ clearTimeout(setHeaderH._t); setHeaderH._t=setTimeout(setHeaderH,120); });
 })();
+
+/* ---------- Device tuning (Fire TV, touch) ---------- */
+const ua = navigator.userAgent || '';
+const isFireTV = /AFT|AmazonWebAppPlatform|Fire TV/i.test(ua);
+const isTouch  = matchMedia('(pointer: coarse)').matches;
+if(isFireTV){ document.body.classList.add('tv'); }
 
 /* ---------- Helpers ---------- */
 const normalizeStream = u => (typeof u==='string' ? u.replace('.m3d8','.m3u8') : u);
@@ -385,14 +407,17 @@ function focusMenu(el){
   el.classList.add('focused-menu'); el.focus();
 }
 
-/* ---------- D-Pad Navigation ---------- */
+/* ---------- D-Pad Navigation (snappier) ---------- */
 let focusedIndex=0;
 let lastNavTs = 0;
-const NAV_GAP = 55;
+const NAV_GAP = 45; /* slightly faster than before */
 let navRAF = null;
 
-function gridCols(){ const w=window.innerWidth; return w>=1400?6:(w>=900?5:3); }
-
+function gridCols(){ 
+  if(document.body.classList.contains('tv')) return 5;
+  const w=window.innerWidth;
+  return w>=1600?6:(w>=1280?5:(w>=960?4:(w>=600?3:2)));
+}
 function schedule(fn){
   if(navRAF) cancelAnimationFrame(navRAF);
   navRAF = requestAnimationFrame(()=>{ fn(); navRAF=null; });
@@ -413,15 +438,13 @@ function moveFocus(delta){
   const next = Math.max(0, Math.min(total-1, focusedIndex + delta));
   schedule(()=>focusCard(next));
 }
-function moveRow(deltaRows){
-  const cols = gridCols();
-  moveFocus(deltaRows * cols);
-}
+function moveRow(deltaRows){ moveFocus(deltaRows * gridCols()); }
 
 /* ---------- Long-press to Favorite (Enter hold or touch hold) ---------- */
 let enterHoldTimer=null, enterHeld=false;
 let pointerTimer=null, pointerHeld=false, pointerIdx=null;
-const HOLD_MS = 600;
+/* Smart hold: Fire TV ~520ms, touch ~580ms, desktop ~500ms */
+const HOLD_MS = isFireTV ? 520 : (isTouch ? 580 : 500);
 
 function openFavModal(ch){
   favTarget = ch;
@@ -445,19 +468,16 @@ function toggleFavorite(id){
   if(CURRENT_CAT==='favorites') render();
 }
 
-/* ---------- Keyboard for grid + long press ---------- */
+/* ---------- Keyboard (grid/menu) ---------- */
 document.addEventListener('keydown', (e)=>{
-  if(overlay.classList.contains('show')) return;
+  if(overlay.classList.contains('show') || exitModal.classList.contains('show')) return;
+
   if(favModal.classList.contains('show')){
     const k=e.key;
     if(k==='Backspace'||k==='Escape'||k==='BrowserBack'){ e.preventDefault(); closeFavModal(); return; }
     if(k==='ArrowLeft'||k==='Left'){ e.preventDefault(); favCancel.focus(); return; }
     if(k==='ArrowRight'||k==='Right'){ e.preventDefault(); favConfirm.focus(); return; }
-    if(k==='Enter'){
-      e.preventDefault();
-      (document.activeElement===favCancel?favCancel:favConfirm).click();
-      return;
-    }
+    if(k==='Enter'){ e.preventDefault(); (document.activeElement===favCancel?favCancel:favConfirm).click(); return; }
     return;
   }
 
@@ -466,7 +486,6 @@ document.addEventListener('keydown', (e)=>{
   const onGrid = ae && ae.hasAttribute('data-card');
   const onInput = ae && ae.tagName==='INPUT';
   const key = e.key;
-
   const dpad = ['ArrowRight','Right','ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','PageDown','PageUp','Home','End'];
   if(dpad.includes(key)) e.preventDefault();
 
@@ -484,7 +503,7 @@ document.addEventListener('keydown', (e)=>{
     if(key==='Home'){ schedule(()=>focusCard(0,true)); return; }
     if(key==='End'){ schedule(()=>focusCard(rendered.length-1,true)); return; }
 
-    /* Long press Enter for favorites */
+    /* Long press Enter -> Favorites */
     if(key==='Enter' && !enterHoldTimer){
       e.preventDefault();
       enterHeld=false;
@@ -510,9 +529,8 @@ document.addEventListener('keydown', (e)=>{
     if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); }
   }
 });
-
 document.addEventListener('keyup', (e)=>{
-  if(overlay.classList.contains('show') || favModal.classList.contains('show')) return;
+  if(overlay.classList.contains('show') || favModal.classList.contains('show') || exitModal.classList.contains('show')) return;
   if(e.key==='Enter'){
     if(enterHoldTimer){
       clearTimeout(enterHoldTimer); enterHoldTimer=null;
@@ -522,7 +540,7 @@ document.addEventListener('keyup', (e)=>{
   }
 });
 
-/* ---------- Pointer long press on tiles (mouse/touch/remote pointers) ---------- */
+/* Pointer long-press */
 gridEl.addEventListener('pointerdown', (e)=>{
   const card = e.target.closest('[data-card]'); if(!card) return;
   pointerIdx = Number(card.dataset.idx);
@@ -531,11 +549,8 @@ gridEl.addEventListener('pointerdown', (e)=>{
   pointerTimer = setTimeout(()=>{ pointerHeld=true; openFavModal(rendered[pointerIdx]); }, HOLD_MS);
 });
 ['pointerup','pointerleave','pointercancel'].forEach(evt=>{
-  gridEl.addEventListener(evt, ()=>{
-    clearTimeout(pointerTimer);
-  });
+  gridEl.addEventListener(evt, ()=>{ clearTimeout(pointerTimer); });
 });
-/* Short click still opens player unless a long press already triggered */
 gridEl.addEventListener('click', (e)=>{
   const card = e.target.closest('[data-card]'); if(!card) return;
   if(pointerHeld) { pointerHeld=false; return; }
@@ -565,22 +580,12 @@ function hideControls(){ overlay.classList.add('controls-hidden'); overlayUIVisi
 let toastT=null;
 function showBackToast(){ backToast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=> backToast.classList.remove('show'), 1100); }
 
-async function requestFS(el){
-  try{
-    if(el.requestFullscreen) await el.requestFullscreen();
-    else if(el.webkitEnterFullscreen) el.webkitEnterFullscreen();
-    else if(el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
-    else if(el.msRequestFullscreen) await el.msRequestFullscreen();
-  }catch(e){}
-}
-function exitFS(){ if(document.fullscreenElement){ document.exitFullscreen?.(); } }
-
+/* Open/Close overlay */
 function showOverlay(){
   overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
   showControls();
   lastFocus = document.querySelector('.focused-card') || document.activeElement;
-  try { history.pushState({p:'player'}, '', '#player'); } catch(e){}
-  lastBackTs = 0; player.focus();
+  player.focus();
 }
 function destroyPlayers(){
   try{ if(hls){ hls.destroy(); hls=null; } }catch(e){}
@@ -589,13 +594,28 @@ function destroyPlayers(){
 }
 function hideOverlay(){
   overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true');
-  destroyPlayers(); exitFS();
+  destroyPlayers();
+  if(document.fullscreenElement){ document.exitFullscreen?.(); }
   backToast.classList.remove('show'); errorTray.style.display='none';
   lastFocus?.focus();
+  clearTimeout(enterHoldTimer); enterHoldTimer=null; enterHeld=false;
+  clearTimeout(pointerTimer); pointerTimer=null; pointerHeld=false;
 }
 
-function onFatal(msg){ errorTray.style.display='flex'; errMsg.textContent = msg || 'Playback error'; }
-function resetErrors(){ errorTray.style.display='none'; }
+/* Error handling — focusable buttons for TV remotes */
+function onFatal(msg){
+  showControls();
+  errorTray.style.display='flex';
+  errMsg.textContent = msg || 'Playback error';
+  btnRetry.classList.add('focus'); btnRetry.focus();
+}
+function resetErrors(){
+  errorTray.style.display='none';
+  btnRetry.classList.remove('focus'); btnVLC.classList.remove('focus'); btnNative.classList.remove('focus');
+}
+
+/* Playback */
+function isHttpBlocked(u){ return location.protocol==='https:' && isHttp(u); }
 
 function playHls(url){
   hls = new Hls({
@@ -624,7 +644,7 @@ function playTs(url){
 function playURL(url){
   resetErrors(); currentURL = url;
   destroyPlayers();
-  if (location.protocol === 'https:' && isHttp(url)){
+  if (isHttpBlocked(url)){
     onFatal('This stream is HTTP on an HTTPS page (blocked by the browser). Try “Open in VLC / Open natively”.');
     return;
   }
@@ -639,44 +659,76 @@ function playURL(url){
   if (isTs(url)){ playTs(url); return; }
   location.href = url;
 }
+async function requestFS(el){
+  try{
+    if(el.requestFullscreen) await el.requestFullscreen();
+    else if(el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+    else if(el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+    else if(el.msRequestFullscreen) await el.msRequestFullscreen();
+  }catch(e){}
+}
 async function openPlayer(ch){ showOverlay(); currentChannel = ch; playURL(ch.url); }
 
-/* Overlay interactions */
-let lastPointerTs = 0;
-function maybeShowControls(){ const now=Date.now(); if(now - lastPointerTs > 120){ showControls(); } lastPointerTs = now; }
-overlay.addEventListener('mousemove', maybeShowControls);
-overlay.addEventListener('pointermove', maybeShowControls);
-overlay.addEventListener('touchstart', maybeShowControls);
-
-function handleBackPress(fromPopstate=false){
-  const now = Date.now();
-  if(overlayUIVisible){
-    hideControls(); showBackToast();
-    if(fromPopstate){ try { history.pushState({p:'player'}, '', '#player'); } catch(e){} }
-    lastBackTs = now;
-  } else {
-    if(now - lastBackTs <= BACK_DOUBLE_MS){ hideOverlay(); }
-    else { hideControls(); showBackToast(); lastBackTs = now; if(fromPopstate){ try { history.pushState({p:'player'}, '', '#player'); } catch(e){} } }
-  }
-}
+/* Overlay key handling — navigate Close & Error tray with D-pad */
 document.addEventListener('keydown', (e)=>{
   if(!overlay.classList.contains('show')) return;
   const k=e.key;
-  if(['ArrowUp','Up','ArrowDown','Down','ArrowRight','Right','ArrowLeft','Left'].includes(k)){
-    showControls();
-    if(['ArrowLeft','Left'].includes(k)){ e.preventDefault(); closeBtn.classList.add('focused'); closeBtn.focus(); }
+
+  if(k==='Backspace' || k==='Escape' || k==='BrowserBack'){
+    e.preventDefault();
+    const now = Date.now();
+    if(overlayUIVisible){
+      hideControls(); showBackToast(); lastBackTs = now;
+    }else{
+      if(now - lastBackTs <= BACK_DOUBLE_MS){ hideOverlay(); }
+      else { hideControls(); showBackToast(); lastBackTs = now; }
+    }
     return;
   }
-  if(k==='Enter' && document.activeElement===closeBtn){ e.preventDefault(); hideOverlay(); return; }
-  if(k==='Backspace' || k==='Escape' || k==='BrowserBack'){ e.preventDefault(); handleBackPress(false); return; }
+
+  const trayVisible = errorTray.style.display!=='none';
+  const focusables = trayVisible ? [btnRetry, btnVLC, btnNative, closeBtn] : [closeBtn];
+  const idx = focusables.indexOf(document.activeElement);
+
+  if(['ArrowLeft','Left','ArrowRight','Right','ArrowUp','Up','ArrowDown','Down'].includes(k)){
+    e.preventDefault(); showControls();
+    if(trayVisible){
+      if(k==='ArrowLeft' || k==='Left'){ const n = Math.max(0, idx-1); focusables[n].focus(); markTrayFocus(focusables[n]); }
+      else if(k==='ArrowRight'|| k==='Right'){ const n = Math.min(focusables.length-1, idx+1); focusables[n].focus(); markTrayFocus(focusables[n]); }
+      else if(k==='ArrowUp'   || k==='Up'){ closeBtn.focus(); }
+      else if(k==='ArrowDown' || k==='Down'){ btnRetry.focus(); markTrayFocus(btnRetry); }
+    }else{
+      closeBtn.focus();
+    }
+    return;
+  }
+
+  if(k==='Enter'){
+    const el = document.activeElement;
+    if(el===closeBtn){ e.preventDefault(); hideOverlay(); return; }
+    if(el===btnRetry){ e.preventDefault(); if(currentURL){ playURL(currentURL); } return; }
+    if(el===btnVLC){
+      e.preventDefault(); if(currentURL){
+        const isHttps = /^https:/.test(currentURL);
+        const hostless = currentURL.replace(/^https?:\/\//,'');
+        const intent = `intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
+        const scheme = 'vlc://' + currentURL;
+        const start = Date.now();
+        const t = setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; setTimeout(()=>{ location.href=currentURL; }, 700); }}, 700);
+        location.href = scheme;
+        const vis = ()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange', vis); };
+        document.addEventListener('visibilitychange', vis);
+      }
+      return;
+    }
+    if(el===btnNative){ e.preventDefault(); if(currentURL){ location.href=currentURL; } return; }
+  }
 });
-window.addEventListener('popstate', ()=>{ if(overlay.classList.contains('show')) handleBackPress(true); });
+function markTrayFocus(el){
+  [btnRetry,btnVLC,btnNative].forEach(b=>b.classList.toggle('focus', b===el));
+}
 
-closeBtn.addEventListener('focus', ()=>closeBtn.classList.add('focused'));
-closeBtn.addEventListener('blur',  ()=>closeBtn.classList.remove('focused'));
-closeBtn.addEventListener('click', hideOverlay);
-
-/* Error tray actions */
+/* Error tray actions (mouse/touch) */
 btnRetry.onclick = ()=>{ if(currentURL){ playURL(currentURL); } };
 btnVLC.onclick   = ()=>{ if(currentURL){
   const isHttps = /^https:/.test(currentURL);
@@ -700,16 +752,56 @@ const favCancel = document.getElementById('favCancel');
 let favTarget   = null;
 
 favCancel.addEventListener('click', closeFavModal);
-favConfirm.addEventListener('click', ()=>{
-  if(!favTarget) return;
-  toggleFavorite(favTarget.id);
-  closeFavModal();
+favConfirm.addEventListener('click', ()=>{ if(!favTarget) return; toggleFavorite(favTarget.id); closeFavModal(); });
+
+/* ---------- Exit app modal + main-screen double-back ---------- */
+const exitModal   = document.getElementById('exitModal');
+const exitCancel  = document.getElementById('exitCancel');
+const exitConfirm = document.getElementById('exitConfirm');
+let mainBackTs    = 0;
+
+function showExitModal(){
+  exitModal.classList.add('show'); exitModal.setAttribute('aria-hidden','false'); exitConfirm.focus();
+}
+function hideExitModal(){
+  exitModal.classList.remove('show'); exitModal.setAttribute('aria-hidden','true');
+  document.querySelector('.focused-menu, [data-card].focused-card')?.focus();
+}
+function tryExitApp(){
+  try{ window.close(); }catch(e){}
+  setTimeout(()=>{ location.href='about:blank'; }, 60);
+}
+exitCancel.addEventListener('click', hideExitModal);
+exitConfirm.addEventListener('click', tryExitApp);
+
+document.addEventListener('keydown', (e)=>{
+  if(overlay.classList.contains('show') || favModal.classList.contains('show')) return;
+
+  if(exitModal.classList.contains('show')){
+    if(e.key==='Backspace' || e.key==='Escape' || e.key==='BrowserBack'){ e.preventDefault(); tryExitApp(); return; }
+    if(e.key==='ArrowLeft' || e.key==='Left'){ e.preventDefault(); exitCancel.focus(); return; }
+    if(e.key==='ArrowRight'|| e.key==='Right'){ e.preventDefault(); exitConfirm.focus(); return; }
+    if(e.key==='Enter'){ e.preventDefault(); (document.activeElement===exitCancel?exitCancel:exitConfirm).click(); return; }
+    return;
+  }
+
+  if(e.key==='Backspace' || e.key==='Escape' || e.key==='BrowserBack'){
+    e.preventDefault();
+    const now = Date.now();
+    if(now - mainBackTs <= 1200){ showExitModal(); mainBackTs = 0; }
+    else { mainBackTs = now; showBackToast(); }
+  }
 });
 
 /* ---------- Wire up ---------- */
+const gridElClick = (e)=>{
+  const card = e.target.closest('[data-card]'); if(!card) return;
+  const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
+};
 qEl.addEventListener('input', render);
 selectMenu('all');
 render();
+gridEl.addEventListener('click', gridElClick);
 </script>
 </body>
 </html>
