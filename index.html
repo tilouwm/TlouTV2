@@ -8,18 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --header-h: 72px; /* set at runtime */
+    --header-h: 72px;
     --bg:#0a0f1f; --text:#e9eef7; --muted:#9fb2c7;
     --menu-bg: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     --ring: 0 0 0 4px rgba(79,140,255,.33);
-
-    /* Deep blue tile palette */
-    --tile-bg-top:#153066;
-    --tile-bg-bot:#0e224a;
-    --tile-border:#1b3a7c;
-    --tile-border-strong:#5ba0ff;
-    --tile-focus-bg:#153a73;
-    --logo-canvas:#0b1634;
+    --tile-bg-top:#153066; --tile-bg-bot:#0e224a;
+    --tile-border:#1b3a7c; --tile-border-strong:#5ba0ff;
+    --tile-focus-bg:#153a73; --logo-canvas:#0b1634;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -35,7 +30,6 @@
     padding-top: calc(var(--header-h) + env(safe-area-inset-top));
   }
 
-  /* Header */
   header{
     position:fixed; top:0; left:0; right:0; z-index:20;
     padding:12px 18px;
@@ -48,18 +42,12 @@
   .brand .title{ font:800 19px/1 Outfit,Inter,sans-serif; letter-spacing:.3px }
   .brand .sub{ font-size:10px; letter-spacing:2px; color:#a9f0ff; text-transform:uppercase }
 
-  /* Layout */
   .app{
     display:grid; grid-template-columns: 240px 1fr;
     height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
   }
 
-  /* Left Menu */
-  .menu{
-    border-right:1px solid rgba(255,255,255,.08);
-    background: var(--menu-bg);
-    padding:14px 10px 24px; overflow:auto;
-  }
+  .menu{ border-right:1px solid rgba(255,255,255,.08); background: var(--menu-bg); padding:14px 10px 24px; overflow:auto; }
   .menu h3{ margin:6px 10px 10px; font:700 12px/1 Outfit,Inter; letter-spacing:1px; color:var(--muted); text-transform:uppercase }
   .mitem{
     display:flex; align-items:center; gap:12px; width:100%;
@@ -72,25 +60,16 @@
   .mitem.active{ outline:var(--ring); border-color:rgba(79,140,255,.45) }
   .focused-menu{ outline:var(--ring); border-color:rgba(79,140,255,.55) }
 
-  /* Content / Grid */
   .content{ overflow:auto; padding:16px 18px 28px; scroll-behavior:auto }
   .search-row{ display:flex; gap:10px; align-items:center; margin:6px 0 16px }
-  .search{
-    flex:1; padding:13px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.1);
-    background: rgba(255,255,255,.07); color:var(--text); font-size:17px;
-  }
+  .search{ flex:1; padding:13px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.07); color:var(--text); font-size:17px; }
 
-  /* Grid — bigger tiles; responsive columns */
-  .grid{
-    display:grid; gap:16px;
-    grid-template-columns: repeat(2, minmax(0,1fr)); /* phones default bigger */
-  }
+  .grid{ display:grid; gap:16px; grid-template-columns: repeat(2, minmax(0,1fr)); }
   @media(min-width:600px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
   @media(min-width:960px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
   @media(min-width:1280px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
   @media(min-width:1600px){ .grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
 
-  /* TV / Fire TV — larger tiles and gaps */
   body.tv .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); gap:22px; }
   body.tv .card{ min-height: 260px; }
   body.tv .logo img{ width:94%; height:94%; }
@@ -98,48 +77,24 @@
   body.tv .meta{ font-size:14px; }
 
   .card{
-    position:relative;
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    gap:12px; padding:16px 14px;
-    border-radius:16px;
+    position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    gap:12px; padding:16px 14px; border-radius:16px;
     background: linear-gradient(180deg, var(--tile-bg-top), var(--tile-bg-bot));
-    color:#f1f5ff;
-    border:2px solid var(--tile-border);
-    outline:none; cursor:pointer; touch-action:manipulation;
-    min-height: 200px;
+    color:#f1f5ff; border:2px solid var(--tile-border);
+    outline:none; cursor:pointer; touch-action:manipulation; min-height: 200px;
     box-shadow: inset 0 2px 6px rgba(0,0,0,.18);
   }
-  .logo{
-    width:100%;
-    aspect-ratio: 1/1;
-    border-radius:12px;
-    background:var(--logo-canvas);
-    display:grid; place-items:center; overflow:hidden;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-  }
+  .logo{ width:100%; aspect-ratio: 1/1; border-radius:12px; background:var(--logo-canvas); display:grid; place-items:center; overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
   .logo img{ width:92%; height:92%; object-fit:contain }
+  .title{ text-align:center; font-weight:800; font-size:15px; line-height:1.1; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .meta{ font-size:12.5px; color:#c4d7ff; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  .title{
-    text-align:center; font-weight:800; font-size:15px; line-height:1.1;
-    width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .meta{
-    font-size:12.5px; color:#c4d7ff; text-align:center;
-    width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-
-  .focused-card{
-    border-color: var(--tile-border-strong);
-    box-shadow: 0 0 0 4px var(--tile-border-strong);
-    background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot));
-  }
+  .focused-card{ border-color: var(--tile-border-strong); box-shadow: 0 0 0 4px var(--tile-border-strong); background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot)); }
   .card:focus-visible{ outline:none }
 
-  /* Player overlay */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
   .overlay.show{ display:block }
-  .overlay.controls-hidden .close-btn,
-  .overlay.controls-hidden .error-tray{ display:none !important; }
+  .overlay.controls-hidden .close-btn, .overlay.controls-hidden .error-tray{ display:none !important; }
   .shade{ position:absolute; inset:0; background:rgba(0,0,0,.9) }
   .player-wrap{ position:absolute; inset:0; display:grid; place-items:center; }
   video{ width:100vw; height:100vh; background:#000; outline:none; }
@@ -149,42 +104,27 @@
     padding:12px 16px; border-radius:14px;
     border:1px solid rgba(255,255,255,.28);
     background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
-    color:#fff; font-weight:800; cursor:pointer;
-    outline:none; touch-action:manipulation;
+    color:#fff; font-weight:800; cursor:pointer; outline:none; touch-action:manipulation;
   }
-  .close-btn:focus-visible, .close-btn.focused{
-    outline:4px solid #22d3ee; box-shadow:0 0 0 6px rgba(34,211,238,.35);
-  }
+  .close-btn:focus-visible, .close-btn.focused{ outline:4px solid #22d3ee; box-shadow:0 0 0 6px rgba(34,211,238,.35); }
 
   .error-tray{
-    position:absolute; left:16px; bottom:16px; z-index:60;
-    display:flex; gap:10px; flex-wrap:nowrap; align-items:center;
-    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.2);
-    border-radius:12px; padding:10px 12px;
+    position:absolute; left:16px; bottom:16px; z-index:60; display:flex; gap:10px; align-items:center;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:10px 12px;
   }
   .e-btn{ border-radius:10px; border:1px solid rgba(255,255,255,.25); padding:9px 12px; background:rgba(255,255,255,.1); color:#fff; cursor:pointer; touch-action:manipulation; }
   .e-btn:focus-visible, .e-btn.focus{ outline:4px solid rgba(91,160,255,.6) }
 
-  .back-toast{
-    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-    z-index:70; padding:10px 14px; border-radius:12px;
-    background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.18);
-    color:#fff; font-weight:700; font-size:13px; letter-spacing:.2px;
-    opacity:0; pointer-events:none; transition:opacity .15s linear;
-  }
+  .back-toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:70; padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.18); color:#fff; font-weight:700; font-size:13px; opacity:0; pointer-events:none; transition:opacity .15s linear; }
   .back-toast.show{ opacity:1; }
 
-  /* Modals (favorites + exit) */
   .modal{ position:fixed; inset:0; z-index:80; display:none; }
   .modal.show{ display:grid; place-items:center; }
   .modal .shade{ position:absolute; inset:0; background:rgba(0,0,0,.6); }
   .dialog{
-    position:relative; z-index:81;
-    width:min(92vw, 440px);
+    position:relative; z-index:81; width:min(92vw, 440px);
     background: linear-gradient(180deg, #153468, #0f2147);
-    border:2px solid #2a58b8;
-    border-radius:16px; padding:18px;
-    color:#eef6ff;
+    border:2px solid #2a58b8; border-radius:16px; padding:18px; color:#eef6ff;
   }
   .dialog h4{ margin:0 0 6px; font:800 19px/1.2 Outfit,Inter }
   .dialog p{ margin:0 0 14px; color:#cfe2ff; font-size:14px }
@@ -210,7 +150,6 @@
 </header>
 
 <div class="app">
-  <!-- LEFT MENU -->
   <aside class="menu" id="leftMenu">
     <h3>Browse</h3>
     <button class="mitem focused-menu" data-menu data-cat="all" id="mi-all"><span class="dot"></span><span>All Channels</span></button>
@@ -223,7 +162,6 @@
     <button class="mitem" data-menu data-cat="favorites" id="mi-fav"><span class="dot"></span><span>Favorites</span></button>
   </aside>
 
-  <!-- RIGHT CONTENT -->
   <section class="content" id="content">
     <div class="search-row">
       <input id="q" class="search" placeholder="Search channels…" />
@@ -273,26 +211,21 @@
   </div>
 </div>
 
-<!-- Back toast -->
 <div class="back-toast" id="backToast">Press Back again to exit</div>
 
-<!-- Players -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 
 <script>
-/* ---------- Header sizing ---------- */
+/* ---------- Header sizing (prevents header overlaying first row) ---------- */
 (function(){
   const header = document.getElementById('topHeader');
-  function setHeaderH(){
-    const h = header.offsetHeight || 72;
-    document.documentElement.style.setProperty('--header-h', h + 'px');
-  }
+  function setHeaderH(){ const h = header.offsetHeight || 72; document.documentElement.style.setProperty('--header-h', h + 'px'); }
   window.addEventListener('load', setHeaderH);
   window.addEventListener('resize', ()=>{ clearTimeout(setHeaderH._t); setHeaderH._t=setTimeout(setHeaderH,120); });
 })();
 
-/* ---------- Device tuning (Fire TV, touch) ---------- */
+/* ---------- Device flags ---------- */
 const ua = navigator.userAgent || '';
 const isFireTV = /AFT|AmazonWebAppPlatform|Fire TV/i.test(ua);
 const isTouch  = matchMedia('(pointer: coarse)').matches;
@@ -300,11 +233,11 @@ if(isFireTV){ document.body.classList.add('tv'); }
 
 /* ---------- Helpers ---------- */
 const normalizeStream = u => (typeof u==='string' ? u.replace('.m3d8','.m3u8') : u);
-const isHls = url => /\.m3u8(\?|$)/i.test(url);
-const isTs  = url => /\.ts(\?|$)/i.test(url) || /(?:^|[?&])extension=ts\b/i.test(url);
+const isHls  = url => /\.m3u8(\?|$)/i.test(url);
+const isTs   = url => /\.ts(\?|$)/i.test(url) || /(?:^|[?&])extension=ts\b/i.test(url);
 const isHttp = url => /^http:\/\//i.test(url);
 
-/* ---------- Channels (Tele 6 Univers & TNH added; RTC removed) ---------- */
+/* ---------- Channels (duplicate Tele Pam removed) ---------- */
 const CHANNELS = [
   {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Live from Télé 6 Univers"},
   {"id":"tnh","name":"TNH","logo":"https://yt3.googleusercontent.com/ytc/AIdro_lBzJBBQ1Mc4BVr7u87SMcL3lGU4N6U2WD9-__OgE050a0=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("https://haititivi.com/rezo/boul2/tracks-v1/index.fmp4.m3u8"),"genre":"news","description":"Télévision Nationale d’Haïti"},
@@ -335,7 +268,6 @@ const CHANNELS = [
   {"id":"channel26","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music","description":"Latin music and culture from Trace Latina"},
   {"id":"channel27","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general","description":"General programming from DBM"},
   {"id":"channel28","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music","description":"Music and entertainment from TMA"},
-  {"id":"channel29","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/web/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from Tele Pam"},
   {"id":"channel30","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8"),"genre":"general","description":"Live stream from Tele Eclair"},
   {"id":"channel31","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General programming from TVA 30"},
   {"id":"channel35","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general","description":"Live stream from PVS"},
@@ -348,18 +280,27 @@ const CHANNELS = [
   {"id":"channel39","name":"Dream In TV","logo":"https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png","url":normalizeStream("https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8"),"genre":"music","description":"Music channel to help you dream in TV"}
 ];
 
-/* ---------- State ---------- */
+/* ---------- State & elements ---------- */
 const NS='tloutv:stable';
-let CURRENT_CAT='all';
-let lastFocus = null;
+let CURRENT_CAT='all', lastFocus=null;
 
-/* ---------- Rendering ---------- */
 const gridEl = document.getElementById('grid');
 const qEl = document.getElementById('q');
+const overlay = document.getElementById('overlay');
+let   player = document.getElementById('player'); // NOTE: let so we can swap it
+const closeBtn = document.getElementById('closeBtn');
+const errorTray = document.getElementById('errorTray');
+const errMsg = document.getElementById('errMsg');
+const btnRetry = document.getElementById('btnRetry');
+const btnVLC = document.getElementById('btnVLC');
+const btnNative = document.getElementById('btnNative');
+const backToast = document.getElementById('backToast');
 
+/* ---------- Favorites helpers ---------- */
 function favorites(){ try{return JSON.parse(localStorage.getItem(NS+':fav')||'[]')}catch{return[]} }
 function setFavorites(x){ localStorage.setItem(NS+':fav', JSON.stringify([...new Set(x)]) ) }
 
+/* ---------- Render ---------- */
 function filterChannels(){
   const q=(qEl.value||'').toLowerCase();
   return CHANNELS.filter(c=>{
@@ -372,7 +313,6 @@ function filterChannels(){
     return matchQ && matchCat;
   });
 }
-
 function card(c,i){
   return `
     <div class="card" data-card data-idx="${i}" tabindex="0" role="button" aria-label="${c.name}">
@@ -382,7 +322,6 @@ function card(c,i){
     </div>
   `;
 }
-
 let rendered=[];
 function render(){
   const list = filterChannels();
@@ -394,215 +333,154 @@ function render(){
 
 /* ---------- Menu ---------- */
 const menuItems = Array.from(document.querySelectorAll('[data-menu]'));
-function selectMenu(cat){
-  CURRENT_CAT = cat;
-  menuItems.forEach(b=>b.classList.toggle('active', b.dataset.cat===cat));
-  render();
-}
-menuItems.forEach(btn=>{
-  btn.addEventListener('click',()=>{ selectMenu(btn.dataset.cat); focusMenu(btn); });
-});
-function focusMenu(el){
-  menuItems.forEach(b=>b.classList.remove('focused-menu'));
-  el.classList.add('focused-menu'); el.focus();
-}
+function selectMenu(cat){ CURRENT_CAT = cat; menuItems.forEach(b=>b.classList.toggle('active', b.dataset.cat===cat)); render(); }
+menuItems.forEach(btn=>{ btn.addEventListener('click',()=>{ selectMenu(btn.dataset.cat); focusMenu(btn); }); });
+function focusMenu(el){ menuItems.forEach(b=>b.classList.remove('focused-menu')); el.classList.add('focused-menu'); el.focus(); }
 
-/* ---------- D-Pad Navigation (snappier) ---------- */
-let focusedIndex=0;
-let lastNavTs = 0;
-const NAV_GAP = 45; /* slightly faster than before */
-let navRAF = null;
-
-function gridCols(){ 
-  if(document.body.classList.contains('tv')) return 5;
-  const w=window.innerWidth;
-  return w>=1600?6:(w>=1280?5:(w>=960?4:(w>=600?3:2)));
-}
-function schedule(fn){
-  if(navRAF) cancelAnimationFrame(navRAF);
-  navRAF = requestAnimationFrame(()=>{ fn(); navRAF=null; });
-}
+/* ---------- D-Pad ---------- */
+let focusedIndex=0, lastNavTs=0; const NAV_GAP=45; let navRAF=null;
+function gridCols(){ if(document.body.classList.contains('tv')) return 5; const w=innerWidth; return w>=1600?6:(w>=1280?5:(w>=960?4:(w>=600?3:2))); }
+function schedule(fn){ if(navRAF) cancelAnimationFrame(navRAF); navRAF=requestAnimationFrame(()=>{ fn(); navRAF=null; }); }
 function focusCard(idx, forceTop=false){
-  const prev = document.querySelector('.focused-card'); if(prev) prev.classList.remove('focused-card');
+  const prev=document.querySelector('.focused-card'); if(prev) prev.classList.remove('focused-card');
   const el = gridEl.querySelector(`[data-card][data-idx="${idx}"]`);
-  if(el){
-    el.classList.add('focused-card');
-    el.focus({preventScroll:false});
-    el.scrollIntoView({block: forceTop ? 'start' : 'nearest', inline:'nearest'});
-    focusedIndex=idx;
-  }
+  if(el){ el.classList.add('focused-card'); el.focus({preventScroll:false}); el.scrollIntoView({block: forceTop?'start':'nearest', inline:'nearest'}); focusedIndex=idx; }
 }
-function moveFocus(delta){
-  const now=Date.now(); if(now-lastNavTs<NAV_GAP) return; lastNavTs=now;
-  const total = rendered.length;
-  const next = Math.max(0, Math.min(total-1, focusedIndex + delta));
-  schedule(()=>focusCard(next));
-}
+function moveFocus(delta){ const now=Date.now(); if(now-lastNavTs<NAV_GAP) return; lastNavTs=now; const total=rendered.length; const next=Math.max(0,Math.min(total-1,focusedIndex+delta)); schedule(()=>focusCard(next)); }
 function moveRow(deltaRows){ moveFocus(deltaRows * gridCols()); }
 
-/* ---------- Long-press to Favorite (Enter hold or touch hold) ---------- */
-let enterHoldTimer=null, enterHeld=false;
-let pointerTimer=null, pointerHeld=false, pointerIdx=null;
-/* Smart hold: Fire TV ~520ms, touch ~580ms, desktop ~500ms */
+/* ---------- Long-press to Favorite ---------- */
+let enterHoldTimer=null, enterHeld=false, pointerTimer=null, pointerHeld=false, pointerIdx=null;
 const HOLD_MS = isFireTV ? 520 : (isTouch ? 580 : 500);
+
+const favModal  = document.getElementById('favModal');
+const favTitle  = document.getElementById('favTitle');
+const favDesc   = document.getElementById('favDesc');
+const favConfirm= document.getElementById('favConfirm');
+const favCancel = document.getElementById('favCancel');
+let favTarget   = null;
 
 function openFavModal(ch){
   favTarget = ch;
-  const favs = new Set(favorites());
-  const isFav = favs.has(ch.id);
+  const s=new Set(favorites());
+  const isFav = s.has(ch.id);
   favTitle.textContent = isFav ? 'Remove from Favorites?' : 'Add to Favorites?';
   favDesc.textContent  = ch.name;
   favConfirm.textContent = isFav ? 'Remove' : 'Add';
-  favModal.classList.add('show'); favModal.setAttribute('aria-hidden','false');
-  favConfirm.focus();
+  favModal.classList.add('show'); favModal.setAttribute('aria-hidden','false'); favConfirm.focus();
 }
-function closeFavModal(){
-  favModal.classList.remove('show'); favModal.setAttribute('aria-hidden','true');
-  favTarget = null;
-  gridEl.querySelector(`[data-card][data-idx="${focusedIndex}"]`)?.focus();
-}
-function toggleFavorite(id){
-  const s=new Set(favorites());
-  s.has(id) ? s.delete(id) : s.add(id);
-  setFavorites([...s]);
-  if(CURRENT_CAT==='favorites') render();
-}
+function closeFavModal(){ favModal.classList.remove('show'); favModal.setAttribute('aria-hidden','true'); favTarget=null; gridEl.querySelector(`[data-card][data-idx="${focusedIndex}"]`)?.focus(); }
+function toggleFavorite(id){ const s=new Set(favorites()); s.has(id)?s.delete(id):s.add(id); setFavorites([...s]); if(CURRENT_CAT==='favorites') render(); }
 
-/* ---------- Keyboard (grid/menu) ---------- */
-document.addEventListener('keydown', (e)=>{
+document.addEventListener('keydown',(e)=>{
   if(overlay.classList.contains('show') || exitModal.classList.contains('show')) return;
-
   if(favModal.classList.contains('show')){
     const k=e.key;
     if(k==='Backspace'||k==='Escape'||k==='BrowserBack'){ e.preventDefault(); closeFavModal(); return; }
-    if(k==='ArrowLeft'||k==='Left'){ e.preventDefault(); favCancel.focus(); return; }
-    if(k==='ArrowRight'||k==='Right'){ e.preventDefault(); favConfirm.focus(); return; }
+    if(k==='ArrowLeft'||k==='Left'){ e.preventDefault(); favCancel.focus(); return;}
+    if(k==='ArrowRight'||k==='Right'){ e.preventDefault(); favConfirm.focus(); return;}
     if(k==='Enter'){ e.preventDefault(); (document.activeElement===favCancel?favCancel:favConfirm).click(); return; }
     return;
   }
-
   const ae=document.activeElement;
   const onMenu = ae && ae.hasAttribute('data-menu');
   const onGrid = ae && ae.hasAttribute('data-card');
   const onInput = ae && ae.tagName==='INPUT';
-  const key = e.key;
-  const dpad = ['ArrowRight','Right','ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','PageDown','PageUp','Home','End'];
-  if(dpad.includes(key)) e.preventDefault();
+  const k=e.key;
+  const dpad=['ArrowRight','Right','ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','PageDown','PageUp','Home','End'];
+  if(dpad.includes(k)) e.preventDefault();
 
   if(onGrid){
-    if(key==='ArrowRight' || key==='Right'){ moveFocus(1); return; }
-    if(key==='ArrowLeft'  || key==='Left'){
-      const cols = gridCols();
-      if(focusedIndex%cols===0){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); return; }
-      moveFocus(-1); return;
-    }
-    if(key==='ArrowDown' || key==='Down'){ moveRow(1); return; }
-    if(key==='ArrowUp'   || key==='Up'){ moveRow(-1); return; }
-    if(key==='PageDown'){ moveRow(3); return; }
-    if(key==='PageUp'){ moveRow(-3); return; }
-    if(key==='Home'){ schedule(()=>focusCard(0,true)); return; }
-    if(key==='End'){ schedule(()=>focusCard(rendered.length-1,true)); return; }
-
-    /* Long press Enter -> Favorites */
-    if(key==='Enter' && !enterHoldTimer){
-      e.preventDefault();
-      enterHeld=false;
-      enterHoldTimer=setTimeout(()=>{ enterHeld=true; openFavModal(rendered[focusedIndex]); }, HOLD_MS);
-      return;
-    }
+    if(k==='ArrowRight'||k==='Right'){ moveFocus(1); return; }
+    if(k==='ArrowLeft'||k==='Left'){ const cols=gridCols(); if(focusedIndex%cols===0){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); return; } moveFocus(-1); return; }
+    if(k==='ArrowDown'||k==='Down'){ moveRow(1); return; }
+    if(k==='ArrowUp'||k==='Up'){ moveRow(-1); return; }
+    if(k==='PageDown'){ moveRow(3); return; }
+    if(k==='PageUp'){ moveRow(-3); return; }
+    if(k==='Home'){ schedule(()=>focusCard(0,true)); return; }
+    if(k==='End'){ schedule(()=>focusCard(rendered.length-1,true)); return; }
+    if(k==='Enter'&&!enterHoldTimer){ e.preventDefault(); enterHeld=false; enterHoldTimer=setTimeout(()=>{ enterHeld=true; openFavModal(rendered[focusedIndex]); }, HOLD_MS); return; }
   }
 
   if(onMenu){
-    const i = menuItems.indexOf(ae);
-    if(key==='ArrowDown' || key==='Down'){ focusMenu(menuItems[Math.min(menuItems.length-1,i+1)]); return; }
-    if(key==='ArrowUp'   || key==='Up'){ focusMenu(menuItems[Math.max(0,i-1)]); return; }
-    if(key==='ArrowRight'|| key==='Right'){ focusCard(0,true); return; }
-    if(key==='Enter'){ ae.click(); return; }
+    const i=menuItems.indexOf(ae);
+    if(k==='ArrowDown'||k==='Down'){ focusMenu(menuItems[Math.min(menuItems.length-1,i+1)]); return; }
+    if(k==='ArrowUp'||k==='Up'){ focusMenu(menuItems[Math.max(0,i-1)]); return; }
+    if(k==='ArrowRight'||k==='Right'){ focusCard(0,true); return; }
+    if(k==='Enter'){ ae.click(); return; }
   }
 
-  if(onInput){
-    if(key==='Escape'){ gridEl.querySelector('[data-card]')?.focus(); }
-    return;
-  }
-
-  if(['ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','ArrowRight','Right'].includes(key)){
-    if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); }
-  }
+  if(onInput){ if(k==='Escape'){ gridEl.querySelector('[data-card]')?.focus(); } return; }
+  if(['ArrowLeft','Left','ArrowUp','Up','ArrowDown','Down','ArrowRight','Right'].includes(k)){ if(!onMenu && !onGrid && !onInput){ focusMenu(document.querySelector(`[data-menu][data-cat="${CURRENT_CAT}"]`)||menuItems[0]); } }
 });
-document.addEventListener('keyup', (e)=>{
+document.addEventListener('keyup',(e)=>{
   if(overlay.classList.contains('show') || favModal.classList.contains('show') || exitModal.classList.contains('show')) return;
-  if(e.key==='Enter'){
-    if(enterHoldTimer){
-      clearTimeout(enterHoldTimer); enterHoldTimer=null;
-      if(!enterHeld){ openPlayer(rendered[focusedIndex]); }
-      enterHeld=false;
-    }
-  }
+  if(e.key==='Enter' && enterHoldTimer){ clearTimeout(enterHoldTimer); enterHoldTimer=null; if(!enterHeld){ openPlayer(rendered[focusedIndex]); } enterHeld=false; }
 });
-
-/* Pointer long-press */
-gridEl.addEventListener('pointerdown', (e)=>{
-  const card = e.target.closest('[data-card]'); if(!card) return;
-  pointerIdx = Number(card.dataset.idx);
-  pointerHeld = false;
-  clearTimeout(pointerTimer);
-  pointerTimer = setTimeout(()=>{ pointerHeld=true; openFavModal(rendered[pointerIdx]); }, HOLD_MS);
+gridEl.addEventListener('pointerdown',(e)=>{
+  const card=e.target.closest('[data-card]'); if(!card) return;
+  pointerIdx=Number(card.dataset.idx); pointerHeld=false; clearTimeout(pointerTimer);
+  pointerTimer=setTimeout(()=>{ pointerHeld=true; openFavModal(rendered[pointerIdx]); }, HOLD_MS);
 });
-['pointerup','pointerleave','pointercancel'].forEach(evt=>{
-  gridEl.addEventListener(evt, ()=>{ clearTimeout(pointerTimer); });
-});
-gridEl.addEventListener('click', (e)=>{
-  const card = e.target.closest('[data-card]'); if(!card) return;
-  if(pointerHeld) { pointerHeld=false; return; }
-  const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
-});
+['pointerup','pointerleave','pointercancel'].forEach(evt=>{ gridEl.addEventListener(evt, ()=>{ clearTimeout(pointerTimer); }); });
+gridEl.addEventListener('click',(e)=>{ const card=e.target.closest('[data-card]'); if(!card) return; if(pointerHeld){ pointerHeld=false; return; } const idx=Number(card.dataset.idx); openPlayer(rendered[idx]); });
 
-/* ---------- Player (HLS + MPEG-TS) ---------- */
-const overlay = document.getElementById('overlay');
-const player = document.getElementById('player');
-const closeBtn = document.getElementById('closeBtn');
-const errorTray = document.getElementById('errorTray');
-const errMsg = document.getElementById('errMsg');
-const btnRetry = document.getElementById('btnRetry');
-const btnVLC = document.getElementById('btnVLC');
-const btnNative = document.getElementById('btnNative');
-const backToast = document.getElementById('backToast');
-
-let hls = null, tsPlayer = null, currentURL = null, currentChannel = null;
-
-let overlayUIVisible = true;
-let lastBackTs = 0;
-const BACK_DOUBLE_MS = 1200;
-
-function showControls(){ overlay.classList.remove('controls-hidden'); overlayUIVisible = true; }
-function hideControls(){ overlay.classList.add('controls-hidden'); overlayUIVisible = false; closeBtn.classList.remove('focused'); }
-
+/* ---------- Player (freeze-proof) ---------- */
+let hls=null, tsPlayer=null, currentURL=null, currentChannel=null;
+let overlayUIVisible=true, lastBackTs=0; const BACK_DOUBLE_MS=1200;
 let toastT=null;
-function showBackToast(){ backToast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=> backToast.classList.remove('show'), 1100); }
 
-/* Open/Close overlay */
+/* Startup watchdog: surface error tray if not playing in ~6s */
+let startTimer=null;
+function startupWatchStart(){
+  clearTimeout(startTimer);
+  startTimer = setTimeout(()=>{
+    try{
+      if(player.readyState < 2 || player.paused){
+        onFatal('Stream didn’t start. Choose Retry or open externally.');
+      }
+    }catch(e){ onFatal('Playback did not start.'); }
+  }, 6000);
+}
+function startupWatchStop(){ clearTimeout(startTimer); startTimer=null; }
+
+function showControls(){ overlay.classList.remove('controls-hidden'); overlayUIVisible=true; }
+function hideControls(){ overlay.classList.add('controls-hidden'); overlayUIVisible=false; closeBtn.classList.remove('focused'); }
+function showBackToast(){ backToast.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=> backToast.classList.remove('show'), 1100); }
+
 function showOverlay(){
-  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
-  showControls();
-  lastFocus = document.querySelector('.focused-card') || document.activeElement;
-  player.focus();
+  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); showControls();
+  lastFocus=document.querySelector('.focused-card')||document.activeElement; player.focus();
+}
+function swapVideoElement(){
+  const wrap=document.querySelector('.player-wrap'); const old=player;
+  const v=document.createElement('video');
+  v.id='player'; v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline',''); v.playsInline=true;
+  v.controls=true; v.preload='metadata'; v.style.background='#000';
+  wrap.replaceChild(v, old);
+  player=v;
 }
 function destroyPlayers(){
-  try{ if(hls){ hls.destroy(); hls=null; } }catch(e){}
+  try{ if(hls){ try{ hls.stopLoad(); hls.detachMedia(); }catch(e){} try{ hls.destroy(); }catch(e){} hls=null; } }catch(e){}
   try{ if(tsPlayer){ tsPlayer.unload(); tsPlayer.detachMediaElement(); tsPlayer.destroy(); tsPlayer=null; } }catch(e){}
-  try{ player.pause(); player.removeAttribute('src'); player.load(); }catch(e){}
+  try{ player.pause(); player.removeAttribute('src'); player.src=''; player.load(); }catch(e){}
+  startupWatchStop();
+}
+function fullyResetPlayer(){
+  destroyPlayers();
+  try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){}
+  swapVideoElement();
 }
 function hideOverlay(){
   overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true');
-  destroyPlayers();
-  if(document.fullscreenElement){ document.exitFullscreen?.(); }
+  fullyResetPlayer();
   backToast.classList.remove('show'); errorTray.style.display='none';
-  lastFocus?.focus();
+  setTimeout(()=>{ lastFocus?.focus(); }, 0);
   clearTimeout(enterHoldTimer); enterHoldTimer=null; enterHeld=false;
   clearTimeout(pointerTimer); pointerTimer=null; pointerHeld=false;
 }
 
-/* Error handling — focusable buttons for TV remotes */
+/* Errors */
 function onFatal(msg){
   showControls();
   errorTray.style.display='flex';
@@ -614,7 +492,6 @@ function resetErrors(){
   btnRetry.classList.remove('focus'); btnVLC.classList.remove('focus'); btnNative.classList.remove('focus');
 }
 
-/* Playback */
 function isHttpBlocked(u){ return location.protocol==='https:' && isHttp(u); }
 
 function playHls(url){
@@ -625,7 +502,10 @@ function playHls(url){
   });
   hls.attachMedia(player);
   hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
-  hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); });
+  hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{
+    try{ await player.play(); }catch(e){}
+    requestFS(player);
+  });
   hls.on(Hls.Events.ERROR, (_evt,data)=>{ if(data?.fatal){ onFatal('Playback error: ' + (data?.details || data?.type || 'HLS')); }});
 }
 function playTs(url){
@@ -634,7 +514,7 @@ function playTs(url){
     return;
   }
   tsPlayer = mpegts.createPlayer(
-    { type: 'mpegts', isLive: true, url },
+    { type:'mpegts', isLive:true, url },
     { enableWorker:true, liveBufferLatencyChasing:true }
   );
   tsPlayer.attachMediaElement(player);
@@ -642,22 +522,23 @@ function playTs(url){
   tsPlayer.play().then(()=>requestFS(player)).catch(()=>requestFS(player));
 }
 function playURL(url){
-  resetErrors(); currentURL = url;
-  destroyPlayers();
-  if (isHttpBlocked(url)){
-    onFatal('This stream is HTTP on an HTTPS page (blocked by the browser). Try “Open in VLC / Open natively”.');
-    return;
-  }
+  resetErrors(); currentURL=url; destroyPlayers();
+  ['playing'].forEach(ev=>player.addEventListener(ev, startupWatchStop, {once:true}));
+  if (isHttpBlocked(url)){ onFatal('HTTP stream blocked on HTTPS page. Use “Open in VLC / Open natively”.'); return; }
+  ['error','stalled','abort','emptied'].forEach(ev=>{
+    player.addEventListener(ev, ()=>{ onFatal('Playback error ('+ev+')'); }, {once:true});
+  });
+  startupWatchStart();
   if (isHls(url)){
     if (window.Hls && Hls.isSupported()) playHls(url);
     else if (player.canPlayType('application/vnd.apple.mpegurl')){
-      player.src = url;
+      player.src=url;
       player.addEventListener('loadedmetadata', async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); }, {once:true});
     } else onFatal('HLS not supported on this device.');
     return;
   }
   if (isTs(url)){ playTs(url); return; }
-  location.href = url;
+  location.href=url;
 }
 async function requestFS(el){
   try{
@@ -667,22 +548,18 @@ async function requestFS(el){
     else if(el.msRequestFullscreen) await el.msRequestFullscreen();
   }catch(e){}
 }
-async function openPlayer(ch){ showOverlay(); currentChannel = ch; playURL(ch.url); }
+async function openPlayer(ch){ showOverlay(); currentChannel=ch; playURL(ch.url); }
 
-/* Overlay key handling — navigate Close & Error tray with D-pad */
-document.addEventListener('keydown', (e)=>{
+/* Overlay keys */
+document.addEventListener('keydown',(e)=>{
   if(!overlay.classList.contains('show')) return;
   const k=e.key;
 
   if(k==='Backspace' || k==='Escape' || k==='BrowserBack'){
     e.preventDefault();
-    const now = Date.now();
-    if(overlayUIVisible){
-      hideControls(); showBackToast(); lastBackTs = now;
-    }else{
-      if(now - lastBackTs <= BACK_DOUBLE_MS){ hideOverlay(); }
-      else { hideControls(); showBackToast(); lastBackTs = now; }
-    }
+    const now=Date.now();
+    if(overlayUIVisible){ hideControls(); showBackToast(); lastBackTs=now; }
+    else{ if(now-lastBackTs<=BACK_DOUBLE_MS){ hideOverlay(); } else { hideControls(); showBackToast(); lastBackTs=now; } }
     return;
   }
 
@@ -693,115 +570,90 @@ document.addEventListener('keydown', (e)=>{
   if(['ArrowLeft','Left','ArrowRight','Right','ArrowUp','Up','ArrowDown','Down'].includes(k)){
     e.preventDefault(); showControls();
     if(trayVisible){
-      if(k==='ArrowLeft' || k==='Left'){ const n = Math.max(0, idx-1); focusables[n].focus(); markTrayFocus(focusables[n]); }
-      else if(k==='ArrowRight'|| k==='Right'){ const n = Math.min(focusables.length-1, idx+1); focusables[n].focus(); markTrayFocus(focusables[n]); }
-      else if(k==='ArrowUp'   || k==='Up'){ closeBtn.focus(); }
-      else if(k==='ArrowDown' || k==='Down'){ btnRetry.focus(); markTrayFocus(btnRetry); }
-    }else{
-      closeBtn.focus();
-    }
+      if(k==='ArrowLeft'||k==='Left'){ const n=Math.max(0,idx-1); focusables[n].focus(); markTrayFocus(focusables[n]); }
+      else if(k==='ArrowRight'||k==='Right'){ const n=Math.min(focusables.length-1,idx+1); focusables[n].focus(); markTrayFocus(focusables[n]); }
+      else if(k==='ArrowUp'||k==='Up'){ closeBtn.focus(); }
+      else if(k==='ArrowDown'||k==='Down'){ btnRetry.focus(); markTrayFocus(btnRetry); }
+    }else{ closeBtn.focus(); }
     return;
   }
 
   if(k==='Enter'){
-    const el = document.activeElement;
+    const el=document.activeElement;
     if(el===closeBtn){ e.preventDefault(); hideOverlay(); return; }
     if(el===btnRetry){ e.preventDefault(); if(currentURL){ playURL(currentURL); } return; }
-    if(el===btnVLC){
-      e.preventDefault(); if(currentURL){
-        const isHttps = /^https:/.test(currentURL);
-        const hostless = currentURL.replace(/^https?:\/\//,'');
-        const intent = `intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
-        const scheme = 'vlc://' + currentURL;
-        const start = Date.now();
-        const t = setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; setTimeout(()=>{ location.href=currentURL; }, 700); }}, 700);
-        location.href = scheme;
-        const vis = ()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange', vis); };
-        document.addEventListener('visibilitychange', vis);
-      }
-      return;
-    }
-    if(el===btnNative){ e.preventDefault(); if(currentURL){ location.href=currentURL; } return; }
+    if(el===btnVLC){ e.preventDefault(); launchExternal('vlc'); return; }
+    if(el===btnNative){ e.preventDefault(); launchExternal('native'); return; }
   }
 });
-function markTrayFocus(el){
-  [btnRetry,btnVLC,btnNative].forEach(b=>b.classList.toggle('focus', b===el));
-}
+function markTrayFocus(el){ [btnRetry,btnVLC,btnNative].forEach(b=>b.classList.toggle('focus', b===el)); }
 
 /* Error tray actions (mouse/touch) */
 btnRetry.onclick = ()=>{ if(currentURL){ playURL(currentURL); } };
-btnVLC.onclick   = ()=>{ if(currentURL){
-  const isHttps = /^https:/.test(currentURL);
-  const hostless = currentURL.replace(/^https?:\/\//,'');
-  const intent = `intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
-  const scheme = 'vlc://' + currentURL;
-  const start = Date.now();
-  const t = setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; setTimeout(()=>{ location.href=currentURL; }, 700); }}, 700);
-  location.href = scheme;
-  const vis = ()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange', vis); };
-  document.addEventListener('visibilitychange', vis);
-} };
-btnNative.onclick= ()=>{ if(currentURL){ location.href = currentURL; } };
+btnVLC.onclick   = ()=> launchExternal('vlc');
+btnNative.onclick= ()=> launchExternal('native');
 
-/* ---------- Favorites modal wiring ---------- */
-const favModal  = document.getElementById('favModal');
-const favTitle  = document.getElementById('favTitle');
-const favDesc   = document.getElementById('favDesc');
-const favConfirm= document.getElementById('favConfirm');
-const favCancel = document.getElementById('favCancel');
-let favTarget   = null;
+/* External launch: CLOSE OVERLAY FIRST to avoid freezes on return */
+function launchExternal(which){
+  const url=currentURL; if(!url) return;
+  hideOverlay(); // clean state before leaving
+  if(which==='native'){ location.href=url; return; }
+  const isHttps=/^https:/i.test(url);
+  const hostless=url.replace(/^https?:\/\//,'');
+  const intent=`intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
+  const scheme='vlc://'+url;
+  const start=Date.now();
+  const t=setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; }}, 600);
+  location.href=scheme;
+  const vis=()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange',vis); };
+  document.addEventListener('visibilitychange',vis);
+}
 
-favCancel.addEventListener('click', closeFavModal);
-favConfirm.addEventListener('click', ()=>{ if(!favTarget) return; toggleFavorite(favTarget.id); closeFavModal(); });
+/* Watchdog: if we come back visible and playback never started, close overlay */
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden && overlay.classList.contains('show')){
+    const stalled = player.readyState < 2 || player.paused;
+    if(stalled) hideOverlay();
+  }
+});
 
-/* ---------- Exit app modal + main-screen double-back ---------- */
+/* Global guards */
+window.addEventListener('error', ()=>{ if(overlay.classList.contains('show')) hideOverlay(); }, {capture:true});
+window.addEventListener('unhandledrejection', ()=>{ if(overlay.classList.contains('show')) hideOverlay(); });
+
+/* ---------- Exit modal (main screen double back) ---------- */
 const exitModal   = document.getElementById('exitModal');
 const exitCancel  = document.getElementById('exitCancel');
 const exitConfirm = document.getElementById('exitConfirm');
-let mainBackTs    = 0;
+let mainBackTs = 0;
 
-function showExitModal(){
-  exitModal.classList.add('show'); exitModal.setAttribute('aria-hidden','false'); exitConfirm.focus();
-}
-function hideExitModal(){
-  exitModal.classList.remove('show'); exitModal.setAttribute('aria-hidden','true');
-  document.querySelector('.focused-menu, [data-card].focused-card')?.focus();
-}
-function tryExitApp(){
-  try{ window.close(); }catch(e){}
-  setTimeout(()=>{ location.href='about:blank'; }, 60);
-}
+function showExitModal(){ exitModal.classList.add('show'); exitModal.setAttribute('aria-hidden','false'); exitConfirm.focus(); }
+function hideExitModal(){ exitModal.classList.remove('show'); exitModal.setAttribute('aria-hidden','true'); document.querySelector('.focused-menu, [data-card].focused-card')?.focus(); }
+function tryExitApp(){ try{ window.close(); }catch(e){} setTimeout(()=>{ location.href='about:blank'; }, 60); }
 exitCancel.addEventListener('click', hideExitModal);
 exitConfirm.addEventListener('click', tryExitApp);
 
-document.addEventListener('keydown', (e)=>{
-  if(overlay.classList.contains('show') || favModal.classList.contains('show')) return;
-
+document.addEventListener('keydown',(e)=>{
+  if(overlay.classList.contains('show') || document.getElementById('favModal').classList.contains('show')) return;
   if(exitModal.classList.contains('show')){
-    if(e.key==='Backspace' || e.key==='Escape' || e.key==='BrowserBack'){ e.preventDefault(); tryExitApp(); return; }
-    if(e.key==='ArrowLeft' || e.key==='Left'){ e.preventDefault(); exitCancel.focus(); return; }
-    if(e.key==='ArrowRight'|| e.key==='Right'){ e.preventDefault(); exitConfirm.focus(); return; }
+    if(e.key==='Backspace'||e.key==='Escape'||e.key==='BrowserBack'){ e.preventDefault(); tryExitApp(); return; }
+    if(e.key==='ArrowLeft'||e.key==='Left'){ e.preventDefault(); exitCancel.focus(); return; }
+    if(e.key==='ArrowRight'||e.key==='Right'){ e.preventDefault(); exitConfirm.focus(); return; }
     if(e.key==='Enter'){ e.preventDefault(); (document.activeElement===exitCancel?exitCancel:exitConfirm).click(); return; }
     return;
   }
-
-  if(e.key==='Backspace' || e.key==='Escape' || e.key==='BrowserBack'){
+  if(e.key==='Backspace'||e.key==='Escape'||e.key==='BrowserBack'){
     e.preventDefault();
-    const now = Date.now();
-    if(now - mainBackTs <= 1200){ showExitModal(); mainBackTs = 0; }
-    else { mainBackTs = now; showBackToast(); }
+    const now=Date.now();
+    if(now-mainBackTs<=1200){ showExitModal(); mainBackTs=0; }
+    else { mainBackTs=now; showBackToast(); }
   }
 });
 
 /* ---------- Wire up ---------- */
-const gridElClick = (e)=>{
-  const card = e.target.closest('[data-card]'); if(!card) return;
-  const idx = Number(card.dataset.idx); openPlayer(rendered[idx]);
-};
 qEl.addEventListener('input', render);
 selectMenu('all');
 render();
-gridEl.addEventListener('click', gridElClick);
 </script>
 </body>
 </html>
