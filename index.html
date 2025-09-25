@@ -217,7 +217,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 
 <script>
-/* ---------- Header sizing (prevents header overlaying first row) ---------- */
+/* ---------- Header sizing ---------- */
 (function(){
   const header = document.getElementById('topHeader');
   function setHeaderH(){ const h = header.offsetHeight || 72; document.documentElement.style.setProperty('--header-h', h + 'px'); }
@@ -237,10 +237,13 @@ const isHls  = url => /\.m3u8(\?|$)/i.test(url);
 const isTs   = url => /\.ts(\?|$)/i.test(url) || /(?:^|[?&])extension=ts\b/i.test(url);
 const isHttp = url => /^http:\/\//i.test(url);
 
-/* ---------- Channels (duplicate Tele Pam removed) ---------- */
+/* ---------- Channels ---------- */
+/* NOTE: New Twitch sample channel below uses openWith:'vlc' so it always opens externally. */
 const CHANNELS = [
   {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Live from Télé 6 Univers"},
   {"id":"tnh","name":"TNH","logo":"https://yt3.googleusercontent.com/ytc/AIdro_lBzJBBQ1Mc4BVr7u87SMcL3lGU4N6U2WD9-__OgE050a0=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("https://haititivi.com/rezo/boul2/tracks-v1/index.fmp4.m3u8"),"genre":"news","description":"Télévision Nationale d’Haïti"},
+  /* <<< Paste your exact Twitch HLS URL below >>> */
+  {"id":"twitch-vlc","name":"Twitch Stream (Open in VLC)","logo":"https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png","url":"PASTE_FULL_TWITCH_M3U8_HERE","genre":"general","description":"Opens directly in VLC","openWith":"vlc"},
 
   {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news","description":"Stay informed with the latest news from Tele Pacific"},
   {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News"},
@@ -251,7 +254,7 @@ const CHANNELS = [
   {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8"),"genre":"general","description":"Another great channel from the RTH 2000 network"},
   {"id":"channel10","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious","description":"Religious programming and broadcasts"},
   {"id":"channel11","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/4DIASPOTV/4DIASPOTV/chunklist_w507710567.m3u8"),"genre":"general","description":"Variety of entertainment for the Haitian diaspora"},
-  {"id":"channel12","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://acwstream.com/app/2020/telepam/tracks-v1/index.fmp4.m3u8"),"genre":"general","description":"Your own TV channel with diverse content"},
+  {"id":"channel12","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://lakay.online/ott/telepam/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Your own TV channel with diverse content"},
   {"id":"channel13","name":"HMI Promz News","logo":"https://i.imgur.com/gwPaw3v.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8326/8326/chunklist_w1322896209.m3u8"),"genre":"music","description":"Music news and promotions"},
   {"id":"channel14","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":normalizeStream("https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8"),"genre":"religious","description":"Religious programming from Boston"},
   {"id":"channel15","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8"),"genre":"general","description":"A general entertainment channel with a variety of content"},
@@ -318,7 +321,7 @@ function card(c,i){
     <div class="card" data-card data-idx="${i}" tabindex="0" role="button" aria-label="${c.name}">
       <div class="logo">${c.logo?`<img src="${c.logo}" alt="${c.name}" loading="lazy" decoding="async">`:'📺'}</div>
       <div class="title">${c.name}</div>
-      <div class="meta">${c.genre||''}</div>
+      <div class="meta">${c.genre||''}${c.openWith==='vlc'?' · VLC':''}</div>
     </div>
   `;
 }
@@ -425,12 +428,12 @@ gridEl.addEventListener('pointerdown',(e)=>{
 ['pointerup','pointerleave','pointercancel'].forEach(evt=>{ gridEl.addEventListener(evt, ()=>{ clearTimeout(pointerTimer); }); });
 gridEl.addEventListener('click',(e)=>{ const card=e.target.closest('[data-card]'); if(!card) return; if(pointerHeld){ pointerHeld=false; return; } const idx=Number(card.dataset.idx); openPlayer(rendered[idx]); });
 
-/* ---------- Player (freeze-proof) ---------- */
+/* ---------- Player / External launcher ---------- */
 let hls=null, tsPlayer=null, currentURL=null, currentChannel=null;
 let overlayUIVisible=true, lastBackTs=0; const BACK_DOUBLE_MS=1200;
 let toastT=null;
 
-/* Startup watchdog: surface error tray if not playing in ~6s */
+/* Startup watchdog */
 let startTimer=null;
 function startupWatchStart(){
   clearTimeout(startTimer);
@@ -540,6 +543,24 @@ function playURL(url){
   if (isTs(url)){ playTs(url); return; }
   location.href=url;
 }
+
+/* Open externally (VLC or Native). Accepts optional urlArg. */
+function launchExternal(which, urlArg){
+  const url = urlArg || currentURL; if(!url) return;
+  if(overlay.classList.contains('show')) hideOverlay(); // ensure clean state
+  if(which==='native'){ location.href=url; return; }
+  const isHttps=/^https:/i.test(url);
+  const hostless=url.replace(/^https?:\/\//,'');
+  const intent=`intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
+  const scheme='vlc://'+url;
+  const start=Date.now();
+  const t=setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; }}, 600);
+  location.href=scheme;
+  const vis=()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange',vis); };
+  document.addEventListener('visibilitychange',vis);
+}
+
+/* Request fullscreen (for in-app playback only) */
 async function requestFS(el){
   try{
     if(el.requestFullscreen) await el.requestFullscreen();
@@ -548,7 +569,20 @@ async function requestFS(el){
     else if(el.msRequestFullscreen) await el.msRequestFullscreen();
   }catch(e){}
 }
-async function openPlayer(ch){ showOverlay(); currentChannel=ch; playURL(ch.url); }
+
+/* Open player or force external VLC depending on channel */
+async function openPlayer(ch){
+  currentChannel = ch;
+
+  /* Force VLC if channel requests it or URL is a Twitch signed HLS */
+  if (ch.openWith === 'vlc' || /(^|\/\/)[^\/]*ttvnw\.net\//i.test(ch.url)) {
+    launchExternal('vlc', ch.url);
+    return;
+  }
+
+  showOverlay();
+  playURL(ch.url);
+}
 
 /* Overlay keys */
 document.addEventListener('keydown',(e)=>{
@@ -593,23 +627,7 @@ btnRetry.onclick = ()=>{ if(currentURL){ playURL(currentURL); } };
 btnVLC.onclick   = ()=> launchExternal('vlc');
 btnNative.onclick= ()=> launchExternal('native');
 
-/* External launch: CLOSE OVERLAY FIRST to avoid freezes on return */
-function launchExternal(which){
-  const url=currentURL; if(!url) return;
-  hideOverlay(); // clean state before leaving
-  if(which==='native'){ location.href=url; return; }
-  const isHttps=/^https:/i.test(url);
-  const hostless=url.replace(/^https?:\/\//,'');
-  const intent=`intent://${hostless}#Intent;package=org.videolan.vlc;scheme=${isHttps?'https':'http'};end`;
-  const scheme='vlc://'+url;
-  const start=Date.now();
-  const t=setTimeout(()=>{ if(Date.now()-start<1200){ location.href=intent; }}, 600);
-  location.href=scheme;
-  const vis=()=>{ if(document.hidden) clearTimeout(t); document.removeEventListener('visibilitychange',vis); };
-  document.addEventListener('visibilitychange',vis);
-}
-
-/* Watchdog: if we come back visible and playback never started, close overlay */
+/* Visibility watchdog: if we come back and playback never started, close overlay */
 document.addEventListener('visibilitychange', ()=>{
   if(!document.hidden && overlay.classList.contains('show')){
     const stalled = player.readyState < 2 || player.paused;
@@ -657,4 +675,3 @@ render();
 </script>
 </body>
 </html>
-
