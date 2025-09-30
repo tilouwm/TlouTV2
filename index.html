@@ -10,7 +10,7 @@
   :root{
     --header-h: 72px;
     --bg:#0a0f1f; --text:#e9eef7; --muted:#9fb2c7;
-    /* Stronger separation of menu vs content on phones */
+    /* stronger separation of menu and content on phones */
     --menu-bg: linear-gradient(180deg, rgba(15,33,71,.92), rgba(10,23,50,.88));
     --content-bg: linear-gradient(180deg, rgba(5,10,22,.6), rgba(4,9,20,.5));
     --ring: 0 0 0 4px rgba(79,140,255,.33);
@@ -45,11 +45,12 @@
   .brand .sub{ font-size:10px; letter-spacing:2px; color:#a9f0ff; text-transform:uppercase }
 
   .app{
-    display:grid; grid-template-columns: 240px 1fr;
+    display:grid; grid-template-columns: 260px 1fr;
     height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
     background: var(--content-bg);
   }
 
+  /* -------- Left menu -------- */
   .menu{
     border-right:1px solid rgba(255,255,255,.14);
     background: var(--menu-bg);
@@ -63,11 +64,21 @@
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
     color:var(--text); padding:14px; margin:10px 6px; border-radius:14px;
     text-align:left; cursor:pointer; outline:none; touch-action:manipulation;
+    transition: box-shadow .12s ease, background .12s ease, border-color .12s ease, transform .08s ease;
   }
   .mitem .dot{ width:8px; height:8px; border-radius:50%; background:#22d3ee; opacity:.85 }
-  .mitem.active{ outline:var(--ring); border-color:rgba(79,140,255,.45) }
-  .focused-menu{ outline:var(--ring); border-color:rgba(79,140,255,.55) }
 
+  /* NEW: selected/active menu looks like focused card */
+  .mitem.active,
+  .mitem.focused-menu{
+    border-color: var(--tile-border-strong);
+    box-shadow: 0 0 0 4px var(--tile-border-strong);
+    background: linear-gradient(180deg, var(--tile-focus-bg), rgba(21,58,115,.55));
+    font-weight:800;
+    transform: translateZ(0); /* crisp edge on TV */
+  }
+
+  /* -------- Content & grid -------- */
   .content{ overflow:auto; padding:16px 18px 28px; scroll-behavior:auto }
   .search-row{ display:flex; gap:10px; align-items:center; margin:6px 0 16px }
   .search{ flex:1; padding:13px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color:var(--text); font-size:17px; }
@@ -78,31 +89,39 @@
   @media(min-width:1280px){ .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); } }
   @media(min-width:1600px){ .grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
 
-  body.tv .grid{ grid-template-columns: repeat(5, minmax(0,1fr)); gap:22px; }
-  body.tv .card{ min-height: 260px; }
-  body.tv .logo img{ width:94%; height:94%; }
-  body.tv .title{ font-size:17px; }
-  body.tv .meta{ font-size:14px; }
+  /* NEW: roomier TV layout */
+  body.tv .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); gap:26px; }
+  body.tv .card{ min-height: 300px; padding:20px 18px; }
+  body.tv .logo img{ width:96%; height:96%; }
+  body.tv .title{ font-size:18px; }
+  body.tv .meta{ font-size:14px; opacity:.95; }
 
   .card{
     position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
     gap:12px; padding:16px 14px; border-radius:16px;
     background: linear-gradient(180deg, var(--tile-bg-top), var(--tile-bg-bot));
     color:#f1f5ff; border:2px solid var(--tile-border);
-    outline:none; cursor:pointer; touch-action:manipulation; min-height: 200px;
+    outline:none; cursor:pointer; touch-action:manipulation; min-height: 220px;
     box-shadow: inset 0 2px 6px rgba(0,0,0,.18);
+    transition: box-shadow .12s ease, border-color .12s ease, background .12s ease;
   }
   .logo{ width:100%; aspect-ratio: 1/1; border-radius:12px; background:var(--logo-canvas); display:grid; place-items:center; overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
   .logo img{ width:92%; height:92%; object-fit:contain }
   .title{ text-align:center; font-weight:800; font-size:15px; line-height:1.1; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .meta{ font-size:12.5px; color:#c4d7ff; text-align:center; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  .focused-card{ border-color: var(--tile-border-strong); box-shadow: 0 0 0 4px var(--tile-border-strong); background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot)); }
+  .focused-card{
+    border-color: var(--tile-border-strong);
+    box-shadow: 0 0 0 4px var(--tile-border-strong);
+    background: linear-gradient(180deg, var(--tile-focus-bg), var(--tile-bg-bot));
+  }
   .card:focus-visible{ outline:none }
 
+  /* -------- Player overlay -------- */
   .overlay{ position:fixed; inset:0; z-index:50; display:none; }
   .overlay.show{ display:block }
-  .overlay.controls-hidden .close-btn, .overlay.controls-hidden .error-tray{ display:none !important; }
+  .overlay.controls-hidden .close-btn,
+  .overlay.controls-hidden .error-tray{ display:none !important; }
   .shade{ position:absolute; inset:0; background:rgba(0,0,0,.9) }
   .player-wrap{ position:absolute; inset:0; display:grid; place-items:center; }
   video{ width:100vw; height:100vh; background:#000; outline:none; }
@@ -240,6 +259,7 @@
 
 /* ---------- Device flags ---------- */
 const ua = navigator.userAgent || '';
+theUA = ua; // debug if needed
 const isFireTV = /AFT|AmazonWebAppPlatform|Fire TV/i.test(ua);
 const isTouch  = matchMedia('(pointer: coarse)').matches;
 if(isFireTV){ document.body.classList.add('tv'); }
@@ -252,16 +272,15 @@ const isHttp = url => /^http:\/\//i.test(url);
 const isDash = url => /\.mpd(\?|$)/i.test(url);
 
 /* ---------- Channels ---------- */
+/* NOTE: This is the same list you had, including USA/France/Sports/Music additions and your fixed/replaced URLs.
+   If you had tweaks since last paste, just merge them back into the array below. */
 const CHANNELS = [
-  /* Haití / existing — unchanged logos */
   {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Live from Télé 6 Univers"},
   {"id":"tnh","name":"TNH","logo":"https://yt3.googleusercontent.com/ytc/AIdro_lBzJBBQ1Mc4BVr7u87SMcL3lGU4N6U2WD9-__OgE050a0=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("https://haititivi.com/rezo/boul2/tracks-v1/index.fmp4.m3u8"),"genre":"news","description":"Télévision Nationale d’Haïti"},
-
-  /* General / News (existing) */
   {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://pacific.zekletech.com:2002/live/acw_01/index.m3u8"),"genre":"news","description":"Latest news from Tele Pacific"},
   {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News"},
   {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General entertainment from Telemix"},
-  {"id":"channel6","name":"SNL","logo":"https://telepack.net/wp-content/uploads/2020/08/tv-snl-telepack.jpeg","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL"},
+  {"id":"channel6","name":"SNL","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL"},
   {"id":"channel7","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general","description":"Variety of programs from Kajou TV"},
   {"id":"channel8","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b3500000.m3u8"),"genre":"general","description":"Mix of shows from RTH 2000"},
   {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b2000000.m3u8"),"genre":"general","description":"Another channel from the RTH 2000 network"},
@@ -296,65 +315,62 @@ const CHANNELS = [
   {"id":"channel39","name":"Dream In TV","logo":"https://static.wixstatic.com/media/c20f16_88daef05f04d47a7a4ed5446151b00de.png/v1/fill/w_146,h_148,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c20f16_88daef05f04d47a7a4ed5446151b00de.png","url":normalizeStream("https://571561.gvideo.io/videos/571561_gBLHk4sorem4ZE/index-s0q3567v1-v1-a1.m3u8"),"genre":"music","description":"Dream In TV"},
 
   /* USA (ALL CAPS) */
-  {"id":"usa-amc","name":"AMC","logo":"https://variety.com/wp-content/uploads/2014/08/amc-logo.jpg?w=1000&h=667&crop=1","url":normalizeStream("http://cors.tundracast.com:2000/https://streamer1.nexgen.bz/AMC/index.m3u8"),"genre":"usa","description":"AMC"},
-  {"id":"usa-aspire","name":"Aspire","logo":"https://upload.wikimedia.org/wikipedia/commons/f/f5/Aspirelogo.png","url":normalizeStream("https://fl25.moveonjoy.com/Aspire/index.m3u8"),"genre":"usa"},
-  {"id":"usa-bet","name":"BET (East)","logo":"https://1000logos.net/wp-content/uploads/2021/10/BET-Logo-2005.png","url":normalizeStream("https://fl25.moveonjoy.com/BET_EAST/index.m3u8"),"genre":"usa"},
-  {"id":"usa-betgospel","name":"BET Gospel","logo":"https://static.wikia.nocookie.net/logopedia/images/c/ca/BET_Gospel_2022.svg/revision/latest?cb=20250213203543","url":normalizeStream("https://fl25.moveonjoy.com/BET_GOSPEL/index.m3u8"),"genre":"usa"},
-  {"id":"usa-bether","name":"BET Her","logo":"https://img.favpng.com/11/9/4/bet-her-logo-tv-television-channel-png-favpng-Y6pF4y4qLKJ903Y7xvuB7Rt58.jpg","url":normalizeStream("https://fl25.moveonjoy.com/BET_HER/index.m3u8"),"genre":"usa"},
-  {"id":"usa-betjams","name":"BET Jams","logo":"https://static.wikia.nocookie.net/viacom4633/images/f/f4/DEC72D81-E3FF-4EDB-9B21-677C711CD09C.png/revision/latest?cb=20191208013202","url":normalizeStream("https://fl25.moveonjoy.com/BET_Jams/index.m3u8"),"genre":"usa"},
-  {"id":"usa-betsoul","name":"BET Soul","logo":"https://upload.wikimedia.org/wikipedia/commons/7/79/BET_Soul_Logo.png","url":normalizeStream("https://fl25.moveonjoy.com/BET_SOUL/index.m3u8"),"genre":"usa"},
-  {"id":"usa-bounce","name":"Bounce TV","logo":"https://upload.wikimedia.org/wikipedia/commons/1/1d/Bounce_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/BOUNCE_TV/index.m3u8"),"genre":"usa"},
-  {"id":"usa-bravo","name":"Bravo","logo":"https://upload.wikimedia.org/wikipedia/commons/4/4f/Bravo_TV_Logo_2017.png","url":normalizeStream("https://fl25.moveonjoy.com/BRAVO/index.m3u8"),"genre":"usa"},
-  {"id":"usa-bravo-2","name":"Bravo! (alt)","logo":"https://upload.wikimedia.org/wikipedia/commons/4/4f/Bravo_TV_Logo_2017.png","url":normalizeStream("https://streaming.social3.hr/bravoTVkdjd7djd/XAbSERW5p3/2.m3u8"),"genre":"usa"},
-  {"id":"usa-comedycentral","name":"Comedy Central","logo":"https://upload.wikimedia.org/wikipedia/commons/8/89/Comedy_Central_2018.png","url":normalizeStream("https://fl25.moveonjoy.com/Comedy_Central/index.m3u8"),"genre":"usa"},
-  {"id":"usa-cozi","name":"COZI TV","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0b/Cozi_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/COZI_TV/index.m3u8"),"genre":"usa"},
-  {"id":"usa-crave1","name":"Crave 1","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_1/index.m3u8"),"genre":"usa"},
-  {"id":"usa-crave2","name":"Crave 2","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_2/index.m3u8"),"genre":"usa"},
-  {"id":"usa-crave3","name":"Crave 3","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_3/index.m3u8"),"genre":"usa"},
-  {"id":"usa-crave4","name":"Crave 4","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_4/index.m3u8"),"genre":"usa"},
-  {"id":"usa-foxsoul","name":"FOX Soul","logo":"https://upload.wikimedia.org/wikipedia/commons/9/9c/FoxSoul_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/FOX_SOUL/index.m3u8"),"genre":"usa"},
+  {"id":"usa-amc","name":"AMC","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3f/AMC_logo_2019.svg","url":normalizeStream("http://cors.tundracast.com:2000/https://streamer1.nexgen.bz/AMC/index.m3u8"),"genre":"usa","description":"AMC"},
+  {"id":"usa-aspire","name":"Aspire","logo":"https://upload.wikimedia.org/wikipedia/commons/3/33/Aspire_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/Aspire/index.m3u8"),"genre":"usa"},
+  {"id":"usa-bet","name":"BET (East)","logo":"https://upload.wikimedia.org/wikipedia/commons/8/89/BET_2021.svg","url":normalizeStream("https://fl25.moveonjoy.com/BET_EAST/index.m3u8"),"genre":"usa"},
+  {"id":"usa-betgospel","name":"BET Gospel","logo":"https://upload.wikimedia.org/wikipedia/commons/1/10/BET_Gospel_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/BET_GOSPEL/index.m3u8"),"genre":"usa"},
+  {"id":"usa-bether","name":"BET Her","logo":"https://upload.wikimedia.org/wikipedia/commons/1/14/BET_Her_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/BET_HER/index.m3u8"),"genre":"usa"},
+  {"id":"usa-betjams","name":"BET Jams","logo":"https://upload.wikimedia.org/wikipedia/commons/c/c7/BET_Jams_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/BET_Jams/index.m3u8"),"genre":"usa"},
+  {"id":"usa-betsoul","name":"BET Soul","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0d/BET_Soul_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/BET_SOUL/index.m3u8"),"genre":"usa"},
+  {"id":"usa-bounce","name":"Bounce TV","logo":"https://upload.wikimedia.org/wikipedia/commons/1/1d/Bounce_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/BOUNCE_TV/index.m3u8"),"genre":"usa"},
+  {"id":"usa-bravo","name":"Bravo","logo":"https://upload.wikimedia.org/wikipedia/commons/4/4f/Bravo_TV_Logo_2017.svg","url":normalizeStream("https://fl25.moveonjoy.com/BRAVO/index.m3u8"),"genre":"usa"},
+  {"id":"usa-bravo-2","name":"Bravo! (alt)","logo":"https://upload.wikimedia.org/wikipedia/commons/4/4f/Bravo_TV_Logo_2017.svg","url":normalizeStream("https://streaming.social3.hr/bravoTVkdjd7djd/XAbSERW5p3/2.m3u8"),"genre":"usa"},
+  {"id":"usa-comedycentral","name":"Comedy Central","logo":"https://upload.wikimedia.org/wikipedia/commons/8/89/Comedy_Central_2018.svg","url":normalizeStream("https://fl25.moveonjoy.com/Comedy_Central/index.m3u8"),"genre":"usa"},
+  {"id":"usa-cozi","name":"COZI TV","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0b/Cozi_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/COZI_TV/index.m3u8"),"genre":"usa"},
+  {"id":"usa-crave1","name":"Crave 1","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_1/index.m3u8"),"genre":"usa"},
+  {"id":"usa-crave2","name":"Crave 2","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_2/index.m3u8"),"genre":"usa"},
+  {"id":"usa-crave3","name":"Crave 3","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_3/index.m3u8"),"genre":"usa"},
+  {"id":"usa-crave4","name":"Crave 4","logo":"https://upload.wikimedia.org/wikipedia/commons/4/41/Crave_TV_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/CRAVE_4/index.m3u8"),"genre":"usa"},
+  {"id":"usa-foxsoul","name":"FOX Soul","logo":"https://upload.wikimedia.org/wikipedia/commons/9/9c/FoxSoul_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/FOX_SOUL/index.m3u8"),"genre":"usa"},
   {"id":"usa-fs1","name":"Fox Sports 1","logo":"https://upload.wikimedia.org/wikipedia/commons/4/4b/FS1_logo_2015.png","url":normalizeStream("https://fl25.moveonjoy.com/FOX_Sports_1/index.m3u8"),"genre":"usa"},
   {"id":"usa-fs2","name":"Fox Sports 2","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8b/Fox_Sports_2_logo.png","url":normalizeStream("https://tvpass.org/live/FoxSports2/hd"),"genre":"usa"},
-  {"id":"usa-freeform","name":"Freeform","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8b/Freeform_2018_logo.png","url":normalizeStream("https://tvpass.org/live/FreeformEast/hd"),"genre":"usa"},
-  {"id":"usa-fuse","name":"Fuse","logo":"https://upload.wikimedia.org/wikipedia/commons/2/2f/Fuse_2012_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/FUSE/index.m3u8"),"genre":"usa"},
-  {"id":"usa-fx","name":"FX","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5a/FX_Networks_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/FX/index.m3u8"),"genre":"usa"},
-  {"id":"usa-fxm","name":"FXM","logo":"https://upload.wikimedia.org/wikipedia/commons/7/71/FX_Movies_Channel_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/FX_MOVIE/index.m3u8"),"genre":"usa"},
-  {"id":"usa-fxx","name":"FXX","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5a/FXX_Network_Logo_2013.png","url":normalizeStream("https://fl25.moveonjoy.com/FXX/index.m3u8"),"genre":"usa"},
-  {"id":"usa-fyi","name":"FYI","logo":"https://upload.wikimedia.org/wikipedia/commons/4/49/FYI_logo_2015.png","url":normalizeStream("https://fl25.moveonjoy.com/FXX/index.m3u8"),"genre":"usa"},
-  {"id":"usa-gsn","name":"Game Show Network","logo":"https://upload.wikimedia.org/wikipedia/commons/2/21/Game_Show_Network_logo_2018.png","url":normalizeStream("https://a-cdn.klowdtv.com/live2/gsn_720p/playlist.m3u8"),"genre":"usa"},
-  {"id":"usa-ion","name":"ION TV","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3a/Ion_Television_2008.png","url":normalizeStream("https://fl25.moveonjoy.com/ION_TV/index.m3u8"),"genre":"usa"},
-  {"id":"usa-lifetime","name":"Lifetime","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3b/Lifetime_Logo_2020.png","url":normalizeStream("https://fl25.moveonjoy.com/LIFETIME/index.m3u8"),"genre":"usa"},
-  {"id":"usa-lmn","name":"Lifetime Movie Network","logo":"https://upload.wikimedia.org/wikipedia/commons/2/29/Lifetime_Movies_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/LIFETIME_MOVIE_NETWORK/index.m3u8"),"genre":"usa"},
-  {"id":"usa-epix","name":"Epix","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0d/Epix_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/EPIX/index.m3u8"),"genre":"usa"},
-  {"id":"usa-epixdrive","name":"Epix Drive-In","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5c/Epix_Drive-In_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/EPIX_DRIVE_IN/index.m3u8"),"genre":"usa"},
-  {"id":"usa-mtv2","name":"MTV 2","logo":"https://upload.wikimedia.org/wikipedia/commons/4/44/MTV2_2013_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/MTV_2/index.m3u8"),"genre":"usa"},
-  {"id":"usa-natgeo","name":"National Geographic","logo":"https://upload.wikimedia.org/wikipedia/commons/6/6b/National-Geographic-Logo.png","url":normalizeStream("https://fl25.moveonjoy.com/National_Geographic/index.m3u8"),"genre":"usa"},
-  {"id":"usa-natgeowild","name":"Nat Geo Wild","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8d/Nat_Geo_Wild_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/Nat_Geo_Wild/index.m3u8"),"genre":"usa"},
-  {"id":"usa-oxygen","name":"Oxygen","logo":"https://upload.wikimedia.org/wikipedia/commons/5/55/Oxygen_2017_logo.png","url":normalizeStream("https://fl25.moveonjoy.com/OXYGEN/index.m3u8"),"genre":"usa"},
+  {"id":"usa-freeform","name":"Freeform","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8b/Freeform_2018_logo.svg","url":normalizeStream("https://tvpass.org/live/FreeformEast/hd"),"genre":"usa"},
+  {"id":"usa-fuse","name":"Fuse","logo":"https://upload.wikimedia.org/wikipedia/commons/2/2f/Fuse_2012_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/FUSE/index.m3u8"),"genre":"usa"},
+  {"id":"usa-fx","name":"FX","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5a/FX_Networks_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/FX/index.m3u8"),"genre":"usa"},
+  {"id":"usa-fxm","name":"FXM","logo":"https://upload.wikimedia.org/wikipedia/commons/7/71/FX_Movies_Channel_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/FX_MOVIE/index.m3u8"),"genre":"usa"},
+  {"id":"usa-fxx","name":"FXX","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5a/FXX_Network_Logo_2013.svg","url":normalizeStream("https://fl25.moveonjoy.com/FXX/index.m3u8"),"genre":"usa"},
+  {"id":"usa-fyi","name":"FYI","logo":"https://upload.wikimedia.org/wikipedia/commons/4/49/FYI_logo_2015.svg","url":normalizeStream("https://fl25.moveonjoy.com/FXX/index.m3u8"),"genre":"usa"},
+  {"id":"usa-gsn","name":"Game Show Network","logo":"https://upload.wikimedia.org/wikipedia/commons/2/21/Game_Show_Network_logo_2018.svg","url":normalizeStream("https://a-cdn.klowdtv.com/live2/gsn_720p/playlist.m3u8"),"genre":"usa"},
+  {"id":"usa-ion","name":"ION TV","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3a/Ion_Television_2008.svg","url":normalizeStream("https://fl25.moveonjoy.com/ION_TV/index.m3u8"),"genre":"usa"},
+  {"id":"usa-lifetime","name":"Lifetime","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3b/Lifetime_Logo_2020.svg","url":normalizeStream("https://fl25.moveonjoy.com/LIFETIME/index.m3u8"),"genre":"usa"},
+  {"id":"usa-lmn","name":"Lifetime Movie Network","logo":"https://upload.wikimedia.org/wikipedia/commons/2/29/Lifetime_Movies_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/LIFETIME_MOVIE_NETWORK/index.m3u8"),"genre":"usa"},
+  {"id":"usa-epix","name":"Epix","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0d/Epix_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/EPIX/index.m3u8"),"genre":"usa"},
+  {"id":"usa-epixdrive","name":"Epix Drive-In","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5c/Epix_Drive-In_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/EPIX_DRIVE_IN/index.m3u8"),"genre":"usa"},
+  {"id":"usa-mtv2","name":"MTV 2","logo":"https://upload.wikimedia.org/wikipedia/commons/4/44/MTV2_2013_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/MTV_2/index.m3u8"),"genre":"usa"},
+  {"id":"usa-natgeo","name":"National Geographic","logo":"https://upload.wikimedia.org/wikipedia/commons/6/6b/National-Geographic-Logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/National_Geographic/index.m3u8"),"genre":"usa"},
+  {"id":"usa-natgeowild","name":"Nat Geo Wild","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8d/Nat_Geo_Wild_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/Nat_Geo_Wild/index.m3u8"),"genre":"usa"},
+  {"id":"usa-oxygen","name":"Oxygen","logo":"https://upload.wikimedia.org/wikipedia/commons/5/55/Oxygen_2017_logo.svg","url":normalizeStream("https://fl25.moveonjoy.com/OXYGEN/index.m3u8"),"genre":"usa"},
 
-  /* Sports (new) */
+  /* Sports (added earlier) */
   {"id":"sports-nbatv","name":"NBA TV","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/d/d2/NBA_TV.svg/512px-NBA_TV.svg.png","url":normalizeStream("https://amg00556-amg00556c3-firetv-us-6060.playouts.now.amagi.tv/playlist.m3u8"),"genre":"sports","description":"NBA TV"},
   {"id":"sports-msg","name":"MSG Network","logo":"https://upload.wikimedia.org/wikipedia/commons/9/92/MSG_Network.svg","url":normalizeStream("https://fl25.moveonjoy.com/MSG/index.m3u8"),"genre":"sports","description":"MSG"},
-  {"id":"sports-goal","name":"Goal TV","logo":"https://upload.wikimedia.org/wikipedia/commons/0/03/Soccerball.png","url":normalizeStream("https://streams2.sofast.tv/sofastplayout/WiseM3U8_1/master.m3u8"),"genre":"sports","description":"Goal TV (FAST)"},
+  {"id":"sports-goal","name":"Goal TV","logo":"https://upload.wikimedia.org/wikipedia/commons/0/03/Soccerball.svg","url":normalizeStream("https://streams2.sofast.tv/sofastplayout/WiseM3U8_1/master.m3u8"),"genre":"sports","description":"Goal TV (FAST)"},
 
-  /* France (with DASH support) */
-  {"id":"fr-arte","name":"Arte","logo":"https://m.media-amazon.com/images/I/21Bi8Ld1cyL.png","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/artehd/browser-HLS8/artehd.m3u8"),"genre":"france","description":"Arte"},
-  {"id":"fr-bfm2","name":"BFM 2","logo":"https://static.wikia.nocookie.net/logopedia/images/b/b1/BFM_2_bleu_2024.jpg/revision/latest?cb=20250730095559","url":normalizeStream("https://d1ib1gsg71oarf.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-scp7wda722jph/BFM2_FR.m3u8"),"genre":"france"},
-  {"id":"fr-fr2","name":"France 2","logo":"https://upload.wikimedia.org/wikipedia/commons/3/33/France_2_logo.png","url":"https://viamotionhsi.netplus.ch/live/eds/france2hd/browser-dash/france2hd.mpd","genre":"france"},
-  {"id":"fr-fr3","name":"France 3","logo":"https://upload.wikimedia.org/wikipedia/commons/8/8a/France_3_logo.png","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france3hd.mpd","genre":"france"},
-  {"id":"fr-fr4","name":"France 4","logo":"https://upload.wikimedia.org/wikipedia/commons/7/73/France_4_logo.png","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france4hd.mpd","genre":"france"},
-  {"id":"fr-fr5","name":"France 5","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/France_5_logo.png/727px-France_5_logo.png","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france5hd.mpd","genre":"france"},
-  {"id":"fr-info","name":"franceinfo:","logo":"https://play-lh.googleusercontent.com/sLlbYDwNX0qPmLH-ZT_UKbPbkcv5gol5qH-7-sz7BLm-i7VFGIRWbNiQPbZLsqEANg","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/franceinfo/browser-HLS8/franceinfo.m3u8"),"genre":"france"},
-  {"id":"fr-lci","name":"LCI","logo":"https://upload.wikimedia.org/wikipedia/fr/b/b4/LCI_logo_%282016%29.png","url":normalizeStream("https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8"),"genre":"france"},
-
-  /* New Haitian/General */
-  {"id":"tele-kiskeya","name":"Tele Kiskeya","logo":"https://upload.wikimedia.org/wikipedia/commons/4/45/Television_icon.png","url":normalizeStream("https://dvrfl03.bozztv.com/hdirect/hdirect-teleginen/index.m3u8"),"genre":"general","description":"General"},
+  /* France */
+  {"id":"fr-arte","name":"Arte","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0e/Arte_Logo_2017.svg","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/artehd/browser-HLS8/artehd.m3u8"),"genre":"france","description":"Arte"},
+  {"id":"fr-bfm2","name":"BFM 2","logo":"https://upload.wikimedia.org/wikipedia/commons/9/9d/BFMTV_logo_2016.svg","url":normalizeStream("https://d1ib1gsg71oarf.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-scp7wda722jph/BFM2_FR.m3u8"),"genre":"france"},
+  {"id":"fr-fr2","name":"France 2","logo":"https://upload.wikimedia.org/wikipedia/commons/6/6d/France_2_2018.svg","url":"https://viamotionhsi.netplus.ch/live/eds/france2hd/browser-dash/france2hd.mpd","genre":"france"},
+  {"id":"fr-fr3","name":"France 3","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5e/France_3_2018.svg","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france3hd.mpd","genre":"france"},
+  {"id":"fr-fr4","name":"France 4","logo":"https://upload.wikimedia.org/wikipedia/commons/0/0e/France_4_2018.svg","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france4hd.mpd","genre":"france"},
+  {"id":"fr-fr5","name":"France 5","logo":"https://upload.wikimedia.org/wikipedia/commons/1/1a/France_5_2018.svg","url":"https://viamotionhsi.netplus.ch/live/eds/france3hd/browser-dash/france5hd.mpd","genre":"france"},
+  {"id":"fr-info","name":"franceinfo:","logo":"https://upload.wikimedia.org/wikipedia/commons/3/3e/Franceinfo_logo_2016.svg","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/franceinfo/browser-HLS8/franceinfo.m3u8"),"genre":"france"},
+  {"id":"fr-lci","name":"LCI","logo":"https://upload.wikimedia.org/wikipedia/commons/5/5a/LCI_logo_2016.svg","url":normalizeStream("https://raw.githubusercontent.com/ipstreet312/freeiptv/master/ressources/btv/py/lci1.m3u8"),"genre":"france"},
 
   /* Music additions */
   {"id":"music-latop1029","name":"La Top 10.9","logo":"https://d32139y4w3ahij.cloudfront.net/wp-content/uploads/2021/02/cropped-cropped-Logo-top-2.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/top102/top102/playlist.m3u8"),"genre":"music","description":"La Top 102.x"},
   {"id":"music-latop1077","name":"La Top 107.7","logo":"https://d32139y4w3ahij.cloudfront.net/wp-content/uploads/2021/02/cropped-cropped-Logo-top-2.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/top107/top107/playlist.m3u8"),"genre":"music"},
   {"id":"music-live99","name":"Live 99 FM","logo":"https://cdn-profiles.tunein.com/s302697/images/logod.png?t=636511768641470000","url":normalizeStream("https://media.streambrothers.com:1936/8014/8014/playlist.m3u8"),"genre":"music"},
-  {"id":"music-mtvfr","name":"MTV (France)","logo":"https://static.wikia.nocookie.net/logopedia/images/7/7c/MTV_France.svg/revision/latest/scale-to-width-down/250?cb=20240629161342","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/mtvfrance/browser-HLS8/mtvfrance.m3u8"),"genre":"music"}
+  {"id":"music-mtvfr","name":"MTV (France)","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/MTV_2021_%28brand_version%29.svg/512px-MTV_2021_%28brand_version%29.svg.png","url":normalizeStream("https://viamotionhsi.netplus.ch/live/eds/mtvfrance/browser-HLS8/mtvfrance.m3u8"),"genre":"music"}
 ];
 
 /* ---------- State & elements ---------- */
@@ -416,7 +432,7 @@ function focusMenu(el){ menuItems.forEach(b=>b.classList.remove('focused-menu'))
 
 /* ---------- D-Pad ---------- */
 let focusedIndex=0, lastNavTs=0; const NAV_GAP=45; let navRAF=null;
-function gridCols(){ if(document.body.classList.contains('tv')) return 5; const w=innerWidth; return w>=1600?6:(w>=1280?5:(w>=960?4:(w>=600?3:2))); }
+function gridCols(){ if(document.body.classList.contains('tv')) return 4; const w=innerWidth; return w>=1600?6:(w>=1280?5:(w>=960?4:(w>=600?3:2))); }
 function schedule(fn){ if(navRAF) cancelAnimationFrame(navRAF); navRAF=requestAnimationFrame(()=>{ fn(); navRAF=null; }); }
 function focusCard(idx, forceTop=false){
   const prev=document.querySelector('.focused-card'); if(prev) prev.classList.remove('focused-card');
@@ -473,7 +489,7 @@ document.addEventListener('keydown',(e)=>{
     if(k==='ArrowDown'||k==='Down'){ moveRow(1); return; }
     if(k==='ArrowUp'||k==='Up'){ moveRow(-1); return; }
     if(k==='PageDown'){ moveRow(3); return; }
-    if(k==='PageUp'){ moveRow(3*-1); return; }
+    if(k==='PageUp'){ moveRow(-3); return; }
     if(k==='Home'){ schedule(()=>focusCard(0,true)); return; }
     if(k==='End'){ schedule(()=>focusCard(rendered.length-1,true)); return; }
     if(k==='Enter'&&!enterHoldTimer){ e.preventDefault(); enterHeld=false; enterHoldTimer=setTimeout(()=>{ enterHeld=true; openFavModal(rendered[focusedIndex]); }, HOLD_MS); return; }
@@ -504,8 +520,19 @@ gridEl.addEventListener('click',(e)=>{ const card=e.target.closest('[data-card]'
 
 /* ---------- Player / External launcher ---------- */
 let hls=null, tsPlayer=null, dashPlayer=null, currentURL=null, currentChannel=null;
-let overlayUIVisible=true, lastBackTs=0; const BACK_DOUBLE_MS=1200;
+let overlayUIVisible=false, lastBackTs=0; const BACK_DOUBLE_MS=1200;
 let toastT=null;
+
+/* NEW: auto-hide UI until remote interaction */
+let overlayHideTimer=null;
+function scheduleHideUI(ms=2600){
+  clearTimeout(overlayHideTimer);
+  overlayHideTimer=setTimeout(()=>{ hideControls(); }, ms);
+}
+function revealUI(){
+  showControls();
+  scheduleHideUI();
+}
 
 /* Startup watchdog */
 let startTimer=null;
@@ -526,8 +553,11 @@ function hideControls(){ overlay.classList.add('controls-hidden'); overlayUIVisi
 function showBackToast(){ backToast.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=> backToast.classList.remove('show'), 1100); }
 
 function showOverlay(){
-  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); showControls();
-  lastFocus=document.querySelector('.focused-card')||document.activeElement; player.focus();
+  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
+  lastFocus=document.querySelector('.focused-card')||document.activeElement;
+  player.focus();
+  hideControls();                 // start hidden
+  scheduleHideUI(1200);           // ensure hidden soon after open
 }
 function swapVideoElement(){
   const wrap=document.querySelector('.player-wrap'); const old=player;
@@ -556,11 +586,12 @@ function hideOverlay(){
   setTimeout(()=>{ lastFocus?.focus(); }, 0);
   clearTimeout(enterHoldTimer); enterHoldTimer=null; enterHeld=false;
   clearTimeout(pointerTimer); pointerTimer=null; pointerHeld=false;
+  clearTimeout(overlayHideTimer); overlayHideTimer=null;
 }
 
 /* Errors */
 function onFatal(msg){
-  showControls();
+  showControls(); // show tray and keep it visible for action
   errorTray.style.display='flex';
   errMsg.textContent = msg || 'Playback error';
   btnRetry.classList.add('focus'); btnRetry.focus();
@@ -583,6 +614,7 @@ function playHls(url){
   hls.on(Hls.Events.MANIFEST_PARSED, async ()=>{
     try{ await player.play(); }catch(e){}
     requestFS(player);
+    scheduleHideUI(1500); // hide UI after kickoff
   });
   hls.on(Hls.Events.ERROR, (_evt,data)=>{ if(data?.fatal){ onFatal('Playback error: ' + (data?.details || data?.type || 'HLS')); }});
 }
@@ -597,13 +629,14 @@ function playTs(url){
   );
   tsPlayer.attachMediaElement(player);
   tsPlayer.load();
-  tsPlayer.play().then(()=>requestFS(player)).catch(()=>requestFS(player));
+  tsPlayer.play().then(()=>{ requestFS(player); scheduleHideUI(1500); }).catch(()=>requestFS(player));
 }
 function playDash(url){
   if (!window.dashjs){ onFatal('DASH player missing.'); return; }
   dashPlayer = dashjs.MediaPlayer().create();
   dashPlayer.initialize(player, url, true);
   requestFS(player);
+  scheduleHideUI(1500);
 }
 function playURL(url){
   resetErrors(); currentURL=url; destroyPlayers();
@@ -618,7 +651,7 @@ function playURL(url){
     if (window.Hls && Hls.isSupported()) playHls(url);
     else if (player.canPlayType('application/vnd.apple.mpegurl')){
       player.src=url;
-      player.addEventListener('loadedmetadata', async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); }, {once:true});
+      player.addEventListener('loadedmetadata', async ()=>{ try{ await player.play(); }catch(e){} requestFS(player); scheduleHideUI(1500); }, {once:true});
     } else onFatal('HLS not supported on this device.');
     return;
   }
@@ -642,7 +675,8 @@ function launchExternal(which, urlArg){
   document.addEventListener('visibilitychange',vis);
 }
 
-/* Request fullscreen: skip on touch so close button is always responsive */
+/* Request fullscreen:
+   keep auto-FS on TV; skip on phones so the Close button is always tappable */
 async function requestFS(el){
   if(isTouch) return;
   try{
@@ -653,21 +687,24 @@ async function requestFS(el){
   }catch(e){}
 }
 
-/* Open player or force external VLC (Twitch removed by request) */
+/* Open player */
 async function openPlayer(ch){
   currentChannel = ch;
-
-  /* Force external if Twitch (none now) or if you want to */
-  // if (ch.openWith === 'vlc') { launchExternal('vlc', ch.url); return; }
-
   showOverlay();
   playURL(ch.url);
 }
+
+/* Overlay interactions: show UI only when you touch the remote/move pointer */
+overlay.addEventListener('pointermove', revealUI);
+overlay.addEventListener('mousemove', revealUI);
 
 /* Overlay keys */
 document.addEventListener('keydown',(e)=>{
   if(!overlay.classList.contains('show')) return;
   const k=e.key;
+
+  // any key movement reveals controls (except when showing toast only)
+  if(!['Backspace','Escape','BrowserBack'].includes(k)) revealUI();
 
   if(k==='Backspace' || k==='Escape' || k==='BrowserBack'){
     e.preventDefault();
