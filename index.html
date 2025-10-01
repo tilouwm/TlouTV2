@@ -275,9 +275,10 @@ const isDash = url => /\.mpd(\?|$)/i.test(url);
 /* NOTE: This is the same list you had, including USA/France/Sports/Music additions and your fixed/replaced URLs.
    If you had tweaks since last paste, just merge them back into the array below. */
 const CHANNELS = [
+  {"id":"tele-metropole","name":"Tele Metropole","logo":"https://www.newsfromhaiti.com/images/tele_metropole.jpg","url":normalizeStream("https://dvrfl03.bozztv.com/hdirect/hdirect-telemetrolple2/index.m3u8"),"genre":"news","description":"Haiti news from Télé Métropole"},
   {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general","description":"Live from Télé 6 Univers"},
   {"id":"tnh","name":"TNH","logo":"https://yt3.googleusercontent.com/ytc/AIdro_lBzJBBQ1Mc4BVr7u87SMcL3lGU4N6U2WD9-__OgE050a0=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("https://haititivi.com/rezo/boul2/tracks-v1/index.fmp4.m3u8"),"genre":"news","description":"Télévision Nationale d’Haïti"},
-  {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://pacific.zekletech.com:2002/live/acw_01/index.m3u8"),"genre":"news","description":"Latest news from Tele Pacific"},
+  {"id":"channel1","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news","description":"Latest news from Tele Pacific"},
   {"id":"channel3","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news","description":"Breaking news and current events from Haiti News"},
   {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general","description":"General entertainment from Telemix"},
   {"id":"channel6","name":"SNL","logo":"https://upload.wikimedia.org/wikipedia/en/thumb/3/30/SNL_logo.svg/1200px-SNL_logo.svg.png","url":normalizeStream("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"),"genre":"general","description":"A mix of shows and general programming from SNL"},
@@ -792,4 +793,3 @@ render();
 </script>
 </body>
 </html>
-
