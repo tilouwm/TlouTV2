@@ -1,10 +1,13 @@
 /* =============================
-   TlouTV Pro — app.js (FIXED)
+   TlouTV Pro — app.js (FULL)
+   - Mobile back: Player -> Rows -> Tabs
+   - Firestick: try in-app 2s then VLC for selected channels
+   - Return from VLC forces Menu (tabs)
+   - Player OK behavior fixed
 ============================= */
 
-/* --------- REQUIRED (you were missing this) --------- */
+/* --------- REQUIRED --------- */
 function normalizeStream(url){
-  // keep it simple: trim + return
   return (url || "").trim();
 }
 
@@ -46,7 +49,7 @@ const CHANNELS = [
   {"id":"channel34","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious"},
   {"id":"channel35","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music"},
   {"id":"channel36","name":"Zoukla TV","logo":"https://www.telezoukla.com/gallery/tv%20zoukla-ts1633041059.png?ts=1768183155","url":normalizeStream("https://vdo.pro-fhi.net:3228/stream/play.m3u8"),"genre":"music"},
-  {"id":"channel37","name":"Generation TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAaQP-C3ATroz7tdW3USycLU19GDxT0H-sCw&s","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
+  {"id":"channel37","name":"Generation TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAaQP-C3ATroz7tdW3USycLU19GDxF0H-sCw&s","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
   {"id":"channel38","name":"Identite TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBLm7oYAN63J2TLWzmUbvV0LuvDKZZ07fMrg&s","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"}
 ];
 
@@ -83,6 +86,73 @@ function isFireTv(){
   return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
 }
 
+/* ================= MOBILE BACK BUTTON (Android/PWA) ================= */
+function pushView(view){
+  try{
+    if (history.state && history.state.view === view) return;
+    history.pushState({ view }, "");
+  } catch(_) {}
+}
+function replaceView(view){
+  try { history.replaceState({ view }, ""); } catch(_) {}
+}
+replaceView('tabs');
+
+window.addEventListener('popstate', () => {
+  // Back from Player -> close player and return to rows
+  if (state.playing){
+    stopPlayback();
+    state.focus = 'rows';
+    updateFocus();
+    return;
+  }
+
+  // Back from Rows -> go to Tabs
+  if (state.focus === 'rows'){
+    state.focus = 'tabs';
+    updateFocus();
+    replaceView('tabs');
+    return;
+  }
+
+  // If already on tabs, let browser/back exit naturally
+});
+
+/* ================= FIRESTICK VLC PREFER LIST ================= */
+const FIRESTICK_PREFER_VLC = new Set([
+  "Radio Tele Ginen",
+  "Radio Tele Puissance",
+  "Radio Tele Caraibes",
+]);
+
+function shouldPreferVlc(channel){
+  return !!channel && isFireTv() && FIRESTICK_PREFER_VLC.has(channel.name);
+}
+
+let pendingVlcTimer = null;
+let pendingVlcUrl = null;
+
+function clearPendingVlc(){
+  if (pendingVlcTimer) clearTimeout(pendingVlcTimer);
+  pendingVlcTimer = null;
+  pendingVlcUrl = null;
+}
+
+/* Force UI back to MENU (tabs) — used when returning from VLC */
+function forceBackToMenu(){
+  clearPendingVlc();
+
+  if (state.playing){
+    try { stopPlayback(); } catch(_) {}
+  }
+
+  state.playing = false;
+  state.menu = false;
+  state.focus = 'tabs';
+  updateFocus();
+  replaceView('tabs');
+}
+
 /* ================= TABS: MOMENTUM + SNAP ================= */
 let tabScrollX = 0;
 let tabVel = 0;
@@ -95,13 +165,11 @@ function tabsMaxShift(){
   const railW = tabsRail.scrollWidth;
   return Math.max(0, railW - viewportW);
 }
-
 function applyTabsShift(){
   const max = tabsMaxShift();
   tabScrollX = Math.max(0, Math.min(tabScrollX, max));
   tabsRail.style.transform = `translateX(${-tabScrollX}px)`;
 }
-
 function snapTabsToCenter(){
   const viewportRect = tabsViewport.getBoundingClientRect();
   const viewportCenter = (viewportRect.left + viewportRect.right) / 2;
@@ -119,7 +187,6 @@ function snapTabsToCenter(){
   tabScrollX += bestDelta;
   applyTabsShift();
 }
-
 function scheduleTabSnap(){
   if (tabSnapTimer) clearTimeout(tabSnapTimer);
   tabSnapTimer = setTimeout(() => {
@@ -139,7 +206,6 @@ tabsViewport.addEventListener('pointerdown', (e) => {
   tabLastX = e.clientX;
   tabsViewport.setPointerCapture?.(e.pointerId);
 });
-
 tabsViewport.addEventListener('pointermove', (e) => {
   if (!tabDragging) return;
   const dx = tabLastX - e.clientX;
@@ -147,7 +213,6 @@ tabsViewport.addEventListener('pointermove', (e) => {
   tabVel += dx;
   scheduleTabSnap();
 });
-
 tabsViewport.addEventListener('pointerup', () => {
   tabDragging = false;
   scheduleTabSnap();
@@ -170,14 +235,12 @@ function getTileSize(rowObj){
   const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 14;
   return { tileW, gap };
 }
-
 function railMaxShift(rowObj){
   const wrapW = rowObj.wrapEl.getBoundingClientRect().width;
   const { tileW, gap } = getTileSize(rowObj);
   const contentW = rowObj.items.length * (tileW + gap) - gap;
   return Math.max(0, contentW - wrapW + 12);
 }
-
 function applyRailShift(rowObj){
   const max = railMaxShift(rowObj);
   rowObj.scrollX = Math.max(0, Math.min(rowObj.scrollX || 0, max));
@@ -228,7 +291,6 @@ function attachRailScroll(rowObj){
 function clearFocused(){
   document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
 }
-
 function ensureRowVisible(rowEl){
   const box = rowsEl.getBoundingClientRect();
   const r = rowEl.getBoundingClientRect();
@@ -236,7 +298,6 @@ function ensureRowVisible(rowEl){
   if (r.top < box.top + pad) rowsEl.scrollTop -= (box.top + pad - r.top);
   else if (r.bottom > box.bottom - pad) rowsEl.scrollTop += (r.bottom - (box.bottom - pad));
 }
-
 function updateRailTransformForFocus(rowObj){
   if (rowObj.dragging) return;
 
@@ -253,7 +314,6 @@ function updateRailTransformForFocus(rowObj){
   rowObj.scrollX = shift;
   applyRailShift(rowObj);
 }
-
 function updateFocus(){
   clearFocused();
 
@@ -373,14 +433,22 @@ function buildVlcIntent(url){
 }
 
 function openExternalFallback(url){
-  loading.style.display = 'block';
-
   if (isFireTv()){
-    loading.innerHTML = 'Opening VLC…<br><small style="font-size:14px;opacity:.7;">Press BACK to return</small>';
-    const intentUri = buildVlcIntent(url);
-    try { window.location.href = intentUri; return; } catch(_){ }
+    // IMPORTANT: set the app back to menu BEFORE jumping to VLC
+    forceBackToMenu();
+
+    // Small delay helps UI render menu state before leaving
+    setTimeout(() => {
+      const intentUri = buildVlcIntent(url);
+      try { window.location.href = intentUri; return; } catch(_){ }
+      try { window.location.assign(intentUri); } catch(_) {}
+    }, 80);
+
+    return;
   }
 
+  // Desktop / normal web fallback
+  loading.style.display = 'block';
   loading.innerHTML = 'Opening external player…<br><small style="font-size:14px;opacity:.7;">If nothing opens, press BACK.</small>';
   let opened = null;
   try { opened = window.open(url, '_blank'); } catch(_) { opened = null; }
@@ -453,8 +521,15 @@ function startWebPlayback(url){
 
     hls = new Hls({
       enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 30,
+      lowLatencyMode: false,
+      backBufferLength: 10,
+      maxBufferLength: 20,
+      maxMaxBufferLength: 40,
+      liveSyncDurationCount: 2,
+      liveMaxLatencyDurationCount: 4,
+      fragLoadingTimeOut: 15000,
+      manifestLoadingTimeOut: 15000,
+      levelLoadingTimeOut: 15000,
       xhrSetup: (xhr) => { xhr.withCredentials = false; }
     });
 
@@ -510,6 +585,8 @@ function startWebPlayback(url){
 }
 
 function openPlayer(channel){
+  clearPendingVlc();
+
   state.playing = true;
   state.menu = false;
 
@@ -520,11 +597,36 @@ function openPlayer(channel){
   loading.style.display = 'block';
   loading.innerHTML = `Loading stream…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
 
+  // Firestick: try in-app for 2 seconds then VLC (only for selected channels)
+  if (shouldPreferVlc(channel)){
+    pendingVlcUrl = channel.url;
+
+    // Start in-app playback attempt
+    startWebPlayback(channel.url);
+
+    // After 2 seconds, if still in player mode, fall back to VLC
+    pendingVlcTimer = setTimeout(() => {
+      if (state.playing && pendingVlcUrl){
+        try{
+          loading.style.display = 'block';
+          loading.innerHTML = `Switching to VLC…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
+        } catch(_) {}
+        openExternalFallback(pendingVlcUrl);
+      }
+    }, 2000);
+
+    updateFocus();
+    return;
+  }
+
+  // Normal behavior for everything else
   startWebPlayback(channel.url);
   updateFocus();
 }
 
 function stopPlayback(){
+  clearPendingVlc();
+
   state.playing = false;
   state.menu = false;
 
@@ -548,8 +650,19 @@ function togglePlayerMenu(){
 
 /* ================= ACTIONS ================= */
 function handleEnter(){
+  // If playing:
+  // 1st Enter shows menu
+  // 2nd Enter (while menu open) exits player
   if (state.playing){
-    togglePlayerMenu();
+    if (!state.menu){
+      togglePlayerMenu();
+    } else {
+      stopPlayback();
+      // after stopping player, go back to menu on Firestick-friendly behavior
+      state.focus = 'tabs';
+      updateFocus();
+      replaceView('tabs');
+    }
     return;
   }
 
@@ -557,24 +670,32 @@ function handleEnter(){
     const cat = tabs[state.tabIdx]?.dataset.cat || 'all';
     setFilter(cat);
     state.focus = 'rows';
+    pushView('rows');
     updateFocus();
     return;
   }
 
   const rowObj = state.rows[state.rowIdx];
   const ch = rowObj ? rowObj.items[state.itemIdx] : null;
-  if (ch) openPlayer(ch);
+  if (ch){
+    pushView('player');
+    openPlayer(ch);
+  }
 }
 
 function handleBack(){
   if (state.playing){
     stopPlayback();
+    state.focus = 'tabs';
+    updateFocus();
+    replaceView('tabs');
     return true;
   }
 
   if (state.focus === 'rows'){
     state.focus = 'tabs';
     updateFocus();
+    replaceView('tabs');
     return true;
   }
 
@@ -585,9 +706,12 @@ function handleBack(){
 tabsRail.addEventListener('click', (e) => {
   const tab = e.target.closest('.tab');
   if (!tab) return;
+
   state.tabIdx = tabs.indexOf(tab);
   setFilter(tab.dataset.cat || 'all');
+
   state.focus = 'rows';
+  pushView('rows');
   updateFocus();
 });
 
@@ -605,11 +729,17 @@ rowsEl.addEventListener('click', (e) => {
     state.rowIdx = rIdx;
     state.itemIdx = iIdx;
     updateFocus();
+    pushView('player');
     handleEnter();
   }
 });
 
-backBtn.addEventListener('click', stopPlayback);
+backBtn.addEventListener('click', () => {
+  stopPlayback();
+  state.focus = 'tabs';
+  updateFocus();
+  replaceView('tabs');
+});
 
 /* ================= FIRESTICK REMOTE / KEYBOARD ================= */
 window.addEventListener('keydown', (e) => {
@@ -645,6 +775,7 @@ window.addEventListener('keydown', (e) => {
     }
     if (keyCode === 40 || key === 'ArrowDown'){
       state.focus = 'rows';
+      pushView('rows');
       updateFocus();
       return;
     }
@@ -668,6 +799,7 @@ window.addEventListener('keydown', (e) => {
     if (keyCode === 38 || key === 'ArrowUp'){
       if (state.rowIdx === 0){
         state.focus = 'tabs';
+        replaceView('tabs');
       } else {
         state.rowIdx = Math.max(0, state.rowIdx - 1);
         state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
@@ -688,6 +820,16 @@ window.addEventListener('resize', () => {
   updateFocus();
   applyTabsShift();
   state.rows.forEach(r => applyRailShift(r));
+});
+
+/* ================= RETURNING FROM VLC ================= */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden){
+    forceBackToMenu();
+  }
+});
+window.addEventListener('focus', () => {
+  forceBackToMenu();
 });
 
 /* ================= INIT ================= */
