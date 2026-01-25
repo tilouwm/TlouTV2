@@ -1,13 +1,15 @@
-/* =========================
-FILE: js/app.js
-========================= */
-
-/* -------- REQUIRED: you were missing this in your broken version -------- */
-function normalizeStream(url){
-  return (url || "").trim();
-}
+/* ===========================
+   TlouTV Pro — app.js (FULL)
+   - Netflix TV style UI
+   - Tabs + Rows render
+   - Firestick remote navigation
+   - HLS playback + VLC fallback
+   - Exit confirmation modal on BACK
+   - Smooth horizontal drag scrolling (rows + tabs)
+   =========================== */
 
 /* ================= CHANNELS ================= */
+// NOTE: Keep this array valid. No extra "]);" at the end.
 const CHANNELS = [
   {"id":"channel1","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel2","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":normalizeStream("https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8"),"genre":"general"},
@@ -46,74 +48,58 @@ const CHANNELS = [
   {"id":"channel35","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music"},
   {"id":"channel36","name":"Zoukla TV","logo":"https://www.telezoukla.com/gallery/tv%20zoukla-ts1633041059.png?ts=1768183155","url":normalizeStream("https://vdo.pro-fhi.net:3228/stream/play.m3u8"),"genre":"music"},
   {"id":"channel37","name":"Generation TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAaQP-C3ATroz7tdW3USycLU19GDxF0H-sCw&s","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
-  {"id":"channel38","name":"Identite TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBLm7oYAN63J2TLWzmUbvV0LuvDKZZ07fMrg&s","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"}
+  {"id":"channel38","name":"Identite TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBLm7oYAN63J2TLWzmUbvV0LuvDKZZ07fMrg&s","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"},
+  {"id":"channel39","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music"}
 ];
 
+const GENRE_ORDER = ["news","general","music","religious","sports"];
+
 /* ================= ELEMENTS ================= */
-const rowsEl = document.getElementById('rows');
-const tabsViewport = document.getElementById('tabsViewport');
-const tabsRail = document.getElementById('tabsRail');
-const tabs = Array.from(document.querySelectorAll('.tab'));
+const rowsEl = document.getElementById("rows");
+const tabsViewport = document.getElementById("tabsViewport");
+const tabsRail = document.getElementById("tabsRail");
+const tabs = Array.from(document.querySelectorAll(".tab"));
 
-const player = document.getElementById('player');
-const video = document.getElementById('videoPlayer');
-const loading = document.getElementById('loading');
-const backBtn = document.getElementById('backBtn');
+const player = document.getElementById("player");
+const video = document.getElementById("videoPlayer");
+const loading = document.getElementById("loading");
+const backBtn = document.getElementById("backBtn");
 
-/* EXIT CONFIRM ELEMENTS */
-const exitModal = document.getElementById('exitConfirm');
-const exitYes = document.getElementById('exitYes');
-const exitNo = document.getElementById('exitNo');
-let exitVisible = false;
+// Exit modal elements (must exist in index.html)
+const exitModal = document.getElementById("exitModal");
+const exitYes = document.getElementById("exitYes");
+const exitNo  = document.getElementById("exitNo");
 
 let hls = null;
 
 /* ================= STATE ================= */
 const state = {
-  focus: 'tabs',
+  focus: "tabs",     // "tabs" | "rows"
   tabIdx: 0,
   rowIdx: 0,
   itemIdx: 0,
-  filter: 'all',
+  filter: "all",
   rows: [],
   playing: false,
-  menu: false
+  menu: false,
+  exitOpen: false,
+  exitChoice: 0 // 0=Yes, 1=No
 };
 
-const GENRE_ORDER = ['news','general','music','religious','sports'];
-
-/* ================= ENV DETECT (FIRE TV / ANDROID TV) ================= */
+/* ================= ENV DETECT ================= */
 function isFireTv(){
-  const ua = navigator.userAgent || '';
+  const ua = navigator.userAgent || "";
   return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
 }
 
-/* ================= EXIT MODAL ================= */
-function showExitConfirm(){
-  exitVisible = true;
-  exitModal.classList.remove('hidden');
-  exitModal.setAttribute('aria-hidden', 'false');
-  exitYes.classList.add('focused');
-  exitNo.classList.remove('focused');
+/* ================= URL NORMALIZATION ================= */
+function normalizeStream(url){
+  if (!url) return "";
+  // leave https, fix accidental spaces
+  return String(url).trim();
 }
 
-function hideExitConfirm(){
-  exitVisible = false;
-  exitModal.classList.add('hidden');
-  exitModal.setAttribute('aria-hidden', 'true');
-}
-
-exitYes.addEventListener('click', () => {
-  // Try to close tab (may be blocked by browser)
-  try { window.close(); } catch(_) {}
-
-  // WebView fallback
-  try { location.href = 'about:blank'; } catch(_) {}
-});
-
-exitNo.addEventListener('click', hideExitConfirm);
-
-/* ================= TABS: MOMENTUM + SNAP (NO PAGE SHIFT) ================= */
+/* ================= TABS MOMENTUM SCROLL ================= */
 let tabScrollX = 0;
 let tabVel = 0;
 let tabDragging = false;
@@ -125,13 +111,11 @@ function tabsMaxShift(){
   const railW = tabsRail.scrollWidth;
   return Math.max(0, railW - viewportW);
 }
-
 function applyTabsShift(){
   const max = tabsMaxShift();
   tabScrollX = Math.max(0, Math.min(tabScrollX, max));
   tabsRail.style.transform = `translateX(${-tabScrollX}px)`;
 }
-
 function snapTabsToCenter(){
   const viewportRect = tabsViewport.getBoundingClientRect();
   const viewportCenter = (viewportRect.left + viewportRect.right) / 2;
@@ -149,36 +133,33 @@ function snapTabsToCenter(){
   tabScrollX += bestDelta;
   applyTabsShift();
 }
-
 function scheduleTabSnap(){
   if (tabSnapTimer) clearTimeout(tabSnapTimer);
   tabSnapTimer = setTimeout(() => {
-    if (!tabDragging && !state.playing) snapTabsToCenter();
+    if (!tabDragging && !state.playing && !state.exitOpen) snapTabsToCenter();
   }, 90);
 }
 
-tabsViewport.addEventListener('wheel', (e) => {
+tabsViewport.addEventListener("wheel", (e) => {
   e.preventDefault();
   const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   tabVel += dx;
   scheduleTabSnap();
 }, { passive:false });
 
-tabsViewport.addEventListener('pointerdown', (e) => {
+tabsViewport.addEventListener("pointerdown", (e) => {
   tabDragging = true;
   tabLastX = e.clientX;
   tabsViewport.setPointerCapture?.(e.pointerId);
 });
-
-tabsViewport.addEventListener('pointermove', (e) => {
+tabsViewport.addEventListener("pointermove", (e) => {
   if (!tabDragging) return;
   const dx = tabLastX - e.clientX;
   tabLastX = e.clientX;
   tabVel += dx;
   scheduleTabSnap();
 });
-
-tabsViewport.addEventListener('pointerup', () => {
+tabsViewport.addEventListener("pointerup", () => {
   tabDragging = false;
   scheduleTabSnap();
 });
@@ -193,70 +174,59 @@ function tickTabsMomentum(){
 }
 tickTabsMomentum();
 
-/* ================= ROW RAIL: SWIPE SCROLL + MOMENTUM ================= */
-function getTileSize(rowObj){
-  const tileEl = rowObj.railEl.querySelector('.tile');
-  const tileW = tileEl ? tileEl.getBoundingClientRect().width : 240;
-  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 14;
-  return { tileW, gap };
-}
-
-function railMaxShift(rowObj){
-  const wrapW = rowObj.wrapEl.getBoundingClientRect().width;
-  const { tileW, gap } = getTileSize(rowObj);
-  const contentW = rowObj.items.length * (tileW + gap) - gap;
-  return Math.max(0, contentW - wrapW + 12);
-}
-
-function applyRailShift(rowObj){
-  const max = railMaxShift(rowObj);
-  rowObj.scrollX = Math.max(0, Math.min(rowObj.scrollX || 0, max));
-  rowObj.railEl.style.transform = `translateX(${-rowObj.scrollX}px)`;
-}
-
+/* ================= ROW RAIL SCROLL (DRAG) ================= */
 function attachRailScroll(rowObj){
-  rowObj.scrollX = rowObj.scrollX || 0;
-  rowObj.velX = 0;
-  rowObj.dragging = false;
-  rowObj.lastX = 0;
+  // We use native scrollLeft for the wrap, but keep rail transforms for remote focus.
+  // Add drag behavior to the wrap.
 
-  rowObj.wrapEl.addEventListener('wheel', (e) => {
+  rowObj.dragging = false;
+  rowObj.allowClick = true;
+  rowObj.startX = 0;
+  rowObj.startScrollLeft = 0;
+
+  // Wheel horizontal support
+  rowObj.wrapEl.addEventListener("wheel", (e) => {
+    // Only affect horizontal scrolling; prevent page from shifting
     e.preventDefault();
     const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    rowObj.velX += dx;
+    rowObj.wrapEl.scrollLeft += dx;
   }, { passive:false });
 
-  rowObj.wrapEl.addEventListener('pointerdown', (e) => {
+  rowObj.wrapEl.addEventListener("pointerdown", (e) => {
     rowObj.dragging = true;
-    rowObj.lastX = e.clientX;
+    rowObj.allowClick = false;
+    rowObj.startX = e.clientX;
+    rowObj.startScrollLeft = rowObj.wrapEl.scrollLeft;
+    rowObj.wrapEl.classList.add("dragging");
     rowObj.wrapEl.setPointerCapture?.(e.pointerId);
   });
 
-  rowObj.wrapEl.addEventListener('pointermove', (e) => {
+  // CONTINUED FROM YOUR LINE:
+  rowObj.wrapEl.addEventListener("pointermove", (e) => {
     if (!rowObj.dragging) return;
-    const dx = rowObj.lastX - e.clientX;
-    rowObj.lastX = e.clientX;
-    rowObj.velX += dx;
+    e.preventDefault();
+
+    const x = e.clientX;
+    const delta = x - rowObj.startX;
+
+    // Invert drag for natural feel
+    rowObj.wrapEl.scrollLeft = rowObj.startScrollLeft - delta;
   });
 
-  rowObj.wrapEl.addEventListener('pointerup', () => {
+  const stopDragging = () => {
     rowObj.dragging = false;
-  });
-
-  const tick = () => {
-    if (!state.playing && Math.abs(rowObj.velX) > 0.12){
-      rowObj.scrollX += rowObj.velX;
-      rowObj.velX *= 0.90;
-      applyRailShift(rowObj);
-    }
-    requestAnimationFrame(tick);
+    rowObj.wrapEl.classList.remove("dragging");
+    setTimeout(() => { rowObj.allowClick = true; }, 50);
   };
-  tick();
+
+  rowObj.wrapEl.addEventListener("pointerup", stopDragging);
+  rowObj.wrapEl.addEventListener("pointerleave", stopDragging);
+  rowObj.wrapEl.addEventListener("pointercancel", stopDragging);
 }
 
 /* ================= HELPERS ================= */
 function clearFocused(){
-  document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
+  document.querySelectorAll(".focused").forEach(el => el.classList.remove("focused"));
 }
 
 function ensureRowVisible(rowEl){
@@ -267,58 +237,61 @@ function ensureRowVisible(rowEl){
   else if (r.bottom > box.bottom - pad) rowsEl.scrollTop += (r.bottom - (box.bottom - pad));
 }
 
-function updateRailTransformForFocus(rowObj){
-  if (rowObj.dragging) return;
-
-  const wrapW = rowObj.wrapEl.getBoundingClientRect().width;
-  const { tileW, gap } = getTileSize(rowObj);
-  const leftTarget = state.itemIdx * (tileW + gap);
-  const margin = 80;
-  const contentW = rowObj.items.length * (tileW + gap) - gap;
-  const maxShift = Math.max(0, contentW - wrapW + margin);
-
-  let shift = leftTarget - margin;
-  shift = Math.max(0, Math.min(shift, maxShift));
-
-  rowObj.scrollX = shift;
-  applyRailShift(rowObj);
-}
-
 function updateFocus(){
   clearFocused();
 
+  // Exit modal focus
+  if (state.exitOpen){
+    // 0=Yes, 1=No
+    if (state.exitChoice === 0) exitYes?.classList.add("focused");
+    else exitNo?.classList.add("focused");
+    return;
+  }
+
+  // Player focus
   if (state.playing){
-    if (state.menu) backBtn.classList.add('focused');
+    if (state.menu) backBtn.classList.add("focused");
     return;
   }
 
-  if (exitVisible){
-    // focus is handled by classes on the buttons
-    return;
-  }
-
-  if (state.focus === 'tabs'){
+  // Tabs focus
+  if (state.focus === "tabs"){
     const tab = tabs[state.tabIdx];
-    if (tab) tab.classList.add('focused');
+    if (tab) tab.classList.add("focused");
     return;
   }
 
+  // Rows focus
   const rowObj = state.rows[state.rowIdx];
   if (!rowObj) return;
 
   const tile = rowObj.railEl.querySelector(`.tile[data-i="${state.itemIdx}"]`);
-  if (tile) tile.classList.add('focused');
+  if (tile) tile.classList.add("focused");
 
-  updateRailTransformForFocus(rowObj);
+  // Keep focus visible
   ensureRowVisible(rowObj.rowEl);
+
+  // Ensure the wrap scrollLeft keeps focused tile on screen (remote navigation)
+  const tileEl = tile;
+  if (tileEl){
+    const wrapRect = rowObj.wrapEl.getBoundingClientRect();
+    const tileRect = tileEl.getBoundingClientRect();
+    const margin = 70;
+
+    if (tileRect.left < wrapRect.left + margin){
+      rowObj.wrapEl.scrollLeft -= (wrapRect.left + margin - tileRect.left);
+    } else if (tileRect.right > wrapRect.right - margin){
+      rowObj.wrapEl.scrollLeft += (tileRect.right - (wrapRect.right - margin));
+    }
+  }
 }
 
 /* ================= RENDER ================= */
 function buildRows(){
-  rowsEl.innerHTML = '';
+  rowsEl.innerHTML = "";
   state.rows = [];
 
-  const genresToShow = (state.filter === 'all')
+  const genresToShow = (state.filter === "all")
     ? GENRE_ORDER
     : GENRE_ORDER.filter(g => g === state.filter);
 
@@ -326,29 +299,40 @@ function buildRows(){
     const items = CHANNELS.filter(c => c.genre === g);
     if (!items.length) return;
 
-    const section = document.createElement('section');
-    section.className = 'row';
+    const section = document.createElement("section");
+    section.className = "row";
     section.dataset.genre = g;
 
-    const head = document.createElement('div');
-    head.className = 'row-head';
+    const head = document.createElement("div");
+    head.className = "row-head";
     head.innerHTML = `<div class="row-title">${g.toUpperCase()}</div><div class="row-meta">${items.length} channels</div>`;
 
-    const wrap = document.createElement('div');
-    wrap.className = 'rail-wrap';
+    const wrap = document.createElement("div");
+    wrap.className = "rail-wrap";
     wrap.innerHTML = `<div class="rail-fade-left"></div><div class="rail-fade-right"></div>`;
 
-    const rail = document.createElement('div');
-    rail.className = 'rail';
+    const rail = document.createElement("div");
+    rail.className = "rail";
 
     items.forEach((c, i) => {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
+      const tile = document.createElement("div");
+      tile.className = "tile";
       tile.dataset.i = String(i);
       tile.innerHTML = `
-        <div class="thumb"><img src="${c.logo}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>
+        <div class="thumb"><img src="${c.logo}" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
         <div class="tile-foot">${c.name}</div>
       `;
+
+      tile.addEventListener("click", (e) => {
+        // block click if user was dragging
+        const rowObj = state.rows.find(r => r.genre === g);
+        if (rowObj && rowObj.allowClick === false){
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      });
+
       rail.appendChild(tile);
     });
 
@@ -357,7 +341,7 @@ function buildRows(){
     section.appendChild(wrap);
     rowsEl.appendChild(section);
 
-    const rowObj = { genre: g, items, rowEl: section, wrapEl: wrap, railEl: rail, scrollX: 0, velX: 0, dragging: false, lastX: 0 };
+    const rowObj = { genre: g, items, rowEl: section, wrapEl: wrap, railEl: rail };
     state.rows.push(rowObj);
     attachRailScroll(rowObj);
   });
@@ -366,23 +350,22 @@ function buildRows(){
   const curRow = state.rows[state.rowIdx];
   state.itemIdx = Math.min(state.itemIdx, Math.max(0, (curRow?.items.length || 1) - 1));
 
-  state.rows.forEach(r => applyRailShift(r));
   updateFocus();
 }
 
 /* ================= FILTER (TABS) ================= */
 function setFilter(cat){
   state.filter = cat;
-  tabs.forEach(t => t.classList.remove('active'));
 
-  const idx = tabs.findIndex(t => (t.dataset.cat || 'all') === cat);
+  tabs.forEach(t => t.classList.remove("active"));
+  const idx = tabs.findIndex(t => (t.dataset.cat || "all") === cat);
   state.tabIdx = idx >= 0 ? idx : 0;
-  tabs[state.tabIdx].classList.add('active');
+  tabs[state.tabIdx]?.classList.add("active");
 
   state.rowIdx = 0;
   state.itemIdx = 0;
-
   rowsEl.scrollTop = 0;
+
   buildRows();
 }
 
@@ -391,16 +374,16 @@ function cleanupPlayback(){
   if (hls){ try{ hls.destroy(); } catch(_){ } hls = null; }
   try{ video.pause(); } catch(_){ }
   video.srcObject = null;
-  video.removeAttribute('src');
+  video.removeAttribute("src");
   video.load();
 }
 
 function buildVlcIntent(url){
   try{
     const u = new URL(url);
-    const scheme = (u.protocol || 'https:').replace(':','');
+    const scheme = (u.protocol || "https:").replace(":","");
     const path = `${u.host}${u.pathname}${u.search}`;
-    const type = /\.m3u8(\?|$)/i.test(url) ? 'application/x-mpegURL' : 'video/*';
+    const type = /\.m3u8(\?|$)/i.test(url) ? "application/x-mpegURL" : "video/*";
     return `intent://${path}#Intent;scheme=${scheme};package=org.videolan.vlc;action=android.intent.action.VIEW;type=${type};end`;
   } catch(_){
     return `vlc://${url}`;
@@ -408,40 +391,40 @@ function buildVlcIntent(url){
 }
 
 function openExternalFallback(url){
-  loading.style.display = 'block';
+  loading.style.display = "block";
+  loading.innerHTML = isFireTv()
+    ? "Opening VLC…<br><small style='font-size:14px;opacity:.7;'>Press BACK to return</small>"
+    : "Opening external player…<br><small style='font-size:14px;opacity:.7;'>If nothing opens, press BACK.</small>";
 
   if (isFireTv()){
-    loading.innerHTML = 'Opening VLC…<br><small style="font-size:14px;opacity:.7;">Press BACK to return</small>';
     const intentUri = buildVlcIntent(url);
     try { window.location.href = intentUri; return; } catch(_){ }
   }
 
-  loading.innerHTML = 'Opening external player…<br><small style="font-size:14px;opacity:.7;">If nothing opens, press BACK.</small>';
   let opened = null;
-  try { opened = window.open(url, '_blank'); } catch(_) { opened = null; }
+  try { opened = window.open(url, "_blank"); } catch(_) { opened = null; }
   if (!opened){ try { window.location.assign(url); } catch(_) {} }
 }
 
 function startWebPlayback(url){
   cleanupPlayback();
-
   if (!url){
-    loading.style.display = 'block';
-    loading.innerHTML = 'No stream URL for this channel.';
+    loading.style.display = "block";
+    loading.innerHTML = "No stream URL for this channel.";
     return;
   }
 
   const isHttp = /^http:\/\//i.test(url);
-  const httpsTry = isHttp ? url.replace(/^http:\/\//i, 'https://') : url;
+  const httpsTry = isHttp ? url.replace(/^http:\/\//i, "https://") : url;
 
   const tryNative = (src) => new Promise((resolve, reject) => {
     let done = false;
 
     const cleanup = () => {
-      video.removeEventListener('canplay', onCanPlay);
-      video.removeEventListener('canplaythrough', onCanPlay);
-      video.removeEventListener('error', onFail);
-      video.removeEventListener('stalled', onFail);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("canplaythrough", onCanPlay);
+      video.removeEventListener("error", onFail);
+      video.removeEventListener("stalled", onFail);
     };
 
     const onCanPlay = async () => {
@@ -456,20 +439,20 @@ function startWebPlayback(url){
       if (done) return;
       done = true;
       cleanup();
-      reject(new Error('native_fail'));
+      reject(new Error("native_fail"));
     };
 
-    video.addEventListener('canplay', onCanPlay);
-    video.addEventListener('canplaythrough', onCanPlay);
-    video.addEventListener('error', onFail);
-    video.addEventListener('stalled', onFail);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("canplaythrough", onCanPlay);
+    video.addEventListener("error", onFail);
+    video.addEventListener("stalled", onFail);
 
     video.controls = true;
     video.autoplay = true;
     video.muted = false;
     video.playsInline = true;
-    video.setAttribute('playsinline','');
-    video.setAttribute('webkit-playsinline','');
+    video.setAttribute("playsinline","");
+    video.setAttribute("webkit-playsinline","");
 
     video.src = src;
     video.load();
@@ -478,13 +461,13 @@ function startWebPlayback(url){
       if (!done){
         done = true;
         cleanup();
-        reject(new Error('native_timeout'));
+        reject(new Error("native_timeout"));
       }
     }, 6500);
   });
 
   const tryHlsJs = (src) => new Promise((resolve, reject) => {
-    if (!(window.Hls && Hls.isSupported())) return reject(new Error('hls_not_supported'));
+    if (!(window.Hls && Hls.isSupported())) return reject(new Error("hls_not_supported"));
 
     hls = new Hls({
       enableWorker: true,
@@ -508,7 +491,7 @@ function startWebPlayback(url){
     const onError = (_evt, data) => {
       if (data && data.fatal){
         cleanup();
-        reject(new Error(data.type || 'hls_fatal'));
+        reject(new Error(data.type || "hls_fatal"));
       }
     };
 
@@ -520,22 +503,22 @@ function startWebPlayback(url){
 
     setTimeout(() => {
       cleanup();
-      reject(new Error('hls_timeout'));
+      reject(new Error("hls_timeout"));
     }, 9000);
   });
 
   (async () => {
     try{
       if (httpsTry !== url){
-        try { await tryNative(httpsTry); loading.style.display='none'; return; } catch(_){ }
+        try { await tryNative(httpsTry); loading.style.display="none"; return; } catch(_){ }
       }
       await tryNative(url);
-      loading.style.display = 'none';
+      loading.style.display = "none";
       return;
     } catch(_nativeErr){
       try{
         await tryHlsJs(httpsTry);
-        loading.style.display = 'none';
+        loading.style.display = "none";
         return;
       } catch(_hlsErr){
         openExternalFallback(url);
@@ -548,11 +531,11 @@ function openPlayer(channel){
   state.playing = true;
   state.menu = false;
 
-  player.classList.add('active');
-  player.classList.remove('show-menu');
-  player.setAttribute('aria-hidden', 'false');
+  player.classList.add("active");
+  player.classList.remove("show-menu");
+  player.setAttribute("aria-hidden", "false");
 
-  loading.style.display = 'block';
+  loading.style.display = "block";
   loading.innerHTML = `Loading stream…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
 
   startWebPlayback(channel.url);
@@ -563,29 +546,59 @@ function stopPlayback(){
   state.playing = false;
   state.menu = false;
 
-  player.classList.remove('active');
-  player.classList.remove('show-menu');
-  player.setAttribute('aria-hidden', 'true');
+  player.classList.remove("active");
+  player.classList.remove("show-menu");
+  player.setAttribute("aria-hidden", "true");
 
   cleanupPlayback();
 
-  loading.style.display = 'block';
-  loading.innerHTML = 'Loading stream…';
+  loading.style.display = "block";
+  loading.innerHTML = "Loading stream…";
 
   updateFocus();
 }
 
 function togglePlayerMenu(){
   state.menu = !state.menu;
-  player.classList.toggle('show-menu', state.menu);
+  player.classList.toggle("show-menu", state.menu);
   updateFocus();
+}
+
+/* ================= EXIT MODAL ================= */
+function openExitModal(){
+  state.exitOpen = true;
+  state.exitChoice = 0; // default YES
+  exitModal?.classList.add("active");
+  updateExitFocus();
+}
+
+function closeExitModal(){
+  state.exitOpen = false;
+  exitModal?.classList.remove("active");
+  updateFocus();
+}
+
+function updateExitFocus(){
+  exitYes?.classList.toggle("focused", state.exitChoice === 0);
+  exitNo?.classList.toggle("focused", state.exitChoice === 1);
+}
+
+function doExit(){
+  // Best-effort exit for WebView/PWA/Browser
+  try { window.close(); } catch(_){}
+
+  // If installed as PWA, window.close() may fail; attempt navigation
+  try { window.location.href = "about:blank"; } catch(_){}
+
+  // Last resort
+  try { history.go(-999); } catch(_){}
 }
 
 /* ================= ACTIONS ================= */
 function handleEnter(){
-  if (exitVisible){
-    if (exitYes.classList.contains('focused')) exitYes.click();
-    else exitNo.click();
+  if (state.exitOpen){
+    if (state.exitChoice === 0) doExit();
+    else closeExitModal();
     return;
   }
 
@@ -594,10 +607,10 @@ function handleEnter(){
     return;
   }
 
-  if (state.focus === 'tabs'){
-    const cat = tabs[state.tabIdx]?.dataset.cat || 'all';
+  if (state.focus === "tabs"){
+    const cat = tabs[state.tabIdx]?.dataset.cat || "all";
     setFilter(cat);
-    state.focus = 'rows';
+    state.focus = "rows";
     updateFocus();
     return;
   }
@@ -608,28 +621,28 @@ function handleEnter(){
 }
 
 function handleBack(){
-  // If exit dialog is open → close it
-  if (exitVisible){
-    hideExitConfirm();
+  // 1) if exit modal open, close it
+  if (state.exitOpen){
+    closeExitModal();
     return true;
   }
 
-  // If video playing → stop playback
+  // 2) if playing, stop playback
   if (state.playing){
     stopPlayback();
     return true;
   }
 
-  // If browsing rows → back to tabs
-  if (state.focus === 'rows'){
-    state.focus = 'tabs';
+  // 3) if on rows, go to tabs
+  if (state.focus === "rows"){
+    state.focus = "tabs";
     updateFocus();
     return true;
   }
 
-  // If already on tabs → ask to exit app
-  if (state.focus === 'tabs'){
-    showExitConfirm();
+  // 4) if already on tabs (root), ask to exit
+  if (state.focus === "tabs"){
+    openExitModal();
     return true;
   }
 
@@ -637,26 +650,31 @@ function handleBack(){
 }
 
 /* ================= CLICK SUPPORT ================= */
-tabsRail.addEventListener('click', (e) => {
-  const tab = e.target.closest('.tab');
+tabsRail.addEventListener("click", (e) => {
+  const tab = e.target.closest(".tab");
   if (!tab) return;
   state.tabIdx = tabs.indexOf(tab);
-  setFilter(tab.dataset.cat || 'all');
-  state.focus = 'rows';
+  setFilter(tab.dataset.cat || "all");
+  state.focus = "rows";
   updateFocus();
 });
 
-rowsEl.addEventListener('click', (e) => {
-  const tile = e.target.closest('.tile');
+rowsEl.addEventListener("click", (e) => {
+  if (state.exitOpen || state.playing) return;
+
+  const tile = e.target.closest(".tile");
   if (!tile) return;
 
-  const rowSection = e.target.closest('.row');
+  const rowSection = e.target.closest(".row");
   const genre = rowSection ? rowSection.dataset.genre : null;
   const rIdx = state.rows.findIndex(r => r.genre === genre);
-  const iIdx = parseInt(tile.dataset.i || '0', 10);
+  const iIdx = parseInt(tile.dataset.i || "0", 10);
+
+  const rowObj = state.rows[rIdx];
+  if (rowObj && rowObj.allowClick === false) return;
 
   if (rIdx >= 0){
-    state.focus = 'rows';
+    state.focus = "rows";
     state.rowIdx = rIdx;
     state.itemIdx = iIdx;
     updateFocus();
@@ -664,91 +682,89 @@ rowsEl.addEventListener('click', (e) => {
   }
 });
 
-backBtn.addEventListener('click', stopPlayback);
+backBtn?.addEventListener("click", stopPlayback);
+
+// Exit modal buttons
+exitYes?.addEventListener("click", doExit);
+exitNo?.addEventListener("click", closeExitModal);
+
+/* Browser back button support */
+window.addEventListener("popstate", () => {
+  // Instead of leaving, show modal
+  if (!state.exitOpen) openExitModal();
+});
 
 /* ================= FIRESTICK REMOTE / KEYBOARD ================= */
-window.addEventListener('keydown', (e) => {
+window.addEventListener("keydown", (e) => {
   const keyCode = e.keyCode;
   const key = e.key;
 
+  // prevent page scroll for arrows
   if ([37,38,39,40].includes(keyCode)) e.preventDefault();
 
-  // If Exit popup is open: left/right selects yes/no, enter confirms, back closes
-  if (exitVisible){
-    if (keyCode === 37 || key === 'ArrowLeft'){
-      exitYes.classList.add('focused');
-      exitNo.classList.remove('focused');
-      e.preventDefault();
-      return;
-    }
-    if (keyCode === 39 || key === 'ArrowRight'){
-      exitNo.classList.add('focused');
-      exitYes.classList.remove('focused');
-      e.preventDefault();
-      return;
-    }
-    if (keyCode === 13 || key === 'Enter'){
-      e.preventDefault();
-      handleEnter();
-      return;
-    }
-    if (keyCode === 8 || keyCode === 27 || keyCode === 10009 || key === 'Backspace' || key === 'Escape'){
-      e.preventDefault();
-      handleBack();
-      return;
-    }
-  }
-
-  if (keyCode === 13 || key === 'Enter'){
+  // ENTER
+  if (keyCode === 13 || key === "Enter"){
     e.preventDefault();
     handleEnter();
     return;
   }
 
-  if (keyCode === 8 || keyCode === 27 || keyCode === 10009 || key === 'Backspace' || key === 'Escape'){
+  // BACK
+  if (keyCode === 8 || keyCode === 27 || keyCode === 10009 || key === "Backspace" || key === "Escape"){
     const handled = handleBack();
     if (handled) e.preventDefault();
     return;
   }
 
+  // If exit modal open: LEFT/RIGHT change choice
+  if (state.exitOpen){
+    if (keyCode === 37 || key === "ArrowLeft" || keyCode === 39 || key === "ArrowRight"){
+      state.exitChoice = state.exitChoice === 0 ? 1 : 0;
+      updateExitFocus();
+    }
+    return;
+  }
+
   if (state.playing) return;
 
-  if (state.focus === 'tabs'){
-    if (keyCode === 37 || key === 'ArrowLeft'){
+  if (state.focus === "tabs"){
+    if (keyCode === 37 || key === "ArrowLeft"){
       state.tabIdx = Math.max(0, state.tabIdx - 1);
       updateFocus();
+      scheduleTabSnap();
       return;
     }
-    if (keyCode === 39 || key === 'ArrowRight'){
+    if (keyCode === 39 || key === "ArrowRight"){
       state.tabIdx = Math.min(tabs.length - 1, state.tabIdx + 1);
       updateFocus();
+      scheduleTabSnap();
       return;
     }
-    if (keyCode === 40 || key === 'ArrowDown'){
-      state.focus = 'rows';
+    if (keyCode === 40 || key === "ArrowDown"){
+      state.focus = "rows";
       updateFocus();
       return;
     }
     return;
   }
 
-  if (state.focus === 'rows'){
+  if (state.focus === "rows"){
     const rowObj = state.rows[state.rowIdx];
     if (!rowObj) return;
 
-    if (keyCode === 37 || key === 'ArrowLeft'){
+    if (keyCode === 37 || key === "ArrowLeft"){
       state.itemIdx = Math.max(0, state.itemIdx - 1);
       updateFocus();
       return;
     }
-    if (keyCode === 39 || key === 'ArrowRight'){
+    if (keyCode === 39 || key === "ArrowRight"){
       state.itemIdx = Math.min(rowObj.items.length - 1, state.itemIdx + 1);
       updateFocus();
       return;
     }
-    if (keyCode === 38 || key === 'ArrowUp'){
+    if (keyCode === 38 || key === "ArrowUp"){
       if (state.rowIdx === 0){
-        state.focus = 'tabs';
+        state.focus = "tabs";
       } else {
         state.rowIdx = Math.max(0, state.rowIdx - 1);
         state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
@@ -756,7 +772,7 @@ window.addEventListener('keydown', (e) => {
       updateFocus();
       return;
     }
-    if (keyCode === 40 || key === 'ArrowDown'){
+    if (keyCode === 40 || key === "ArrowDown"){
       state.rowIdx = Math.min(state.rows.length - 1, state.rowIdx + 1);
       state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
       updateFocus();
@@ -765,15 +781,24 @@ window.addEventListener('keydown', (e) => {
   }
 }, { passive:false });
 
-/* ================= RESIZE ================= */
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   updateFocus();
   applyTabsShift();
-  state.rows.forEach(r => applyRailShift(r));
 });
 
 /* ================= INIT ================= */
-setFilter('all');
-state.focus = 'tabs';
-updateFocus();
-applyTabsShift();
+function init(){
+  // Ensure exit modal hidden on load
+  exitModal?.classList.remove("active");
+
+  setFilter("all");
+  state.focus = "tabs";
+  updateFocus();
+  applyTabsShift();
+
+  // Add a dummy history state so browser back triggers popstate
+  try { history.replaceState({ tloutv: true }, "", location.href); } catch(_){}
+  try { history.pushState({ tloutv: "guard" }, "", location.href); } catch(_){}
+}
+
+init();
