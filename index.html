@@ -1,3 +1,6 @@
+<!-- =========================
+FILE: index.html
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,44 +9,54 @@
   <title>TlouTV Pro — Netflix TV Style (Firestick)</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="badge">T</div>
-        <div class="brand-title">TlouTV<small>PRO</small></div>
-      </div>
 
-      <nav class="tabs-viewport" id="tabsViewport" aria-label="Categories">
-        <div class="fade-left"></div><div class="fade-right"></div>
-        <div class="tabs-rail" id="tabsRail">
-          <div class="tab active" data-cat="all">Home</div>
-          <div class="tab" data-cat="news">News</div>
-          <div class="tab" data-cat="general">General</div>
-          <div class="tab" data-cat="music">Music</div>
-          <div class="tab" data-cat="religious">Religious</div>
-          <div class="tab" data-cat="sports">Sports</div>
-        </div>
-      </nav>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="badge">T</div>
+      <div class="brand-title">TlouTV<small>PRO</small></div>
     </div>
-  </header>
 
-  <main class="rows" id="rows"></main>
+    <nav class="tabs-viewport" id="tabsViewport" aria-label="Categories">
+      <div class="fade-left"></div><div class="fade-right"></div>
+      <div class="tabs-rail" id="tabsRail">
+        <div class="tab active" data-cat="all">Home</div>
+        <div class="tab" data-cat="news">News</div>
+        <div class="tab" data-cat="general">General</div>
+        <div class="tab" data-cat="music">Music</div>
+        <div class="tab" data-cat="religious">Religious</div>
+        <div class="tab" data-cat="sports">Sports</div>
+      </div>
+    </nav>
+  </div>
+</header>
 
-  <div class="player-overlay" id="player" aria-hidden="true">
-    <div class="loading" id="loading">Loading stream…</div>
-    <video id="videoPlayer" playsinline webkit-playsinline></video>
-    <div class="player-controls">
-      <button class="btn-back" id="backBtn" type="button">MENU</button>
+<main class="rows" id="rows"></main>
+
+<div class="player-overlay" id="player" aria-hidden="true">
+  <div class="loading" id="loading">Loading stream…</div>
+  <video id="videoPlayer" playsinline webkit-playsinline></video>
+  <div class="player-controls">
+    <button class="btn-back" id="backBtn" type="button">MENU</button>
+  </div>
+</div>
+
+<!-- EXIT CONFIRM MODAL -->
+<div id="exitConfirm" class="exit-modal hidden" aria-hidden="true">
+  <div class="exit-box" role="dialog" aria-modal="true" aria-label="Exit confirmation">
+    <div class="exit-title">Exit TlouTV?</div>
+    <div class="exit-actions">
+      <button id="exitYes" class="exit-btn yes" type="button">Yes</button>
+      <button id="exitNo" class="exit-btn no" type="button">No</button>
     </div>
   </div>
+</div>
 
-  <!-- HLS -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- Your App -->
-  <script src="./app.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="./js/app.js" defer></script>
 </body>
 </html>
