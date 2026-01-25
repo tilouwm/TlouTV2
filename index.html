@@ -17,27 +17,30 @@
             --safe-zone: 5%; 
         }
 
-        * { box-sizing: border-box; outline: none; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html {
-            margin: 0; padding: 0; height: 100%; width: 100%;
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
             background-color: var(--bg-base);
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Prevents whole page scroll */
         }
 
         .app-container {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 320px 1fr;
             height: 100vh;
             padding: var(--safe-zone);
+            gap: 20px;
         }
 
+        /* Sidebar: Fixed height and no internal scroll unless necessary */
         .sidebar {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding-right: 40px;
+            height: 100%;
+            overflow: hidden; 
         }
 
         .logo {
@@ -47,6 +50,7 @@
             color: var(--accent);
             margin-bottom: 40px;
             letter-spacing: -1px;
+            flex-shrink: 0;
         }
 
         .nav-item {
@@ -57,29 +61,35 @@
             font-size: 20px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
+            transition: transform 0.2s ease, background 0.2s ease;
+            border: 3px solid transparent;
             text-align: left;
             width: 100%;
+            flex-shrink: 0;
+            transform: translateZ(0);
         }
 
-        .nav-item.focused, .nav-item:focus {
+        .nav-item.focused {
             background: var(--bg-surface);
             color: var(--text-primary);
             border-color: var(--accent);
-            transform: scale(1.05);
+            transform: scale(1.05) translateZ(0);
             box-shadow: 0 0 20px var(--focus-glow);
         }
 
         .nav-item.active {
             color: var(--accent);
-            background: rgba(255, 174, 0, 0.05);
+            background: rgba(255, 174, 0, 0.1);
         }
 
+        /* Content Area: Independent Scroll */
         .content {
+            height: calc(100vh - (var(--safe-zone) * 2));
             overflow-y: auto;
-            padding-bottom: 100px;
+            padding-right: 10px;
+            padding-bottom: 50px;
             scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         .content::-webkit-scrollbar { display: none; }
 
@@ -90,11 +100,16 @@
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 2px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-base);
+            z-index: 50;
+            padding: 10px 0;
         }
 
         .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 24px;
         }
 
@@ -102,15 +117,16 @@
             background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
-            border: 3px solid transparent;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 4px solid transparent;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             cursor: pointer;
+            transform: translateZ(0);
         }
 
         .channel-card.focused {
             border-color: var(--accent);
-            transform: scale(1.08);
+            transform: scale(1.08) translateZ(0);
             z-index: 10;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px var(--focus-glow);
         }
@@ -155,7 +171,7 @@
             position: fixed;
             inset: 0;
             background: #000;
-            z-index: 1000;
+            z-index: 2000;
             display: none;
         }
 
@@ -165,14 +181,16 @@
             width: 100%;
             height: 100%;
             background: #000;
+            object-fit: contain;
         }
 
         .player-controls {
             position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1001;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
@@ -187,22 +205,23 @@
             background: var(--accent);
             color: #000;
             border: none;
-            padding: 16px 40px;
-            border-radius: 40px;
+            padding: 20px 50px;
+            border-radius: 50px;
             font-weight: 800;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            border: 3px solid transparent;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 4px solid transparent;
+            transform: translateZ(0);
         }
 
         .btn-back.focused {
             border-color: white;
-            transform: scale(1.1);
-            box-shadow: 0 0 20px var(--focus-glow);
+            transform: scale(1.15) translateZ(0);
+            box-shadow: 0 0 30px var(--focus-glow);
         }
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
             .app-container { grid-template-columns: 1fr; }
             .sidebar { display: none; }
         }
@@ -236,46 +255,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-    // Helper to ensure URLs are clean strings
-    const normalizeStream = (url) => url;
-
     const CHANNELS = [
-        {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
-        {"id":"channel1","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":normalizeStream("https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8"),"genre":"general"},
-        {"id":"channel2","name":"Radio Tele Ginen","logo":"https://yt3.googleusercontent.com/ytc/AIdro_k18hgxxj--vlOpIKL8WQ-wOw6AvskQT8eXIPn3qWx4-TU=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("http://teleginen.srfms.com:1935/teleginen/livestream/playlist.m3u8"),"genre":"news"},
-        {"id":"channel3","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news"},
-        {"id":"channel4","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":normalizeStream("https://haititivi.com/website/haitinews/index.m3u8"),"genre":"news"},
-        {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general"},
-        {"id":"channel6","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general"},
-        {"id":"channel7","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b1998000.m3u8"),"genre":"general"},
-        {"id":"channel8","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b1966000.m3u8"),"genre":"general"},
-        {"id":"channel9","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious"},
-        {"id":"channel10","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/4diaspo/4diaspo/chunklist_w926608167.m3u8"),"genre":"general"},
-        {"id":"channel11","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://acwstream.com/acw/stream/telepam/tracks-v1/index.fmp4.m3u8"),"genre":"general"},
-        {"id":"channel12","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":normalizeStream("https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8"),"genre":"religious"},
-        {"id":"channel13","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8"),"genre":"general"},
-        {"id":"channel14","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":normalizeStream("https://video1.getstreamhosting.com:1936/8212/8212/chunklist_w28899981.m3u8"),"genre":"general"},
-        {"id":"channel15","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":normalizeStream("https://acwstream.com/lakay/nagotv/tracks-v1a1/mono.m3u8"),"genre":"music"},
-        {"id":"channel16","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":normalizeStream("https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8"),"genre":"religious"},
-        {"id":"channel17","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8"),"genre":"religious"},
-        {"id":"channel18","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music"},
-        {"id":"channel19","name":"Bblack Caribbean","logo":"https://boomboxradio.ru/wp-content/uploads/2024/05/bblack-caribbean-tv-jpg.webp","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music"},
-        {"id":"channel20","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music"},
-        {"id":"channel21","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":normalizeStream("https://stream.ecable.tv/afrobeats/index.m3u8"),"genre":"music"},
-        {"id":"channel22","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music"},
-        {"id":"channel23","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music"},
-        {"id":"channel24","name":"DBM","logo":"https://tv2free.ru/sites/default/files/styles/large/public/tv-logo/tv-dbm-tv.jpg","url":normalizeStream("https://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general"},
-        {"id":"channel25","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music"},
-        {"id":"channel26","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8"),"genre":"general"},
-        {"id":"channel27","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general"},
-        {"id":"channel28","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general"},
-        {"id":"channel29","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":normalizeStream("https://media.streambrothers.com:1936/hpgnrhawxv/hpgnrhawxv/chunklist_w1967596347.m3u8"),"genre":"sports"},
-        {"id":"channel30","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":normalizeStream("https://cdn1.ayitistream.com/web-r1/tracks-v1/index.fmp4.m3u8"),"genre":"sports"},
-        {"id":"channel31","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious"},
-        {"id":"channel32","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8"),"genre":"music"},
-        {"id":"channel33","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious"},
-        {"id":"channel34","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music"},
-        {"id":"channel35","name":"Radio Tele Planet Compas","logo":"https://play-lh.googleusercontent.com/2TF7iHbKnP1TNz4bnaY8aqozDJ-fK58dyRIANbZvt1XQkpvr57ELdUSpSi0LCHb5waot","url":normalizeStream("https://5dcab9aed5331.streamlock.net/mrcompas1/livestream/playlist.m3u8"),"genre":"music"}
+        {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":"https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8","genre":"general"},
+        {"id":"channel1","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":"https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8","genre":"general"},
+        {"id":"channel2","name":"Radio Tele Ginen","logo":"https://yt3.googleusercontent.com/ytc/AIdro_k18hgxxj--vlOpIKL8WQ-wOw6AvskQT8eXIPn3qWx4-TU=s900-c-k-c0x00ffffff-no-rj","url":"http://teleginen.srfms.com:1935/teleginen/livestream/playlist.m3u8","genre":"news"},
+        {"id":"channel3","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":"https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8","genre":"news"},
+        {"id":"channel4","name":"Haiti News","logo":"https://m.media-amazon.com/images/I/611Ffvky5yL.png","url":"https://haititivi.com/website/haitinews/index.m3u8","genre":"news"},
+        {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":"https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8","genre":"general"},
+        {"id":"channel6","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":"https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8","genre":"general"},
+        {"id":"channel7","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":"https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b1998000.m3u8","genre":"general"},
+        {"id":"channel8","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":"https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b1966000.m3u8","genre":"general"},
+        {"id":"channel9","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":"https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8","genre":"religious"},
+        {"id":"channel10","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":"https://5790d294af2dc.streamlock.net/4diaspo/4diaspo/chunklist_w926608167.m3u8","genre":"general"},
+        {"id":"channel11","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":"https://acwstream.com/acw/stream/telepam/tracks-v1/index.fmp4.m3u8","genre":"general"},
+        {"id":"channel12","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":"https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8","genre":"religious"},
+        {"id":"channel13","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":"https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8","genre":"general"},
+        {"id":"channel14","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":"https://video1.getstreamhosting.com:1936/8212/8212/chunklist_w28899981.m3u8","genre":"general"},
+        {"id":"channel15","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":"https://acwstream.com/lakay/nagotv/tracks-v1a1/mono.m3u8","genre":"music"},
+        {"id":"channel16","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":"https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8","genre":"religious"},
+        {"id":"channel17","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":"https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8","genre":"religious"},
+        {"id":"channel18","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":"https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8","genre":"music"},
+        {"id":"channel19","name":"Bblack Caribbean","logo":"https://boomboxradio.ru/wp-content/uploads/2024/05/bblack-caribbean-tv-jpg.webp","url":"https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8","genre":"music"},
+        {"id":"channel20","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":"https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8","genre":"music"},
+        {"id":"channel21","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":"https://stream.ecable.tv/afrobeats/index.m3u8","genre":"music"},
+        {"id":"channel22","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":"https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8","genre":"music"},
+        {"id":"channel23","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":"https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8","genre":"music"},
+        {"id":"channel24","name":"DBM","logo":"https://tv2free.ru/sites/default/files/styles/large/public/tv-logo/tv-dbm-tv.jpg","url":"https://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8","genre":"general"},
+        {"id":"channel25","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":"http://hls.tmacaraibes.com/live/index.m3u8","genre":"music"},
+        {"id":"channel26","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":"https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8","genre":"general"},
+        {"id":"channel27","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":"https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8","genre":"general"},
+        {"id":"channel28","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":"https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8","genre":"general"},
+        {"id":"channel29","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":"https://media.streambrothers.com:1936/hpgnrhawxv/hpgnrhawxv/chunklist_w1967596347.m3u8","genre":"sports"},
+        {"id":"channel30","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":"https://cdn1.ayitistream.com/web-r1/tracks-v1/index.fmp4.m3u8","genre":"sports"},
+        {"id":"channel31","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":"https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8","genre":"religious"},
+        {"id":"channel32","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":"https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8","genre":"music"},
+        {"id":"channel33","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":"https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8","genre":"religious"},
+        {"id":"channel34","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":"https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8","genre":"music"},
+        {"id":"channel35","name":"Radio Tele Planet Compas","logo":"https://play-lh.googleusercontent.com/2TF7iHbKnP1TNz4bnaY8aqozDJ-fK58dyRIANbZvt1XQkpvr57ELdUSpSi0LCHb5waot","url":"https://5dcab9aed5331.streamlock.net/mrcompas1/livestream/playlist.m3u8","genre":"music"}
     ];
 
     let currentFocus = { type: 'nav', index: 0, gridIndex: 0 };
@@ -288,6 +304,7 @@
     const player = document.getElementById('player');
     const video = document.getElementById('videoPlayer');
     const backBtn = document.getElementById('backBtn');
+    const contentArea = document.getElementById('content-area');
 
     function updateView() {
         grid.innerHTML = '';
@@ -306,9 +323,17 @@
                 <div class="channel-name">${ch.name}</div>
                 <div class="channel-badge">LIVE</div>
             `;
-            card.onclick = () => play(ch.url);
+            card.onclick = (e) => {
+                e.preventDefault();
+                currentFocus.type = 'grid';
+                currentFocus.gridIndex = idx;
+                play(ch.url);
+            };
             grid.appendChild(card);
         });
+        
+        // Reset scroll position on category change
+        contentArea.scrollTop = 0;
     }
 
     function applyFocus() {
@@ -320,26 +345,28 @@
         }
 
         if (currentFocus.type === 'nav') {
-            navItems[currentFocus.index].classList.add('focused');
+            const el = navItems[currentFocus.index];
+            el.classList.add('focused');
+            // Don't use scrollIntoView for nav as it might trigger page-level movement
         } else {
             const card = document.getElementById(`ch-${currentFocus.gridIndex}`);
             if (card) {
                 card.classList.add('focused');
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Scroll specifically inside the content area
+                const offsetTop = card.offsetTop - contentArea.offsetTop - 100;
+                contentArea.scrollTo({ top: offsetTop, behavior: 'smooth' });
             }
         }
     }
 
     function showControls() {
         if (!player.classList.contains('active')) return;
-        
         player.classList.add('user-active');
         applyFocus();
-
         if (activityTimer) clearTimeout(activityTimer);
         activityTimer = setTimeout(() => {
             player.classList.remove('user-active');
-        }, 3000);
+        }, 4000);
     }
 
     function moveFocus(dir) {
@@ -349,33 +376,27 @@
         }
 
         if (currentFocus.type === 'nav') {
-            if (dir === 'DOWN') {
-                currentFocus.index = Math.min(currentFocus.index + 1, navItems.length - 1);
-            } else if (dir === 'UP') {
-                currentFocus.index = Math.max(currentFocus.index - 1, 0);
-            } else if (dir === 'RIGHT') {
-                if (filteredChannels.length > 0) {
-                    currentFocus.type = 'grid';
-                    currentFocus.gridIndex = 0;
-                }
+            if (dir === 'DOWN') currentFocus.index = Math.min(currentFocus.index + 1, navItems.length - 1);
+            else if (dir === 'UP') currentFocus.index = Math.max(currentFocus.index - 1, 0);
+            else if (dir === 'RIGHT' && filteredChannels.length > 0) {
+                currentFocus.type = 'grid';
+                currentFocus.gridIndex = 0;
             }
         } else {
-            const containerWidth = document.getElementById('content-area').offsetWidth;
-            const cols = Math.floor(containerWidth / 260) || 1;
+            const containerWidth = contentArea.offsetWidth;
+            const cols = Math.floor(containerWidth / 280) || 1;
             
             if (dir === 'LEFT') {
-                if (currentFocus.gridIndex % cols === 0) {
-                    currentFocus.type = 'nav';
-                } else {
-                    currentFocus.gridIndex--;
-                }
-            } else if (dir === 'RIGHT') {
-                currentFocus.gridIndex = Math.min(currentFocus.gridIndex + 1, filteredChannels.length - 1);
-            } else if (dir === 'DOWN') {
-                currentFocus.gridIndex = Math.min(currentFocus.gridIndex + cols, filteredChannels.length - 1);
-            } else if (dir === 'UP') {
-                if (currentFocus.gridIndex >= cols) {
-                    currentFocus.gridIndex -= cols;
+                if (currentFocus.gridIndex % cols === 0) currentFocus.type = 'nav';
+                else currentFocus.gridIndex--;
+            } 
+            else if (dir === 'RIGHT') currentFocus.gridIndex = Math.min(currentFocus.gridIndex + 1, filteredChannels.length - 1);
+            else if (dir === 'DOWN') currentFocus.gridIndex = Math.min(currentFocus.gridIndex + cols, filteredChannels.length - 1);
+            else if (dir === 'UP') {
+                if (currentFocus.gridIndex >= cols) currentFocus.gridIndex -= cols;
+                else {
+                    // Optionally jump back to nav if moving UP from top row? 
+                    // No, usually best to stay in grid until LEFT is pressed.
                 }
             }
         }
@@ -384,11 +405,8 @@
 
     function select() {
         if (player.classList.contains('active')) {
-            if (player.classList.contains('user-active')) {
-                stopPlayer();
-            } else {
-                showControls();
-            }
+            if (player.classList.contains('user-active')) stopPlayer();
+            else showControls();
             return;
         }
         
@@ -408,12 +426,31 @@
         player.classList.add('active');
         showControls();
         
+        const hlsConfig = {
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 0
+        };
+
         if (Hls.isSupported()) {
             if (hls) hls.destroy();
-            hls = new Hls();
+            hls = new Hls(hlsConfig);
             hls.loadSource(url);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(() => showControls());
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+                        case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+                        default: stopPlayer(); break;
+                    }
+                }
+            });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = url;
             video.play();
@@ -433,26 +470,23 @@
     }
 
     window.addEventListener('keydown', (e) => {
-        switch(e.keyCode) {
-            case 37: moveFocus('LEFT'); break;
-            case 38: moveFocus('UP'); break;
-            case 39: moveFocus('RIGHT'); break;
-            case 40: moveFocus('DOWN'); break;
-            case 13: select(); break;
-            case 27: case 8:
-                if (player.classList.contains('active')) {
-                    stopPlayer();
-                    e.preventDefault();
-                }
-                break;
+        const key = e.keyCode;
+        if (key === 37) moveFocus('LEFT');
+        else if (key === 38) moveFocus('UP');
+        else if (key === 39) moveFocus('RIGHT');
+        else if (key === 40) moveFocus('DOWN');
+        else if (key === 13) select();
+        else if (key === 8 || key === 27 || key === 10009) {
+            if (player.classList.contains('active')) {
+                stopPlayer();
+                e.preventDefault();
+            }
         }
     });
 
-    window.addEventListener('mousemove', () => { if(player.classList.contains('active')) showControls(); });
-    window.addEventListener('touchstart', () => { if(player.classList.contains('active')) showControls(); });
-
     navItems.forEach((item, idx) => {
-        item.onclick = () => {
+        item.onclick = (e) => {
+            e.preventDefault();
             currentFocus.type = 'nav';
             currentFocus.index = idx;
             select();
@@ -465,7 +499,7 @@
     };
 
     updateView();
-    applyFocus();
+    setTimeout(applyFocus, 100);
 </script>
 </body>
 </html>
