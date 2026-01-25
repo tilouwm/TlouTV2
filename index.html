@@ -163,7 +163,7 @@
 <script>
   /* ================= CHANNELS (WORKING URLS FROM YOUR ORIGINAL) ================= */
   const CHANNELS = [
-        {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
+    {"id":"tele6","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
     {"id":"channel1","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":normalizeStream("https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8"),"genre":"general"},
     {"id":"channel2","name":"Radio Tele Ginen","logo":"https://yt3.googleusercontent.com/ytc/AIdro_k18hgxxj--vlOpIKL8WQ-wOw6AvskQT8eXIPn3qWx4-TU=s900-c-k-c0x00ffffff-no-rj","url":normalizeStream("http://teleginen.srfms.com:1935/teleginen/livestream/playlist.m3u8"),"genre":"news"},
     {"id":"channel3","name":"Tele Pacific","logo":"https://static.wikia.nocookie.net/logopedia/images/e/e6/Radio_T%C3%A9l%C3%A9_Pacific_Logo.png","url":normalizeStream("https://hls-p1st0n8r.livepush.io/live_cdn/nsOk3qoty1d5HDD/emB7xoUdyMbnjH8/tracks-v1a1/mono.m3u8"),"genre":"news"},
@@ -180,12 +180,10 @@
     {"id":"channel22","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music"},
     {"id":"channel29","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":normalizeStream("https://media.streambrothers.com:1936/hpgnrhawxv/hpgnrhawxv/chunklist_w1967596347.m3u8"),"genre":"sports"},
     {"id":"channel30","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":normalizeStream("https://cdn1.ayitistream.com/web-r1/tracks-v1/index.fmp4.m3u8"),"genre":"sports"},
-
     {"id":"4diaspo","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":normalizeStream("https://5790d294af2dc.streamlock.net/4diaspo/4diaspo/chunklist_w926608167.m3u8"),"genre":"general"},
     {"id":"planet-compas","name":"Planet Compas","logo":"https://play-lh.googleusercontent.com/2TF7iHbKnP1TNz4bnaY8aqozDJ-fK58dyRIANbZvt1XQkpvr57ELdUSpSi0LCHb5waot","url":normalizeStream("https://5dcab9aed5331.streamlock.net/mrcompas1/livestream/playlist.m3u8"),"genre":"music"},
     {"id":"fidele-tv","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8"),"genre":"general"},
     {"id":"bpx","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":normalizeStream(""),"genre":"general","description":"No stream URL yet"},
-
     {"id":"madras-fm-tv","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music"},
     {"id":"bblack-caribbean","name":"Bblack Caribbean","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2025/06/chaine-tv-bblack-caribbean.png","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music"},
     {"id":"bblack-africa","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music"},
@@ -193,16 +191,13 @@
     {"id":"trace-latina","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music"},
     {"id":"dbm","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general"},
     {"id":"tma","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music"},
-
     {"id":"tele-eclair","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://play.streamhaiti.com:3585/live/radioteleeclairlive.m3u8"),"genre":"general"},
     {"id":"tva-30","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general"},
     {"id":"pvs","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general"},
-
     {"id":"tele-miracle","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious"},
     {"id":"radio-tele-hit","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8"),"genre":"music"},
     {"id":"radio-tele-sentinel","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious"},
     {"id":"va-studio","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music"},
-
     {"id":"zoukla-tv","name":"Zoukla TV","logo":"","url":normalizeStream("https://vdo.pro-fhi.net:3228/stream/play.m3u8"),"genre":"music"},
     {"id":"generation-tv","name":"Generation TV","logo":"","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
     {"id":"identite-tv","name":"Identite TV","logo":"","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"}
