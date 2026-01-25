@@ -1,12 +1,13 @@
 /* =============================
    TlouTV Pro — app.js (FULL)
-   - Mobile back: Player -> Rows -> Tabs
-   - Firestick: try in-app 2s then VLC for selected channels
-   - Return from VLC forces Menu (tabs)
-   - Player OK behavior fixed
+   Updates:
+   - MENU/back returns to rows with last watched tile selected
+   - Firestick: try in-app 2s then VLC for slow channels
+   - Returning from VLC restores menu selection
+   - Remove Tele Eclair, remove RTH2000 TV2
+   - Update logos for Bblack Caribbean + DBM
 ============================= */
 
-/* --------- REQUIRED --------- */
 function normalizeStream(url){
   return (url || "").trim();
 }
@@ -21,7 +22,7 @@ const CHANNELS = [
   {"id":"channel6","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":normalizeStream("https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel7","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8"),"genre":"general"},
   {"id":"channel8","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b1998000.m3u8"),"genre":"general"},
-  {"id":"channel9","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":normalizeStream("https://2-fss-2.streamhoster.com/pl_122/amlst:206708-4202592/chunklist_b1966000.m3u8"),"genre":"general"},
+  /* removed: RTH 2000 TV2 */
   {"id":"channel10","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":normalizeStream("https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8"),"genre":"religious"},
   {"id":"channel11","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":normalizeStream("https://acwstream.com/app/2020/telepam/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel12","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":normalizeStream("https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8"),"genre":"religious"},
@@ -35,13 +36,13 @@ const CHANNELS = [
   {"id":"channel20","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":normalizeStream("https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8"),"genre":"general"},
   {"id":"channel21","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":normalizeStream(""),"genre":"general","description":"No stream URL yet"},
   {"id":"channel22","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":normalizeStream("https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8"),"genre":"music"},
-  {"id":"channel23","name":"Bblack Caribbean","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2025/06/chaine-tv-bblack-caribbean.png","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music"},
+  {"id":"channel23","name":"Bblack Caribbean","logo":"https://boomboxradio.ru/wp-content/uploads/2024/05/bblack-caribbean-tv-jpg.webp","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8"),"genre":"music"},
   {"id":"channel24","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":normalizeStream("https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8"),"genre":"music"},
   {"id":"channel25","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":normalizeStream("https://stream.ecable.tv/afrobeats/index.m3u8"),"genre":"music"},
   {"id":"channel26","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":normalizeStream("https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8"),"genre":"music"},
-  {"id":"channel27","name":"DBM","logo":"https://cdn6.aptoide.com/imgs/f/a/e/fae6e9aafb738fc5f81df9c0281cef8c_icon.png","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general"},
+  {"id":"channel27","name":"DBM","logo":"https://tv2free.ru/sites/default/files/styles/large/public/tv-logo/tv-dbm-tv.jpg","url":normalizeStream("http://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8"),"genre":"general"},
   {"id":"channel28","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":normalizeStream("http://hls.tmacaraibes.com/live/index.m3u8"),"genre":"music"},
-  {"id":"channel29","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":normalizeStream("https://play.streamhaiti.com:3585/live/radioteleeclairlive.m3u8"),"genre":"general"},
+  /* removed: Tele Eclair */
   {"id":"channel30","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":normalizeStream("https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel31","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":normalizeStream("https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8"),"genre":"general"},
   {"id":"channel32","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":normalizeStream("https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8"),"genre":"religious"},
@@ -75,12 +76,13 @@ const state = {
   filter: 'all',
   rows: [],
   playing: false,
-  menu: false
+  menu: false,
+  lastView: null // store last watched selection
 };
 
 const GENRE_ORDER = ['news','general','music','religious','sports'];
 
-/* ================= ENV DETECT (FIRE TV / ANDROID TV) ================= */
+/* ================= ENV DETECT ================= */
 function isFireTv(){
   const ua = navigator.userAgent || '';
   return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
@@ -99,38 +101,34 @@ function replaceView(view){
 replaceView('tabs');
 
 window.addEventListener('popstate', () => {
-  // Back from Player -> close player and return to rows
   if (state.playing){
-    stopPlayback();
-    state.focus = 'rows';
-    updateFocus();
+    exitPlayerToMenu();
     return;
   }
-
-  // Back from Rows -> go to Tabs
   if (state.focus === 'rows'){
     state.focus = 'tabs';
     updateFocus();
     replaceView('tabs');
     return;
   }
-
-  // If already on tabs, let browser/back exit naturally
 });
 
-/* ================= FIRESTICK VLC PREFER LIST ================= */
-const FIRESTICK_PREFER_VLC = new Set([
+/* ================= FIRESTICK VLC LIST (try 2s then VLC) ================= */
+const FIRESTICK_TRY_THEN_VLC = new Set([
   "Radio Tele Ginen",
-  "Radio Tele Puissance",
+  "DBM",
   "Radio Tele Caraibes",
+  "Planet Compas",
+  "Madras FM TV",
 ]);
 
-function shouldPreferVlc(channel){
-  return !!channel && isFireTv() && FIRESTICK_PREFER_VLC.has(channel.name);
+function shouldTryThenVlc(channel){
+  return !!channel && isFireTv() && FIRESTICK_TRY_THEN_VLC.has(channel.name);
 }
 
 let pendingVlcTimer = null;
 let pendingVlcUrl = null;
+let videoStarted = false;
 
 function clearPendingVlc(){
   if (pendingVlcTimer) clearTimeout(pendingVlcTimer);
@@ -138,22 +136,57 @@ function clearPendingVlc(){
   pendingVlcUrl = null;
 }
 
-/* Force UI back to MENU (tabs) — used when returning from VLC */
-function forceBackToMenu(){
-  clearPendingVlc();
+/* ================= RESTORE LAST SELECTION ================= */
+function saveLastView(channel){
+  if (!channel) return;
+  state.lastView = {
+    filter: state.filter,
+    tabIdx: state.tabIdx,
+    channelId: channel.id,
+    channelName: channel.name,
+    channelGenre: channel.genre
+  };
+}
 
-  if (state.playing){
-    try { stopPlayback(); } catch(_) {}
+function restoreMenuSelection(){
+  const lv = state.lastView;
+  if (!lv){
+    state.focus = 'tabs';
+    updateFocus();
+    replaceView('tabs');
+    return;
   }
 
-  state.playing = false;
-  state.menu = false;
+  // Rebuild rows for the same filter
+  setFilter(lv.filter);
+
+  // Restore tab index (if exists)
+  state.tabIdx = Math.min(Math.max(lv.tabIdx || 0, 0), tabs.length - 1);
+
+  // Find row by genre
+  const rIdx = state.rows.findIndex(r => r.genre === lv.channelGenre);
+  if (rIdx >= 0){
+    state.rowIdx = rIdx;
+
+    // Find tile by id/name
+    const items = state.rows[rIdx].items;
+    let iIdx = items.findIndex(x => x.id === lv.channelId);
+    if (iIdx < 0) iIdx = items.findIndex(x => x.name === lv.channelName);
+    state.itemIdx = Math.max(0, iIdx);
+
+    state.focus = 'rows';
+    updateFocus();
+    pushView('rows');
+    return;
+  }
+
+  // Fallback
   state.focus = 'tabs';
   updateFocus();
   replaceView('tabs');
 }
 
-/* ================= TABS: MOMENTUM + SNAP ================= */
+/* ================= TABS MOMENTUM ================= */
 let tabScrollX = 0;
 let tabVel = 0;
 let tabDragging = false;
@@ -228,7 +261,7 @@ function tickTabsMomentum(){
 }
 tickTabsMomentum();
 
-/* ================= ROW RAIL: SCROLL + MOMENTUM ================= */
+/* ================= ROW RAIL SCROLL ================= */
 function getTileSize(rowObj){
   const tileEl = rowObj.railEl.querySelector('.tile');
   const tileW = tileEl ? tileEl.getBoundingClientRect().width : 240;
@@ -246,7 +279,6 @@ function applyRailShift(rowObj){
   rowObj.scrollX = Math.max(0, Math.min(rowObj.scrollX || 0, max));
   rowObj.railEl.style.transform = `translateX(${-rowObj.scrollX}px)`;
 }
-
 function attachRailScroll(rowObj){
   rowObj.scrollX = rowObj.scrollX || 0;
   rowObj.velX = 0;
@@ -395,7 +427,6 @@ function buildRows(){
   updateFocus();
 }
 
-/* ================= FILTER (TABS) ================= */
 function setFilter(cat){
   state.filter = cat;
   tabs.forEach(t => t.classList.remove('active'));
@@ -415,10 +446,18 @@ function setFilter(cat){
 function cleanupPlayback(){
   if (hls){ try{ hls.destroy(); } catch(_){ } hls = null; }
   try{ video.pause(); } catch(_){ }
+  videoStarted = false;
   video.srcObject = null;
   video.removeAttribute('src');
   video.load();
 }
+
+video.addEventListener('playing', () => {
+  videoStarted = true;
+  // If it started playing, cancel VLC fallback
+  clearPendingVlc();
+  loading.style.display = 'none';
+});
 
 function buildVlcIntent(url){
   try{
@@ -434,20 +473,16 @@ function buildVlcIntent(url){
 
 function openExternalFallback(url){
   if (isFireTv()){
-    // IMPORTANT: set the app back to menu BEFORE jumping to VLC
-    forceBackToMenu();
-
-    // Small delay helps UI render menu state before leaving
+    // close overlay + keep selection BEFORE leaving to VLC
+    restoreMenuSelection();
     setTimeout(() => {
       const intentUri = buildVlcIntent(url);
       try { window.location.href = intentUri; return; } catch(_){ }
       try { window.location.assign(intentUri); } catch(_) {}
-    }, 80);
-
+    }, 90);
     return;
   }
 
-  // Desktop / normal web fallback
   loading.style.display = 'block';
   loading.innerHTML = 'Opening external player…<br><small style="font-size:14px;opacity:.7;">If nothing opens, press BACK.</small>';
   let opened = null;
@@ -567,15 +602,13 @@ function startWebPlayback(url){
   (async () => {
     try{
       if (httpsTry !== url){
-        try { await tryNative(httpsTry); loading.style.display='none'; return; } catch(_){ }
+        try { await tryNative(httpsTry); return; } catch(_){ }
       }
       await tryNative(url);
-      loading.style.display = 'none';
       return;
     } catch(_nativeErr){
       try{
         await tryHlsJs(httpsTry);
-        loading.style.display = 'none';
         return;
       } catch(_hlsErr){
         openExternalFallback(url);
@@ -586,6 +619,9 @@ function startWebPlayback(url){
 
 function openPlayer(channel){
   clearPendingVlc();
+  videoStarted = false;
+
+  saveLastView(channel);
 
   state.playing = true;
   state.menu = false;
@@ -598,19 +634,15 @@ function openPlayer(channel){
   loading.innerHTML = `Loading stream…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
 
   // Firestick: try in-app for 2 seconds then VLC (only for selected channels)
-  if (shouldPreferVlc(channel)){
+  if (shouldTryThenVlc(channel)){
     pendingVlcUrl = channel.url;
 
-    // Start in-app playback attempt
     startWebPlayback(channel.url);
 
-    // After 2 seconds, if still in player mode, fall back to VLC
     pendingVlcTimer = setTimeout(() => {
-      if (state.playing && pendingVlcUrl){
-        try{
-          loading.style.display = 'block';
-          loading.innerHTML = `Switching to VLC…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
-        } catch(_) {}
+      if (state.playing && pendingVlcUrl && !videoStarted){
+        loading.style.display = 'block';
+        loading.innerHTML = `Opening VLC…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
         openExternalFallback(pendingVlcUrl);
       }
     }, 2000);
@@ -619,14 +651,12 @@ function openPlayer(channel){
     return;
   }
 
-  // Normal behavior for everything else
   startWebPlayback(channel.url);
   updateFocus();
 }
 
-function stopPlayback(){
+function stopPlaybackOnly(){
   clearPendingVlc();
-
   state.playing = false;
   state.menu = false;
 
@@ -638,8 +668,11 @@ function stopPlayback(){
 
   loading.style.display = 'block';
   loading.innerHTML = 'Loading stream…';
+}
 
-  updateFocus();
+function exitPlayerToMenu(){
+  stopPlaybackOnly();
+  restoreMenuSelection();
 }
 
 function togglePlayerMenu(){
@@ -650,18 +683,12 @@ function togglePlayerMenu(){
 
 /* ================= ACTIONS ================= */
 function handleEnter(){
-  // If playing:
-  // 1st Enter shows menu
-  // 2nd Enter (while menu open) exits player
   if (state.playing){
+    // 1st OK shows menu, 2nd OK exits to menu with selection
     if (!state.menu){
       togglePlayerMenu();
     } else {
-      stopPlayback();
-      // after stopping player, go back to menu on Firestick-friendly behavior
-      state.focus = 'tabs';
-      updateFocus();
-      replaceView('tabs');
+      exitPlayerToMenu();
     }
     return;
   }
@@ -685,10 +712,7 @@ function handleEnter(){
 
 function handleBack(){
   if (state.playing){
-    stopPlayback();
-    state.focus = 'tabs';
-    updateFocus();
-    replaceView('tabs');
+    exitPlayerToMenu();
     return true;
   }
 
@@ -735,10 +759,7 @@ rowsEl.addEventListener('click', (e) => {
 });
 
 backBtn.addEventListener('click', () => {
-  stopPlayback();
-  state.focus = 'tabs';
-  updateFocus();
-  replaceView('tabs');
+  exitPlayerToMenu();
 });
 
 /* ================= FIRESTICK REMOTE / KEYBOARD ================= */
@@ -825,11 +846,12 @@ window.addEventListener('resize', () => {
 /* ================= RETURNING FROM VLC ================= */
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden){
-    forceBackToMenu();
+    // Coming back from VLC — restore selection
+    restoreMenuSelection();
   }
 });
 window.addEventListener('focus', () => {
-  forceBackToMenu();
+  restoreMenuSelection();
 });
 
 /* ================= INIT ================= */
