@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <title>TlouTV Pro — Firestick Optimized</title>
+    <title>TlouTV Pro — Firestick Fixed (VLC Intent)</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,7 +14,7 @@
             --text-secondary: #8b949e;
             --accent: #ffae00; 
             --focus-glow: rgba(255, 174, 0, 0.4);
-            --safe-zone: 5%; 
+            --safe-zone: 40px; 
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -23,58 +23,51 @@
             background-color: var(--bg-base);
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Prevents whole page scroll */
+            overflow: hidden;
         }
 
         .app-container {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 300px 1fr;
             height: 100vh;
             padding: var(--safe-zone);
-            gap: 20px;
+            gap: 30px;
         }
 
-        /* Sidebar: Fixed height and no internal scroll unless necessary */
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             height: 100%;
-            overflow: hidden; 
         }
 
         .logo {
             font-family: 'Outfit', sans-serif;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: var(--accent);
-            margin-bottom: 40px;
-            letter-spacing: -1px;
-            flex-shrink: 0;
+            margin-bottom: 30px;
+            padding-left: 15px;
         }
 
         .nav-item {
-            padding: 18px 24px;
+            padding: 16px 20px;
             border-radius: 12px;
             background: transparent;
             color: var(--text-secondary);
             font-size: 20px;
             font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
             border: 3px solid transparent;
             text-align: left;
-            width: 100%;
-            flex-shrink: 0;
-            transform: translateZ(0);
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .nav-item.focused {
             background: var(--bg-surface);
             color: var(--text-primary);
             border-color: var(--accent);
-            transform: scale(1.05) translateZ(0);
-            box-shadow: 0 0 20px var(--focus-glow);
+            transform: scale(1.05);
         }
 
         .nav-item.active {
@@ -82,53 +75,40 @@
             background: rgba(255, 174, 0, 0.1);
         }
 
-        /* Content Area: Independent Scroll */
         .content {
             height: calc(100vh - (var(--safe-zone) * 2));
             overflow-y: auto;
-            padding-right: 10px;
-            padding-bottom: 50px;
             scrollbar-width: none;
-            -ms-overflow-style: none;
         }
         .content::-webkit-scrollbar { display: none; }
 
         .category-title {
             font-family: 'Outfit';
-            font-size: 28px;
-            margin-bottom: 24px;
+            font-size: 24px;
+            margin-bottom: 20px;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            position: sticky;
-            top: 0;
-            background: var(--bg-base);
-            z-index: 50;
-            padding: 10px 0;
         }
 
         .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            padding-bottom: 100px;
         }
 
         .channel-card {
             background: var(--bg-card);
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px;
             border: 4px solid transparent;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            cursor: pointer;
-            transform: translateZ(0);
+            transition: all 0.2s ease;
         }
 
         .channel-card.focused {
             border-color: var(--accent);
-            transform: scale(1.08) translateZ(0);
-            z-index: 10;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px var(--focus-glow);
+            transform: scale(1.08);
+            box-shadow: 0 0 20px var(--focus-glow);
         }
 
         .thumb-container {
@@ -136,37 +116,28 @@
             aspect-ratio: 16/9;
             background: #000;
             border-radius: 8px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
             overflow: hidden;
         }
 
         .thumb-container img {
-            width: 80%;
-            height: 80%;
+            max-width: 80%;
+            max-height: 80%;
             object-fit: contain;
         }
 
         .channel-name {
             font-size: 18px;
             font-weight: 700;
-            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .channel-badge {
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
+        /* Fullscreen Player Fallback (In case VLC fails) */
         .player-overlay {
             position: fixed;
             inset: 0;
@@ -174,82 +145,72 @@
             z-index: 2000;
             display: none;
         }
-
-        .player-overlay.active { display: flex; flex-direction: column; }
+        .player-overlay.active { display: block; }
 
         #videoPlayer {
             width: 100%;
             height: 100%;
-            background: #000;
-            object-fit: contain;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent);
+            font-size: 24px;
+            text-align: center;
         }
 
         .player-controls {
             position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
+            bottom: 50px;
+            left: 0; right: 0;
             display: flex;
-            align-items: center;
             justify-content: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-
-        .player-overlay.user-active .player-controls {
-            opacity: 1;
-            pointer-events: auto;
         }
 
         .btn-back {
             background: var(--accent);
             color: #000;
             border: none;
-            padding: 20px 50px;
+            padding: 15px 40px;
             border-radius: 50px;
             font-weight: 800;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 4px solid transparent;
-            transform: translateZ(0);
-        }
-
-        .btn-back.focused {
-            border-color: white;
-            transform: scale(1.15) translateZ(0);
-            box-shadow: 0 0 30px var(--focus-glow);
-        }
-
-        @media (max-width: 900px) {
-            .app-container { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
+            font-size: 20px;
+            border: 4px solid white;
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div class="sidebar" id="sidebar">
+    <div class="sidebar">
         <div class="logo">TlouTV</div>
-        <button class="nav-item focused active" data-cat="all">All Channels</button>
-        <button class="nav-item" data-cat="news">News</button>
-        <button class="nav-item" data-cat="general">General</button>
-        <button class="nav-item" data-cat="music">Music</button>
-        <button class="nav-item" data-cat="religious">Religious</button>
-        <button class="nav-item" data-cat="sports">Sports</button>
+        <div id="nav-list">
+            <div class="nav-item active" data-cat="all">All Channels</div>
+            <div class="nav-item" data-cat="news">News</div>
+            <div class="nav-item" data-cat="general">General</div>
+            <div class="nav-item" data-cat="music">Music</div>
+            <div class="nav-item" data-cat="religious">Religious</div>
+            <div class="nav-item" data-cat="sports">Sports</div>
+        </div>
     </div>
 
-    <div class="content" id="content-area">
-        <div id="catHeader" class="category-title">All Channels</div>
-        <div class="channel-grid" id="grid"></div>
+    <div class="content" id="scroll-box">
+        <div id="cat-label" class="category-title">All Channels</div>
+        <div class="channel-grid" id="channel-grid"></div>
     </div>
 </div>
 
+<!-- Fallback Player Overlay -->
 <div class="player-overlay" id="player">
-    <video id="videoPlayer" playsinline></video>
+    <div class="loading-spinner">
+        Launching VLC...<br>
+        <small style="font-size: 14px; opacity: 0.7;">If it doesn't open, press ENTER to try web player.</small>
+    </div>
+    <video id="videoPlayer"></video>
     <div class="player-controls">
-        <button class="btn-back" id="backBtn">RETURN TO MENU</button>
+        <div class="btn-back" id="backBtn">BACK TO MENU</div>
     </div>
 </div>
 
@@ -264,242 +225,181 @@
         {"id":"channel5","name":"Telemix","logo":"https://i.ibb.co/RB7dzZq/logo-mix-2.png","url":"https://haititivi.com/haiti/telemix1/tracks-v1a1/mono.m3u8","genre":"general"},
         {"id":"channel6","name":"Kajou TV","logo":"https://static.wixstatic.com/media/d205b7_ced5950afd8849e2b21a72f36b3a16ff~mv2.png","url":"https://video1.getstreamhosting.com:1936/8055/8055/chunklist_w1507178321.m3u8","genre":"general"},
         {"id":"channel7","name":"RTH 2000","logo":"https://i.imgur.com/4z0FiEA.png","url":"https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4203440/chunklist_b1998000.m3u8","genre":"general"},
-        {"id":"channel8","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":"https://2-fss-2.streamhoster.com/pl_120/amlst:206708-4202592/chunklist_b1966000.m3u8","genre":"general"},
+        {"id":"channel8","name":"RTH 2000 TV2","logo":"https://i.imgur.com/4z0FiEA.png","url":"https://2-fss-2.streamhoster.com/pl_122/amlst:206708-4202592/chunklist_b1966000.m3u8","genre":"general"},
         {"id":"channel9","name":"Radio Tele Puissance","logo":"https://radiotelepuissance.com/wp-content/uploads/2020/08/cropped-radio-logo-1.png","url":"https://video1.getstreamhosting.com:1936/8560/8560/chunklist_w486676635.m3u8","genre":"religious"},
-        {"id":"channel10","name":"4Diaspo TV","logo":"https://m.media-amazon.com/images/I/71w9kTfB7xL.png","url":"https://5790d294af2dc.streamlock.net/4diaspo/4diaspo/chunklist_w926608167.m3u8","genre":"general"},
         {"id":"channel11","name":"Tele Pam","logo":"https://i.imgur.com/zfnFVqQ.png","url":"https://acwstream.com/acw/stream/telepam/tracks-v1/index.fmp4.m3u8","genre":"general"},
         {"id":"channel12","name":"Radio Tele Boston","logo":"https://i.ibb.co/x3Gx3Ps/unnamed.png","url":"https://tv2.fastcast4u.com:3238/live/radiotelebostonlive.m3u8","genre":"religious"},
-        {"id":"channel13","name":"Fidele TV","logo":"https://i.ytimg.com/vi/t8SJhjQvb_4/maxresdefault.jpg","url":"https://59d39900ebfb8.streamlock.net/FIDELETV/FIDELETV/chunklist_w1411395380.m3u8","genre":"general"},
-        {"id":"channel14","name":"BPX","logo":"https://i.ibb.co/SvGYHS7/images-1.jpg","url":"https://video1.getstreamhosting.com:1936/8212/8212/chunklist_w28899981.m3u8","genre":"general"},
         {"id":"channel15","name":"Nago TV","logo":"https://i.ibb.co/fSnCtJb/nago-tv.png","url":"https://acwstream.com/lakay/nagotv/tracks-v1a1/mono.m3u8","genre":"music"},
         {"id":"channel16","name":"Tele 4VEH","logo":"https://4veh.org/en/wp-content/uploads/2021/08/2021-logo-RT-4VEH-ENG-v8.png","url":"https://uni01rtmp.tulix.tv/4vehtv/4vehtv-firetv/playlist.m3u8","genre":"religious"},
         {"id":"channel17","name":"Tele Louange","logo":"https://editor.zenomedia.com/resources/zs_station/436269/CardWebsite/image.png","url":"https://5790d294af2dc.streamlock.net/8124/8124/chunklist_w1901943944.m3u8","genre":"religious"},
-        {"id":"channel18","name":"Madras FM TV","logo":"https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/madrasfm2.png","url":"https://edge12.vedge.infomaniak.com/livecast/ik:madrasfmtv/manifest.m3u8","genre":"music"},
-        {"id":"channel19","name":"Bblack Caribbean","logo":"https://boomboxradio.ru/wp-content/uploads/2024/05/bblack-caribbean-tv-jpg.webp","url":"https://edge16.vedge.infomaniak.com/livecast/ik:bblackcaribbean/chunklist_w2059905249.m3u8","genre":"music"},
-        {"id":"channel20","name":"Bblack Africa","logo":"https://i.ibb.co/mvJc4z0/maxresdefault.jpg","url":"https://edge16.vedge.infomaniak.com/livecast/ik:bblackafrica/chunklist_w2121971628.m3u8","genre":"music"},
         {"id":"channel21","name":"Afrobeats","logo":"https://www.shutterstock.com/image-vector/afro-beat-text-african-drums-260nw-1741803605.jpg","url":"https://stream.ecable.tv/afrobeats/index.m3u8","genre":"music"},
         {"id":"channel22","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":"https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8","genre":"music"},
-        {"id":"channel23","name":"Trace Latina","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/TRACE_Latina_Logo.png/1280px-TRACE_Latina_Logo.png","url":"https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01131-tracetv-tracelatinait-samsungit/playlist.m3u8","genre":"music"},
-        {"id":"channel24","name":"DBM","logo":"https://tv2free.ru/sites/default/files/styles/large/public/tv-logo/tv-dbm-tv.jpg","url":"https://dbmtv.vedge.infomaniak.com/livecast/dbmtv/playlist.m3u8","genre":"general"},
-        {"id":"channel25","name":"TMA","logo":"https://i.ibb.co/rtPW6pV/R.png","url":"http://hls.tmacaraibes.com/live/index.m3u8","genre":"music"},
-        {"id":"channel26","name":"Tele Eclair","logo":"https://cdn6.aptoide.com/imgs/e/7/5/e7523cdc2229b9659beedab45974698d_icon.png","url":"https://live.acwstream.com:3915/live/radioteleeclairlive.m3u8","genre":"general"},
-        {"id":"channel27","name":"TVA 30","logo":"https://televariete.com/tva30/logo.png","url":"https://acwstream.com/hb/chaine30/tracks-v1a1/mono.m3u8","genre":"general"},
-        {"id":"channel28","name":"PVS","logo":"https://image.roku.com/developer_channels/prod/ba4c8f31be166308e659d3ffb67d316465621c29d19db94d6ece8bae7634cee5.png","url":"https://2-fss-1.streamhoster.com/pl_122/202676-1357858-1/chunklist.m3u8","genre":"general"},
         {"id":"channel29","name":"Totalmix Radio","logo":"https://cdn-radiotime-logos.tunein.com/s127273g.png","url":"https://media.streambrothers.com:1936/hpgnrhawxv/hpgnrhawxv/chunklist_w1967596347.m3u8","genre":"sports"},
-        {"id":"channel30","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":"https://cdn1.ayitistream.com/web-r1/tracks-v1/index.fmp4.m3u8","genre":"sports"},
-        {"id":"channel31","name":"Tele Miracle","logo":"https://play-lh.googleusercontent.com/_xLb5cY2Jx9mxWOCcM9eT1mthdxT17zONK19X7dQ3eY9iNL2j88rKxnLhd3bQnMuNvk","url":"https://5790d294af2dc.streamlock.net/MIRACLETV/MIRACLETV/chunklist_w2147348876.m3u8","genre":"religious"},
-        {"id":"channel32","name":"Radio Tele Hit","logo":"https://play-lh.googleusercontent.com/lujstN5hKyG0JWg_heOw5H7d8NbfzFAGE3Uq0oY9Qo8WxgFB6xD60lXCsGhYa8HDwHg","url":"https://59d39900ebfb8.streamlock.net/RadioTelehit/RadioTelehit/playlist.m3u8","genre":"music"},
-        {"id":"channel33","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":"https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8","genre":"religious"},
-        {"id":"channel34","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":"https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8","genre":"music"},
-        {"id":"channel35","name":"Radio Tele Planet Compas","logo":"https://play-lh.googleusercontent.com/2TF7iHbKnP1TNz4bnaY8aqozDJ-fK58dyRIANbZvt1XQkpvr57ELdUSpSi0LCHb5waot","url":"https://5dcab9aed5331.streamlock.net/mrcompas1/livestream/playlist.m3u8","genre":"music"}
+        {"id":"channel30","name":"Rezo Boul","logo":"https://www.rezoboul.com/uploads/images/logo_site_1714115779.png","url":"https://cdn1.ayitistream.com/web-r1/tracks-v1/index.fmp4.m3u8","genre":"sports"}
     ];
 
-    let currentFocus = { type: 'nav', index: 0, gridIndex: 0 };
-    let filteredChannels = [...CHANNELS];
-    let hls = null;
-    let activityTimer = null;
+    let state = {
+        focus: 'nav',
+        navIdx: 0,
+        gridIdx: 0,
+        filtered: [],
+        playing: false,
+        vlcAttempted: false
+    };
 
-    const grid = document.getElementById('grid');
     const navItems = document.querySelectorAll('.nav-item');
+    const grid = document.getElementById('channel-grid');
+    const scrollBox = document.getElementById('scroll-box');
     const player = document.getElementById('player');
     const video = document.getElementById('videoPlayer');
     const backBtn = document.getElementById('backBtn');
-    const contentArea = document.getElementById('content-area');
+    let hls = null;
 
-    function updateView() {
+    function renderGrid() {
+        const cat = navItems[state.navIdx].dataset.cat;
+        document.getElementById('cat-label').innerText = navItems[state.navIdx].innerText;
+        state.filtered = CHANNELS.filter(c => cat === 'all' || c.genre === cat);
         grid.innerHTML = '';
-        const activeNav = document.querySelector('.nav-item.active');
-        const cat = activeNav.dataset.cat;
-        document.getElementById('catHeader').innerText = activeNav.innerText;
-        
-        filteredChannels = CHANNELS.filter(c => cat === 'all' || c.genre === cat);
-        
-        filteredChannels.forEach((ch, idx) => {
+        state.filtered.forEach((ch, i) => {
             const card = document.createElement('div');
             card.className = 'channel-card';
-            card.id = `ch-${idx}`;
+            card.id = `card-${i}`;
             card.innerHTML = `
-                <div class="thumb-container"><img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/200x112/21262d/8b949e?text=TV'"></div>
+                <div class="thumb-container"><img src="${ch.logo}"></div>
                 <div class="channel-name">${ch.name}</div>
-                <div class="channel-badge">LIVE</div>
             `;
-            card.onclick = (e) => {
-                e.preventDefault();
-                currentFocus.type = 'grid';
-                currentFocus.gridIndex = idx;
-                play(ch.url);
-            };
             grid.appendChild(card);
         });
-        
-        // Reset scroll position on category change
-        contentArea.scrollTop = 0;
+        scrollBox.scrollTop = 0;
     }
 
-    function applyFocus() {
+    function updateFocus() {
         document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
-        
-        if (player.classList.contains('active')) {
+        if (state.playing) {
             backBtn.classList.add('focused');
             return;
         }
-
-        if (currentFocus.type === 'nav') {
-            const el = navItems[currentFocus.index];
-            el.classList.add('focused');
-            // Don't use scrollIntoView for nav as it might trigger page-level movement
+        if (state.focus === 'nav') {
+            navItems[state.navIdx].classList.add('focused');
         } else {
-            const card = document.getElementById(`ch-${currentFocus.gridIndex}`);
-            if (card) {
-                card.classList.add('focused');
-                // Scroll specifically inside the content area
-                const offsetTop = card.offsetTop - contentArea.offsetTop - 100;
-                contentArea.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            const el = document.getElementById(`card-${state.gridIdx}`);
+            if (el) {
+                el.classList.add('focused');
+                const topPos = el.offsetTop - scrollBox.offsetTop - 100;
+                scrollBox.scrollTo({ top: topPos, behavior: 'smooth' });
             }
         }
     }
 
-    function showControls() {
-        if (!player.classList.contains('active')) return;
-        player.classList.add('user-active');
-        applyFocus();
-        if (activityTimer) clearTimeout(activityTimer);
-        activityTimer = setTimeout(() => {
-            player.classList.remove('user-active');
-        }, 4000);
-    }
-
-    function moveFocus(dir) {
-        if (player.classList.contains('active')) {
-            showControls();
+    function handleEnter() {
+        if (state.playing) {
+            // If user clicks enter while on the "Launching VLC" screen, trigger web player fallback
+            const channel = state.filtered[state.gridIdx];
+            startWebPlayback(channel.url);
             return;
         }
 
-        if (currentFocus.type === 'nav') {
-            if (dir === 'DOWN') currentFocus.index = Math.min(currentFocus.index + 1, navItems.length - 1);
-            else if (dir === 'UP') currentFocus.index = Math.max(currentFocus.index - 1, 0);
-            else if (dir === 'RIGHT' && filteredChannels.length > 0) {
-                currentFocus.type = 'grid';
-                currentFocus.gridIndex = 0;
-            }
-        } else {
-            const containerWidth = contentArea.offsetWidth;
-            const cols = Math.floor(containerWidth / 280) || 1;
-            
-            if (dir === 'LEFT') {
-                if (currentFocus.gridIndex % cols === 0) currentFocus.type = 'nav';
-                else currentFocus.gridIndex--;
-            } 
-            else if (dir === 'RIGHT') currentFocus.gridIndex = Math.min(currentFocus.gridIndex + 1, filteredChannels.length - 1);
-            else if (dir === 'DOWN') currentFocus.gridIndex = Math.min(currentFocus.gridIndex + cols, filteredChannels.length - 1);
-            else if (dir === 'UP') {
-                if (currentFocus.gridIndex >= cols) currentFocus.gridIndex -= cols;
-                else {
-                    // Optionally jump back to nav if moving UP from top row? 
-                    // No, usually best to stay in grid until LEFT is pressed.
-                }
-            }
-        }
-        applyFocus();
-    }
-
-    function select() {
-        if (player.classList.contains('active')) {
-            if (player.classList.contains('user-active')) stopPlayer();
-            else showControls();
-            return;
-        }
-        
-        if (currentFocus.type === 'nav') {
+        if (state.focus === 'nav') {
             navItems.forEach(n => n.classList.remove('active'));
-            navItems[currentFocus.index].classList.add('active');
-            currentFocus.gridIndex = 0;
-            updateView();
-            applyFocus();
+            navItems[state.navIdx].classList.add('active');
+            renderGrid();
+            if (state.filtered.length > 0) {
+                state.focus = 'grid';
+                state.gridIdx = 0;
+            }
         } else {
-            const ch = filteredChannels[currentFocus.gridIndex];
-            if (ch) play(ch.url);
+            const channel = state.filtered[state.gridIdx];
+            if (channel) launchVLC(channel.url);
         }
+        updateFocus();
     }
 
-    function play(url) {
+    /**
+     * Launch VLC using Android Intents
+     */
+    function launchVLC(url) {
+        state.playing = true;
+        state.vlcAttempted = true;
         player.classList.add('active');
-        showControls();
         
-        const hlsConfig = {
-            maxBufferLength: 30,
-            maxMaxBufferLength: 60,
-            enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 0
-        };
+        // Android Intent for VLC
+        // This will attempt to open VLC directly on Firestick/Android
+        const vlcIntent = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=http;package=org.videolan.vlc;S.title=${encodeURIComponent(state.filtered[state.gridIdx].name)};end`;
+        
+        console.log("Launching VLC Intent:", vlcIntent);
+        window.location.href = vlcIntent;
 
+        // Auto-close overlay after 10 seconds if user stayed in browser (VLC didn't take over)
+        setTimeout(() => {
+            if (state.playing && !video.src) {
+                stopPlayback();
+            }
+        }, 10000);
+    }
+
+    function startWebPlayback(url) {
+        player.querySelector('.loading-spinner').innerHTML = "Loading Web Stream...";
         if (Hls.isSupported()) {
             if (hls) hls.destroy();
-            hls = new Hls(hlsConfig);
+            hls = new Hls();
             hls.loadSource(url);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play().catch(() => showControls());
-            });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
-                        case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
-                        default: stopPlayer(); break;
-                    }
-                }
-            });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else {
             video.src = url;
             video.play();
         }
     }
 
-    function stopPlayer() {
+    function stopPlayback() {
+        state.playing = false;
         player.classList.remove('active');
-        player.classList.remove('user-active');
         video.pause();
         video.src = "";
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
-        applyFocus();
+        if (hls) hls.destroy();
+        updateFocus();
     }
 
     window.addEventListener('keydown', (e) => {
         const key = e.keyCode;
-        if (key === 37) moveFocus('LEFT');
-        else if (key === 38) moveFocus('UP');
-        else if (key === 39) moveFocus('RIGHT');
-        else if (key === 40) moveFocus('DOWN');
-        else if (key === 13) select();
-        else if (key === 8 || key === 27 || key === 10009) {
-            if (player.classList.contains('active')) {
-                stopPlayer();
+        if (key === 13) {
+            e.preventDefault();
+            handleEnter();
+        } else if (key === 8 || key === 27 || key === 10009) {
+            if (state.playing) {
                 e.preventDefault();
+                stopPlayback();
             }
+        } else if (!state.playing) {
+            if (key === 38) { // UP
+                if (state.focus === 'nav') state.navIdx = Math.max(0, state.navIdx - 1);
+                else {
+                    const cols = Math.floor(grid.offsetWidth / 240);
+                    if (state.gridIdx >= cols) state.gridIdx -= cols;
+                }
+            } else if (key === 40) { // DOWN
+                if (state.focus === 'nav') state.navIdx = Math.min(navItems.length - 1, state.navIdx + 1);
+                else {
+                    const cols = Math.floor(grid.offsetWidth / 240);
+                    state.gridIdx = Math.min(state.filtered.length - 1, state.gridIdx + cols);
+                }
+            } else if (key === 37) { // LEFT
+                if (state.focus === 'grid') {
+                    const cols = Math.floor(grid.offsetWidth / 240);
+                    if (state.gridIdx % cols === 0) state.focus = 'nav';
+                    else state.gridIdx--;
+                }
+            } else if (key === 39) { // RIGHT
+                if (state.focus === 'nav' && state.filtered.length > 0) state.focus = 'grid';
+                else if (state.focus === 'grid') state.gridIdx = Math.min(state.filtered.length - 1, state.gridIdx + 1);
+            }
+            updateFocus();
         }
     });
 
-    navItems.forEach((item, idx) => {
-        item.onclick = (e) => {
-            e.preventDefault();
-            currentFocus.type = 'nav';
-            currentFocus.index = idx;
-            select();
-        };
-    });
-
-    backBtn.onclick = (e) => {
-        e.stopPropagation();
-        stopPlayer();
-    };
-
-    updateView();
-    setTimeout(applyFocus, 100);
+    renderGrid();
+    updateFocus();
 </script>
+
 </body>
 </html>
