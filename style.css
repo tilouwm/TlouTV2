@@ -44,8 +44,8 @@ body{overflow-x:hidden;background:linear-gradient(180deg,#04050a,#070910 40%,#04
   background:rgba(20,24,33,.60);
   border:1px solid var(--border);
   max-width:calc(100vw - 420px);
-  overflow:hidden;     /* keep the page from shifting */
-  touch-action:pan-y;  /* allow swipe without page shifting */
+  overflow:hidden;
+  touch-action:pan-y;
 }
 .tabs-rail{display:flex;gap:10px;transform:translateX(0);will-change:transform;}
 .tab{
@@ -127,7 +127,6 @@ body{overflow-x:hidden;background:linear-gradient(180deg,#04050a,#070910 40%,#04
 .player-overlay{position:fixed;inset:0;background:#000;z-index:2000;display:none;}
 .player-overlay.active{display:block;}
 
-/* Ensure video doesn't sit on top of the MENU button */
 #videoPlayer{
   position:absolute;
   inset:0;
