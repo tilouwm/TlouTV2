@@ -1,4 +1,4 @@
-* =============================
+/* =============================
    TlouTV Pro — app.js (FIXED)
 ============================= */
 
@@ -695,5 +695,3 @@ setFilter('all');
 state.focus = 'tabs';
 updateFocus();
 applyTabsShift();
-
-
