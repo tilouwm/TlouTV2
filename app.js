@@ -564,34 +564,40 @@ function togglePlayerMenu(){
   updateFocus();
 }
 
-/* ================= EXIT MODAL ================= */
+/* ================= EXIT MODAL (HARD HIDE) ================= */
 function openExitModal(){
   state.exitOpen = true;
-  state.exitChoice = 0; // default YES
-  exitModal?.classList.add("active");
-  updateExitFocus();
+  state.exitChoice = 1; // default "No"
+  if (exitModal){
+    exitModal.classList.add("active");
+    exitModal.setAttribute("aria-hidden","false");
+    exitModal.style.display = "flex";   // IMPORTANT (works even without CSS)
+  }
+  updateFocus();
 }
 
 function closeExitModal(){
   state.exitOpen = false;
-  exitModal?.classList.remove("active");
+  if (exitModal){
+    exitModal.classList.remove("active");
+    exitModal.setAttribute("aria-hidden","true");
+    exitModal.style.display = "none";   // IMPORTANT
+  }
   updateFocus();
 }
 
-function updateExitFocus(){
-  exitYes?.classList.toggle("focused", state.exitChoice === 0);
-  exitNo?.classList.toggle("focused", state.exitChoice === 1);
+function doExit(){
+  // PWA/Web can't always close window; this is the best practical behavior:
+  try { window.close(); } catch(_){}
+  try { window.location.href = "about:blank"; } catch(_){}
 }
 
-function doExit(){
-  // Best-effort exit for WebView/PWA/Browser
-  try { window.close(); } catch(_){}
-
-  // If installed as PWA, window.close() may fail; attempt navigation
-  try { window.location.href = "about:blank"; } catch(_){}
-
-  // Last resort
-  try { history.go(-999); } catch(_){}
+/* Ensure modal is hidden on startup no matter what */
+function forceHideExitOnLoad(){
+  if (!exitModal) return;
+  exitModal.classList.remove("active");
+  exitModal.setAttribute("aria-hidden","true");
+  exitModal.style.display = "none";
 }
 
 /* ================= ACTIONS ================= */
@@ -786,19 +792,16 @@ window.addEventListener("resize", () => {
   applyTabsShift();
 });
 
-/* ================= INIT ================= */
 function init(){
-  // Ensure exit modal hidden on load
-  exitModal?.classList.remove("active");
-
+  forceHideExitOnLoad();   // <-- ADD THIS
   setFilter("all");
   state.focus = "tabs";
   updateFocus();
   applyTabsShift();
 
-  // Add a dummy history state so browser back triggers popstate
-  try { history.replaceState({ tloutv: true }, "", location.href); } catch(_){}
-  try { history.pushState({ tloutv: "guard" }, "", location.href); } catch(_){}
+  // Hook buttons (in case your listeners are above and failed earlier)
+  if (exitYes) exitYes.onclick = () => doExit();
+  if (exitNo) exitNo.onclick = () => closeExitModal();
 }
-
 init();
+
