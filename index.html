@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Root-level CSS -->
-  <link rel="stylesheet" href="./style.css?v=7" />
+  <!-- IMPORTANT: root-level files -->
+  <link rel="stylesheet" href="./style.css?v=10" />
 </head>
 
 <body>
@@ -52,8 +52,8 @@
     </div>
   </div>
 
-  <!-- EXIT CONFIRM MODAL -->
-  <div class="exit-modal" id="exitModal" aria-hidden="true">
+  <!-- EXIT CONFIRM MODAL (HARD-HIDDEN BY DEFAULT) -->
+  <div class="exit-modal" id="exitModal" aria-hidden="true" style="display:none;">
     <div class="exit-card" role="dialog" aria-modal="true" aria-label="Exit confirmation">
       <div class="exit-title">Exit TlouTV?</div>
       <div class="exit-sub">Are you sure you want to exit?</div>
@@ -64,10 +64,9 @@
     </div>
   </div>
 
-  <!-- HLS -->
+  <!-- HLS + APP -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="./app.js?v=10" defer></script>
 
-  <!-- Root-level JS -->
-  <script src="./app.js?v=7" defer></script>
 </body>
 </html>
