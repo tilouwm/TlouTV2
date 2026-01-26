@@ -1,20 +1,14 @@
+* =============================
+   TlouTV Pro — app.js (FIXED)
+============================= */
 
-/* ===========================
-   TlouTV Pro — app.js (STABLE)
-   =========================== */
-
-/* ---------- helpers ---------- */
+/* --------- REQUIRED (you were missing this) --------- */
 function normalizeStream(url){
-  if (!url) return "";
-  return String(url).trim();
+  // keep it simple: trim + return
+  return (url || "").trim();
 }
 
-function isFireTv(){
-  const ua = navigator.userAgent || "";
-  return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
-}
-
-/* ---------- channels ---------- */
+/* ================= CHANNELS ================= */
 const CHANNELS = [
   {"id":"channel1","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel2","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":normalizeStream("https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8"),"genre":"general"},
@@ -52,246 +46,654 @@ const CHANNELS = [
   {"id":"channel34","name":"Radio Tele Sentinel","logo":"https://radiotelesentinel.com/wp-content/uploads/2025/03/logo-sentinel.png","url":normalizeStream("https://59d39900ebfb8.streamlock.net/radiotelesentinel/radiotelesentinel/chunklist_w2035690488.m3u8"),"genre":"religious"},
   {"id":"channel35","name":"VA Studio","logo":"https://i.imgur.com/bIQjQo1.jpeg","url":normalizeStream("https://haititivi.com/haiti/vastudio/tracks-v1a1/mono.m3u8"),"genre":"music"},
   {"id":"channel36","name":"Zoukla TV","logo":"https://www.telezoukla.com/gallery/tv%20zoukla-ts1633041059.png?ts=1768183155","url":normalizeStream("https://vdo.pro-fhi.net:3228/stream/play.m3u8"),"genre":"music"},
-  {"id":"channel37","name":"Generation TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAaQP-C3ATroz7tdW3USycLU19GDxF0H-sCw&s","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
-  {"id":"channel38","name":"Identite TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBLm7oYAN63J2TLWzmUbvV0LuvDKZZ07fMrg&s","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"},
-  {"id":"channel39","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music"}
+  {"id":"channel37","name":"Generation TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAaQP-C3ATroz7tdW3USycLU19GDxT0H-sCw&s","url":normalizeStream("https://edge20.vedge.infomaniak.com/livecast/ik:generation-tv/chunklist_w1037567077.m3u8"),"genre":"music"},
+  {"id":"channel38","name":"Identite TV","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBLm7oYAN63J2TLWzmUbvV0LuvDKZZ07fMrg&s","url":normalizeStream("https://vdo2.pro-fhi.net:3769/stream/play.m3u8"),"genre":"music"}
 ];
 
-const GENRES = ["news","general","music","religious","sports"];
+/* ================= ELEMENTS ================= */
+const rowsEl = document.getElementById('rows');
+const tabsViewport = document.getElementById('tabsViewport');
+const tabsRail = document.getElementById('tabsRail');
+const tabs = Array.from(document.querySelectorAll('.tab'));
 
-/* ---------- elements ---------- */
-const rowsEl = document.getElementById("rows");
-const tabs = Array.from(document.querySelectorAll(".tab"));
-
-const player = document.getElementById("player");
-const video = document.getElementById("videoPlayer");
-const loading = document.getElementById("loading");
-const backBtn = document.getElementById("backBtn");
-
-const exitModal = document.getElementById("exitModal");
-const exitYes = document.getElementById("exitYes");
-const exitNo  = document.getElementById("exitNo");
+const player = document.getElementById('player');
+const video = document.getElementById('videoPlayer');
+const loading = document.getElementById('loading');
+const backBtn = document.getElementById('backBtn');
 
 let hls = null;
 
-/* ---------- state ---------- */
+/* ================= STATE ================= */
 const state = {
-  focus: "tabs",
+  focus: 'tabs',
   tabIdx: 0,
   rowIdx: 0,
   itemIdx: 0,
+  filter: 'all',
   rows: [],
   playing: false,
-  exitOpen: false
+  menu: false
 };
 
-/* ---------- rendering ---------- */
-function buildRows(){
-  rowsEl.innerHTML = "";
-  state.rows = [];
+const GENRE_ORDER = ['news','general','music','religious','sports'];
 
-  GENRES.forEach(genre=>{
-    const items = CHANNELS.filter(c=>c.genre===genre);
-    if(!items.length) return;
-
-    const section = document.createElement("section");
-    section.className = "row";
-
-    section.innerHTML = `
-      <div class="row-head">
-        <div class="row-title">${genre.toUpperCase()}</div>
-      </div>
-      <div class="rail-wrap">
-        <div class="rail"></div>
-      </div>
-    `;
-
-    const rail = section.querySelector(".rail");
-
-    items.forEach((ch,i)=>{
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      tile.dataset.i = i;
-      tile.innerHTML = `
-        <div class="thumb"><img src="${ch.logo}" onerror="this.style.display='none'"></div>
-        <div class="tile-foot">${ch.name}</div>
-      `;
-      rail.appendChild(tile);
-    });
-
-    rowsEl.appendChild(section);
-    state.rows.push({genre,items,section,rail});
-  });
-
-  updateFocus();
+/* ================= ENV DETECT (FIRE TV / ANDROID TV) ================= */
+function isFireTv(){
+  const ua = navigator.userAgent || '';
+  return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
 }
 
-/* ---------- focus ---------- */
+/* ================= TABS: MOMENTUM + SNAP ================= */
+let tabScrollX = 0;
+let tabVel = 0;
+let tabDragging = false;
+let tabLastX = 0;
+let tabSnapTimer = null;
+
+function tabsMaxShift(){
+  const viewportW = tabsViewport.getBoundingClientRect().width;
+  const railW = tabsRail.scrollWidth;
+  return Math.max(0, railW - viewportW);
+}
+
+function applyTabsShift(){
+  const max = tabsMaxShift();
+  tabScrollX = Math.max(0, Math.min(tabScrollX, max));
+  tabsRail.style.transform = `translateX(${-tabScrollX}px)`;
+}
+
+function snapTabsToCenter(){
+  const viewportRect = tabsViewport.getBoundingClientRect();
+  const viewportCenter = (viewportRect.left + viewportRect.right) / 2;
+
+  let bestDelta = 0;
+  let bestAbs = Infinity;
+  tabs.forEach(t => {
+    const r = t.getBoundingClientRect();
+    const c = (r.left + r.right) / 2;
+    const d = c - viewportCenter;
+    const ad = Math.abs(d);
+    if (ad < bestAbs){ bestAbs = ad; bestDelta = d; }
+  });
+
+  tabScrollX += bestDelta;
+  applyTabsShift();
+}
+
+function scheduleTabSnap(){
+  if (tabSnapTimer) clearTimeout(tabSnapTimer);
+  tabSnapTimer = setTimeout(() => {
+    if (!tabDragging && !state.playing) snapTabsToCenter();
+  }, 90);
+}
+
+tabsViewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  tabVel += dx;
+  scheduleTabSnap();
+}, { passive:false });
+
+tabsViewport.addEventListener('pointerdown', (e) => {
+  tabDragging = true;
+  tabLastX = e.clientX;
+  tabsViewport.setPointerCapture?.(e.pointerId);
+});
+
+tabsViewport.addEventListener('pointermove', (e) => {
+  if (!tabDragging) return;
+  const dx = tabLastX - e.clientX;
+  tabLastX = e.clientX;
+  tabVel += dx;
+  scheduleTabSnap();
+});
+
+tabsViewport.addEventListener('pointerup', () => {
+  tabDragging = false;
+  scheduleTabSnap();
+});
+
+function tickTabsMomentum(){
+  if (Math.abs(tabVel) > 0.15){
+    tabScrollX += tabVel;
+    tabVel *= 0.92;
+    applyTabsShift();
+  }
+  requestAnimationFrame(tickTabsMomentum);
+}
+tickTabsMomentum();
+
+/* ================= ROW RAIL: SCROLL + MOMENTUM ================= */
+function getTileSize(rowObj){
+  const tileEl = rowObj.railEl.querySelector('.tile');
+  const tileW = tileEl ? tileEl.getBoundingClientRect().width : 240;
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 14;
+  return { tileW, gap };
+}
+
+function railMaxShift(rowObj){
+  const wrapW = rowObj.wrapEl.getBoundingClientRect().width;
+  const { tileW, gap } = getTileSize(rowObj);
+  const contentW = rowObj.items.length * (tileW + gap) - gap;
+  return Math.max(0, contentW - wrapW + 12);
+}
+
+function applyRailShift(rowObj){
+  const max = railMaxShift(rowObj);
+  rowObj.scrollX = Math.max(0, Math.min(rowObj.scrollX || 0, max));
+  rowObj.railEl.style.transform = `translateX(${-rowObj.scrollX}px)`;
+}
+
+function attachRailScroll(rowObj){
+  rowObj.scrollX = rowObj.scrollX || 0;
+  rowObj.velX = 0;
+  rowObj.dragging = false;
+  rowObj.lastX = 0;
+
+  rowObj.wrapEl.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    rowObj.velX += dx;
+  }, { passive:false });
+
+  rowObj.wrapEl.addEventListener('pointerdown', (e) => {
+    rowObj.dragging = true;
+    rowObj.lastX = e.clientX;
+    rowObj.wrapEl.setPointerCapture?.(e.pointerId);
+  });
+
+  rowObj.wrapEl.addEventListener('pointermove', (e) => {
+    if (!rowObj.dragging) return;
+    const dx = rowObj.lastX - e.clientX;
+    rowObj.lastX = e.clientX;
+    rowObj.velX += dx;
+  });
+
+  rowObj.wrapEl.addEventListener('pointerup', () => {
+    rowObj.dragging = false;
+  });
+
+  const tick = () => {
+    if (!state.playing && Math.abs(rowObj.velX) > 0.12){
+      rowObj.scrollX += rowObj.velX;
+      rowObj.velX *= 0.90;
+      applyRailShift(rowObj);
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+/* ================= HELPERS ================= */
 function clearFocused(){
-  document.querySelectorAll(".focused").forEach(e=>e.classList.remove("focused"));
+  document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
+}
+
+function ensureRowVisible(rowEl){
+  const box = rowsEl.getBoundingClientRect();
+  const r = rowEl.getBoundingClientRect();
+  const pad = 24;
+  if (r.top < box.top + pad) rowsEl.scrollTop -= (box.top + pad - r.top);
+  else if (r.bottom > box.bottom - pad) rowsEl.scrollTop += (r.bottom - (box.bottom - pad));
+}
+
+function updateRailTransformForFocus(rowObj){
+  if (rowObj.dragging) return;
+
+  const wrapW = rowObj.wrapEl.getBoundingClientRect().width;
+  const { tileW, gap } = getTileSize(rowObj);
+  const leftTarget = state.itemIdx * (tileW + gap);
+  const margin = 80;
+  const contentW = rowObj.items.length * (tileW + gap) - gap;
+  const maxShift = Math.max(0, contentW - wrapW + margin);
+
+  let shift = leftTarget - margin;
+  shift = Math.max(0, Math.min(shift, maxShift));
+
+  rowObj.scrollX = shift;
+  applyRailShift(rowObj);
 }
 
 function updateFocus(){
   clearFocused();
 
-  if(state.exitOpen){
-    exitNo?.classList.add("focused");
+  if (state.playing){
+    if (state.menu) backBtn.classList.add('focused');
     return;
   }
 
-  if(state.playing) return;
-
-  if(state.focus==="tabs"){
-    tabs[state.tabIdx]?.classList.add("focused");
+  if (state.focus === 'tabs'){
+    const tab = tabs[state.tabIdx];
+    if (tab) tab.classList.add('focused');
     return;
   }
 
-  const row = state.rows[state.rowIdx];
-  if(!row) return;
-  const tile = row.rail.querySelector(`.tile[data-i="${state.itemIdx}"]`);
-  tile?.classList.add("focused");
+  const rowObj = state.rows[state.rowIdx];
+  if (!rowObj) return;
+
+  const tile = rowObj.railEl.querySelector(`.tile[data-i="${state.itemIdx}"]`);
+  if (tile) tile.classList.add('focused');
+
+  updateRailTransformForFocus(rowObj);
+  ensureRowVisible(rowObj.rowEl);
 }
 
-/* ---------- playback ---------- */
+/* ================= RENDER ================= */
+function buildRows(){
+  rowsEl.innerHTML = '';
+  state.rows = [];
+
+  const genresToShow = (state.filter === 'all')
+    ? GENRE_ORDER
+    : GENRE_ORDER.filter(g => g === state.filter);
+
+  genresToShow.forEach(g => {
+    const items = CHANNELS.filter(c => c.genre === g);
+    if (!items.length) return;
+
+    const section = document.createElement('section');
+    section.className = 'row';
+    section.dataset.genre = g;
+
+    const head = document.createElement('div');
+    head.className = 'row-head';
+    head.innerHTML = `<div class="row-title">${g.toUpperCase()}</div><div class="row-meta">${items.length} channels</div>`;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'rail-wrap';
+    wrap.innerHTML = `<div class="rail-fade-left"></div><div class="rail-fade-right"></div>`;
+
+    const rail = document.createElement('div');
+    rail.className = 'rail';
+
+    items.forEach((c, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.dataset.i = String(i);
+      tile.innerHTML = `
+        <div class="thumb"><img src="${c.logo}" alt="" loading="lazy" onerror="this.style.display='none'" /></div>
+        <div class="tile-foot">${c.name}</div>
+      `;
+      rail.appendChild(tile);
+    });
+
+    wrap.appendChild(rail);
+    section.appendChild(head);
+    section.appendChild(wrap);
+    rowsEl.appendChild(section);
+
+    const rowObj = { genre: g, items, rowEl: section, wrapEl: wrap, railEl: rail, scrollX: 0, velX: 0, dragging: false, lastX: 0 };
+    state.rows.push(rowObj);
+    attachRailScroll(rowObj);
+  });
+
+  state.rowIdx = Math.min(state.rowIdx, Math.max(0, state.rows.length - 1));
+  const curRow = state.rows[state.rowIdx];
+  state.itemIdx = Math.min(state.itemIdx, Math.max(0, (curRow?.items.length || 1) - 1));
+
+  state.rows.forEach(r => applyRailShift(r));
+  updateFocus();
+}
+
+/* ================= FILTER (TABS) ================= */
+function setFilter(cat){
+  state.filter = cat;
+  tabs.forEach(t => t.classList.remove('active'));
+
+  const idx = tabs.findIndex(t => (t.dataset.cat || 'all') === cat);
+  state.tabIdx = idx >= 0 ? idx : 0;
+  tabs[state.tabIdx].classList.add('active');
+
+  state.rowIdx = 0;
+  state.itemIdx = 0;
+
+  rowsEl.scrollTop = 0;
+  buildRows();
+}
+
+/* ================= PLAYBACK ================= */
 function cleanupPlayback(){
-  if(hls){ try{hls.destroy();}catch{} hls=null; }
-  try{video.pause();}catch{}
-  video.removeAttribute("src");
+  if (hls){ try{ hls.destroy(); } catch(_){ } hls = null; }
+  try{ video.pause(); } catch(_){ }
+  video.srcObject = null;
+  video.removeAttribute('src');
   video.load();
 }
 
-function startPlayback(url){
-  cleanupPlayback();
-  document.body.classList.add("is-playing");
-
-  player.classList.add("active");
-  loading.style.display="block";
-
-  if(video.canPlayType("application/vnd.apple.mpegurl")){
-    video.src=url;
-    video.play().catch(()=>{});
-  }else if(window.Hls && Hls.isSupported()){
-    hls=new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
+function buildVlcIntent(url){
+  try{
+    const u = new URL(url);
+    const scheme = (u.protocol || 'https:').replace(':','');
+    const path = `${u.host}${u.pathname}${u.search}`;
+    const type = /\.m3u8(\?|$)/i.test(url) ? 'application/x-mpegURL' : 'video/*';
+    return `intent://${path}#Intent;scheme=${scheme};package=org.videolan.vlc;action=android.intent.action.VIEW;type=${type};end`;
+  } catch(_){
+    return `vlc://${url}`;
   }
 }
 
-function stopPlayback(){
+function openExternalFallback(url){
+  loading.style.display = 'block';
+
+  if (isFireTv()){
+    loading.innerHTML = 'Opening VLC…<br><small style="font-size:14px;opacity:.7;">Press BACK to return</small>';
+    const intentUri = buildVlcIntent(url);
+    try { window.location.href = intentUri; return; } catch(_){ }
+  }
+
+  loading.innerHTML = 'Opening external player…<br><small style="font-size:14px;opacity:.7;">If nothing opens, press BACK.</small>';
+  let opened = null;
+  try { opened = window.open(url, '_blank'); } catch(_) { opened = null; }
+  if (!opened){ try { window.location.assign(url); } catch(_) {} }
+}
+
+function startWebPlayback(url){
   cleanupPlayback();
-  document.body.classList.remove("is-playing");
-  player.classList.remove("active");
-  state.playing=false;
-  state.focus="tabs";
-  updateFocus();
-}
 
-/* ---------- exit modal ---------- */
-function openExit(){
-  state.exitOpen=true;
-  exitModal.style.display="flex";
-  updateFocus();
-}
-function closeExit(){
-  state.exitOpen=false;
-  exitModal.style.display="none";
-  updateFocus();
-}
-
-/* ---------- actions ---------- */
-function handleEnter(){
-  if(state.exitOpen){
-    closeExit();
+  if (!url){
+    loading.style.display = 'block';
+    loading.innerHTML = 'No stream URL for this channel.';
     return;
   }
 
-  if(state.playing) return;
+  const isHttp = /^http:\/\//i.test(url);
+  const httpsTry = isHttp ? url.replace(/^http:\/\//i, 'https://') : url;
 
-  if(state.focus==="tabs"){
-    state.focus="rows";
+  const tryNative = (src) => new Promise((resolve, reject) => {
+    let done = false;
+
+    const cleanup = () => {
+      video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('canplaythrough', onCanPlay);
+      video.removeEventListener('error', onFail);
+      video.removeEventListener('stalled', onFail);
+    };
+
+    const onCanPlay = async () => {
+      if (done) return;
+      done = true;
+      cleanup();
+      try { await video.play(); } catch(_){ }
+      resolve(true);
+    };
+
+    const onFail = () => {
+      if (done) return;
+      done = true;
+      cleanup();
+      reject(new Error('native_fail'));
+    };
+
+    video.addEventListener('canplay', onCanPlay);
+    video.addEventListener('canplaythrough', onCanPlay);
+    video.addEventListener('error', onFail);
+    video.addEventListener('stalled', onFail);
+
+    video.controls = true;
+    video.autoplay = true;
+    video.muted = false;
+    video.playsInline = true;
+    video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+
+    video.src = src;
+    video.load();
+
+    setTimeout(() => {
+      if (!done){
+        done = true;
+        cleanup();
+        reject(new Error('native_timeout'));
+      }
+    }, 6500);
+  });
+
+  const tryHlsJs = (src) => new Promise((resolve, reject) => {
+    if (!(window.Hls && Hls.isSupported())) return reject(new Error('hls_not_supported'));
+
+    hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 30,
+      xhrSetup: (xhr) => { xhr.withCredentials = false; }
+    });
+
+    const cleanup = () => {
+      if (!hls) return;
+      hls.off(Hls.Events.MANIFEST_PARSED, onParsed);
+      hls.off(Hls.Events.ERROR, onError);
+    };
+
+    const onParsed = async () => {
+      cleanup();
+      try { await video.play(); } catch(_){ }
+      resolve(true);
+    };
+
+    const onError = (_evt, data) => {
+      if (data && data.fatal){
+        cleanup();
+        reject(new Error(data.type || 'hls_fatal'));
+      }
+    };
+
+    hls.on(Hls.Events.MANIFEST_PARSED, onParsed);
+    hls.on(Hls.Events.ERROR, onError);
+
+    hls.loadSource(src);
+    hls.attachMedia(video);
+
+    setTimeout(() => {
+      cleanup();
+      reject(new Error('hls_timeout'));
+    }, 9000);
+  });
+
+  (async () => {
+    try{
+      if (httpsTry !== url){
+        try { await tryNative(httpsTry); loading.style.display='none'; return; } catch(_){ }
+      }
+      await tryNative(url);
+      loading.style.display = 'none';
+      return;
+    } catch(_nativeErr){
+      try{
+        await tryHlsJs(httpsTry);
+        loading.style.display = 'none';
+        return;
+      } catch(_hlsErr){
+        openExternalFallback(url);
+      }
+    }
+  })();
+}
+
+function openPlayer(channel){
+  state.playing = true;
+  state.menu = false;
+
+  player.classList.add('active');
+  player.classList.remove('show-menu');
+  player.setAttribute('aria-hidden', 'false');
+
+  loading.style.display = 'block';
+  loading.innerHTML = `Loading stream…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
+
+  startWebPlayback(channel.url);
+  updateFocus();
+}
+
+function stopPlayback(){
+  state.playing = false;
+  state.menu = false;
+
+  player.classList.remove('active');
+  player.classList.remove('show-menu');
+  player.setAttribute('aria-hidden', 'true');
+
+  cleanupPlayback();
+
+  loading.style.display = 'block';
+  loading.innerHTML = 'Loading stream…';
+
+  updateFocus();
+}
+
+function togglePlayerMenu(){
+  state.menu = !state.menu;
+  player.classList.toggle('show-menu', state.menu);
+  updateFocus();
+}
+
+/* ================= ACTIONS ================= */
+function handleEnter(){
+  if (state.playing){
+    togglePlayerMenu();
+    return;
+  }
+
+  if (state.focus === 'tabs'){
+    const cat = tabs[state.tabIdx]?.dataset.cat || 'all';
+    setFilter(cat);
+    state.focus = 'rows';
     updateFocus();
     return;
   }
 
-  const row = state.rows[state.rowIdx];
-  if(!row) return;
-  const ch = row.items[state.itemIdx];
-  if(!ch) return;
-
-  state.playing=true;
-  startPlayback(ch.url);
+  const rowObj = state.rows[state.rowIdx];
+  const ch = rowObj ? rowObj.items[state.itemIdx] : null;
+  if (ch) openPlayer(ch);
 }
 
 function handleBack(){
-  if(state.exitOpen){
-    closeExit();
-    return true;
-  }
-
-  if(state.playing){
+  if (state.playing){
     stopPlayback();
     return true;
   }
 
-  if(state.focus==="rows"){
-    state.focus="tabs";
+  if (state.focus === 'rows'){
+    state.focus = 'tabs';
     updateFocus();
     return true;
   }
 
-  openExit();
-  return true;
+  return false;
 }
 
-/* ---------- events ---------- */
-rowsEl.addEventListener("click",(e)=>{
-  const tile=e.target.closest(".tile");
-  if(!tile) return;
-
-  const section=e.target.closest(".row");
-  state.rowIdx=[...rowsEl.children].indexOf(section);
-  state.itemIdx=parseInt(tile.dataset.i,10);
-  state.focus="rows";
-  handleEnter();
+/* ================= CLICK SUPPORT ================= */
+tabsRail.addEventListener('click', (e) => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  state.tabIdx = tabs.indexOf(tab);
+  setFilter(tab.dataset.cat || 'all');
+  state.focus = 'rows';
+  updateFocus();
 });
 
-backBtn?.addEventListener("click",()=>{
-  stopPlayback();
+rowsEl.addEventListener('click', (e) => {
+  const tile = e.target.closest('.tile');
+  if (!tile) return;
+
+  const rowSection = e.target.closest('.row');
+  const genre = rowSection ? rowSection.dataset.genre : null;
+  const rIdx = state.rows.findIndex(r => r.genre === genre);
+  const iIdx = parseInt(tile.dataset.i || '0', 10);
+
+  if (rIdx >= 0){
+    state.focus = 'rows';
+    state.rowIdx = rIdx;
+    state.itemIdx = iIdx;
+    updateFocus();
+    handleEnter();
+  }
 });
 
-exitYes?.addEventListener("click",()=>{
-  try{window.close();}catch{}
-  try{location.href="about:blank";}catch{}
-});
-exitNo?.addEventListener("click",closeExit);
+backBtn.addEventListener('click', stopPlayback);
 
-window.addEventListener("keydown",(e)=>{
-  const k=e.keyCode;
+/* ================= FIRESTICK REMOTE / KEYBOARD ================= */
+window.addEventListener('keydown', (e) => {
+  const keyCode = e.keyCode;
+  const key = e.key;
 
-  if(k===13){ handleEnter(); e.preventDefault(); }
-  if(k===8 || k===27 || k===10009){ handleBack(); e.preventDefault(); }
+  if ([37,38,39,40].includes(keyCode)) e.preventDefault();
 
-  if(state.playing) return;
-
-  if(state.focus==="tabs"){
-    if(k===37) state.tabIdx=Math.max(0,state.tabIdx-1);
-    if(k===39) state.tabIdx=Math.min(tabs.length-1,state.tabIdx+1);
-  }else{
-    if(k===37) state.itemIdx=Math.max(0,state.itemIdx-1);
-    if(k===39) state.itemIdx++;
-    if(k===38) state.rowIdx=Math.max(0,state.rowIdx-1);
-    if(k===40) state.rowIdx=Math.min(state.rows.length-1,state.rowIdx+1);
+  if (keyCode === 13 || key === 'Enter'){
+    e.preventDefault();
+    handleEnter();
+    return;
   }
 
+  if (keyCode === 8 || keyCode === 27 || keyCode === 10009 || key === 'Backspace' || key === 'Escape'){
+    const handled = handleBack();
+    if (handled) e.preventDefault();
+    return;
+  }
+
+  if (state.playing) return;
+
+  if (state.focus === 'tabs'){
+    if (keyCode === 37 || key === 'ArrowLeft'){
+      state.tabIdx = Math.max(0, state.tabIdx - 1);
+      updateFocus();
+      return;
+    }
+    if (keyCode === 39 || key === 'ArrowRight'){
+      state.tabIdx = Math.min(tabs.length - 1, state.tabIdx + 1);
+      updateFocus();
+      return;
+    }
+    if (keyCode === 40 || key === 'ArrowDown'){
+      state.focus = 'rows';
+      updateFocus();
+      return;
+    }
+    return;
+  }
+
+  if (state.focus === 'rows'){
+    const rowObj = state.rows[state.rowIdx];
+    if (!rowObj) return;
+
+    if (keyCode === 37 || key === 'ArrowLeft'){
+      state.itemIdx = Math.max(0, state.itemIdx - 1);
+      updateFocus();
+      return;
+    }
+    if (keyCode === 39 || key === 'ArrowRight'){
+      state.itemIdx = Math.min(rowObj.items.length - 1, state.itemIdx + 1);
+      updateFocus();
+      return;
+    }
+    if (keyCode === 38 || key === 'ArrowUp'){
+      if (state.rowIdx === 0){
+        state.focus = 'tabs';
+      } else {
+        state.rowIdx = Math.max(0, state.rowIdx - 1);
+        state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
+      }
+      updateFocus();
+      return;
+    }
+    if (keyCode === 40 || key === 'ArrowDown'){
+      state.rowIdx = Math.min(state.rows.length - 1, state.rowIdx + 1);
+      state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
+      updateFocus();
+      return;
+    }
+  }
+}, { passive:false });
+
+window.addEventListener('resize', () => {
   updateFocus();
+  applyTabsShift();
+  state.rows.forEach(r => applyRailShift(r));
 });
 
-/* ---------- init ---------- */
-function init(){
-  exitModal.style.display="none";
-  buildRows();
-  updateFocus();
-}
-init();
+/* ================= INIT ================= */
+setFilter('all');
+state.focus = 'tabs';
+updateFocus();
+applyTabsShift();
 
 
