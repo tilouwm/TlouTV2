@@ -1,15 +1,20 @@
+
 /* ===========================
-   TlouTV Pro — app.js (FULL)
-   - Netflix TV style UI
-   - Tabs + Rows render
-   - Firestick remote navigation
-   - HLS playback + VLC fallback
-   - Exit confirmation modal on BACK
-   - Smooth horizontal drag scrolling (rows + tabs)
+   TlouTV Pro — app.js (STABLE)
    =========================== */
 
-/* ================= CHANNELS ================= */
-// NOTE: Keep this array valid. No extra "]);" at the end.
+/* ---------- helpers ---------- */
+function normalizeStream(url){
+  if (!url) return "";
+  return String(url).trim();
+}
+
+function isFireTv(){
+  const ua = navigator.userAgent || "";
+  return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
+}
+
+/* ---------- channels ---------- */
 const CHANNELS = [
   {"id":"channel1","name":"Radio Tele 6 Univers","logo":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQhFbArTFlXYPUKKJ_oesEtaxdKyvQBn8D1w&s","url":normalizeStream("https://acwstream.com/lakay/tele6/tracks-v1a1/mono.m3u8"),"genre":"general"},
   {"id":"channel2","name":"Radio Tele Caraibes","logo":"https://ifex.org/wp-content/uploads/2025/03/haiti-radio-television-caraibes-arson-attack-facebook.jpeg","url":normalizeStream("https://bozztv.com/dvrfl03/hdirect/hdirect-telecaraibes/index.m3u8"),"genre":"general"},
@@ -52,12 +57,10 @@ const CHANNELS = [
   {"id":"channel39","name":"Trace Urban","logo":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Trace_Urban_logo_2010.svg/2560px-Trace_Urban_logo_2010.svg.png","url":normalizeStream("https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8"),"genre":"music"}
 ];
 
-const GENRE_ORDER = ["news","general","music","religious","sports"];
+const GENRES = ["news","general","music","religious","sports"];
 
-/* ================= ELEMENTS ================= */
+/* ---------- elements ---------- */
 const rowsEl = document.getElementById("rows");
-const tabsViewport = document.getElementById("tabsViewport");
-const tabsRail = document.getElementById("tabsRail");
 const tabs = Array.from(document.querySelectorAll(".tab"));
 
 const player = document.getElementById("player");
@@ -65,743 +68,230 @@ const video = document.getElementById("videoPlayer");
 const loading = document.getElementById("loading");
 const backBtn = document.getElementById("backBtn");
 
-// Exit modal elements (must exist in index.html)
 const exitModal = document.getElementById("exitModal");
 const exitYes = document.getElementById("exitYes");
 const exitNo  = document.getElementById("exitNo");
 
 let hls = null;
 
-/* ================= STATE ================= */
+/* ---------- state ---------- */
 const state = {
-  focus: "tabs",     // "tabs" | "rows"
+  focus: "tabs",
   tabIdx: 0,
   rowIdx: 0,
   itemIdx: 0,
-  filter: "all",
   rows: [],
   playing: false,
-  menu: false,
-  exitOpen: false,
-  exitChoice: 0 // 0=Yes, 1=No
+  exitOpen: false
 };
 
-/* ================= ENV DETECT ================= */
-function isFireTv(){
-  const ua = navigator.userAgent || "";
-  return /AFT|Fire\s?TV|AmazonWebView|KF[A-Z]{2,}/i.test(ua);
-}
+/* ---------- rendering ---------- */
+function buildRows(){
+  rowsEl.innerHTML = "";
+  state.rows = [];
 
-/* ================= URL NORMALIZATION ================= */
-function normalizeStream(url){
-  if (!url) return "";
-  // leave https, fix accidental spaces
-  return String(url).trim();
-}
+  GENRES.forEach(genre=>{
+    const items = CHANNELS.filter(c=>c.genre===genre);
+    if(!items.length) return;
 
-/* ================= TABS MOMENTUM SCROLL ================= */
-let tabScrollX = 0;
-let tabVel = 0;
-let tabDragging = false;
-let tabLastX = 0;
-let tabSnapTimer = null;
+    const section = document.createElement("section");
+    section.className = "row";
 
-function tabsMaxShift(){
-  const viewportW = tabsViewport.getBoundingClientRect().width;
-  const railW = tabsRail.scrollWidth;
-  return Math.max(0, railW - viewportW);
-}
-function applyTabsShift(){
-  const max = tabsMaxShift();
-  tabScrollX = Math.max(0, Math.min(tabScrollX, max));
-  tabsRail.style.transform = `translateX(${-tabScrollX}px)`;
-}
-function snapTabsToCenter(){
-  const viewportRect = tabsViewport.getBoundingClientRect();
-  const viewportCenter = (viewportRect.left + viewportRect.right) / 2;
+    section.innerHTML = `
+      <div class="row-head">
+        <div class="row-title">${genre.toUpperCase()}</div>
+      </div>
+      <div class="rail-wrap">
+        <div class="rail"></div>
+      </div>
+    `;
 
-  let bestDelta = 0;
-  let bestAbs = Infinity;
-  tabs.forEach(t => {
-    const r = t.getBoundingClientRect();
-    const c = (r.left + r.right) / 2;
-    const d = c - viewportCenter;
-    const ad = Math.abs(d);
-    if (ad < bestAbs){ bestAbs = ad; bestDelta = d; }
+    const rail = section.querySelector(".rail");
+
+    items.forEach((ch,i)=>{
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.i = i;
+      tile.innerHTML = `
+        <div class="thumb"><img src="${ch.logo}" onerror="this.style.display='none'"></div>
+        <div class="tile-foot">${ch.name}</div>
+      `;
+      rail.appendChild(tile);
+    });
+
+    rowsEl.appendChild(section);
+    state.rows.push({genre,items,section,rail});
   });
 
-  tabScrollX += bestDelta;
-  applyTabsShift();
-}
-function scheduleTabSnap(){
-  if (tabSnapTimer) clearTimeout(tabSnapTimer);
-  tabSnapTimer = setTimeout(() => {
-    if (!tabDragging && !state.playing && !state.exitOpen) snapTabsToCenter();
-  }, 90);
+  updateFocus();
 }
 
-tabsViewport.addEventListener("wheel", (e) => {
-  e.preventDefault();
-  const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-  tabVel += dx;
-  scheduleTabSnap();
-}, { passive:false });
-
-tabsViewport.addEventListener("pointerdown", (e) => {
-  tabDragging = true;
-  tabLastX = e.clientX;
-  tabsViewport.setPointerCapture?.(e.pointerId);
-});
-tabsViewport.addEventListener("pointermove", (e) => {
-  if (!tabDragging) return;
-  const dx = tabLastX - e.clientX;
-  tabLastX = e.clientX;
-  tabVel += dx;
-  scheduleTabSnap();
-});
-tabsViewport.addEventListener("pointerup", () => {
-  tabDragging = false;
-  scheduleTabSnap();
-});
-
-function tickTabsMomentum(){
-  if (Math.abs(tabVel) > 0.15){
-    tabScrollX += tabVel;
-    tabVel *= 0.92;
-    applyTabsShift();
-  }
-  requestAnimationFrame(tickTabsMomentum);
-}
-tickTabsMomentum();
-
-/* ================= ROW RAIL SCROLL (DRAG) ================= */
-function attachRailScroll(rowObj){
-  // We use native scrollLeft for the wrap, but keep rail transforms for remote focus.
-  // Add drag behavior to the wrap.
-
-  rowObj.dragging = false;
-  rowObj.allowClick = true;
-  rowObj.startX = 0;
-  rowObj.startScrollLeft = 0;
-
-  // Wheel horizontal support
-  rowObj.wrapEl.addEventListener("wheel", (e) => {
-    // Only affect horizontal scrolling; prevent page from shifting
-    e.preventDefault();
-    const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    rowObj.wrapEl.scrollLeft += dx;
-  }, { passive:false });
-
-  rowObj.wrapEl.addEventListener("pointerdown", (e) => {
-    rowObj.dragging = true;
-    rowObj.allowClick = false;
-    rowObj.startX = e.clientX;
-    rowObj.startScrollLeft = rowObj.wrapEl.scrollLeft;
-    rowObj.wrapEl.classList.add("dragging");
-    rowObj.wrapEl.setPointerCapture?.(e.pointerId);
-  });
-
-  // CONTINUED FROM YOUR LINE:
-  rowObj.wrapEl.addEventListener("pointermove", (e) => {
-    if (!rowObj.dragging) return;
-    e.preventDefault();
-
-    const x = e.clientX;
-    const delta = x - rowObj.startX;
-
-    // Invert drag for natural feel
-    rowObj.wrapEl.scrollLeft = rowObj.startScrollLeft - delta;
-  });
-
-  const stopDragging = () => {
-    rowObj.dragging = false;
-    rowObj.wrapEl.classList.remove("dragging");
-    setTimeout(() => { rowObj.allowClick = true; }, 50);
-  };
-
-  rowObj.wrapEl.addEventListener("pointerup", stopDragging);
-  rowObj.wrapEl.addEventListener("pointerleave", stopDragging);
-  rowObj.wrapEl.addEventListener("pointercancel", stopDragging);
-}
-
-/* ================= HELPERS ================= */
+/* ---------- focus ---------- */
 function clearFocused(){
-  document.querySelectorAll(".focused").forEach(el => el.classList.remove("focused"));
-}
-
-function ensureRowVisible(rowEl){
-  const box = rowsEl.getBoundingClientRect();
-  const r = rowEl.getBoundingClientRect();
-  const pad = 24;
-  if (r.top < box.top + pad) rowsEl.scrollTop -= (box.top + pad - r.top);
-  else if (r.bottom > box.bottom - pad) rowsEl.scrollTop += (r.bottom - (box.bottom - pad));
+  document.querySelectorAll(".focused").forEach(e=>e.classList.remove("focused"));
 }
 
 function updateFocus(){
   clearFocused();
 
-  // Exit modal focus
-  if (state.exitOpen){
-    // 0=Yes, 1=No
-    if (state.exitChoice === 0) exitYes?.classList.add("focused");
-    else exitNo?.classList.add("focused");
+  if(state.exitOpen){
+    exitNo?.classList.add("focused");
     return;
   }
 
-  // Player focus
-  if (state.playing){
-    if (state.menu) backBtn.classList.add("focused");
+  if(state.playing) return;
+
+  if(state.focus==="tabs"){
+    tabs[state.tabIdx]?.classList.add("focused");
     return;
   }
 
-  // Tabs focus
-  if (state.focus === "tabs"){
-    const tab = tabs[state.tabIdx];
-    if (tab) tab.classList.add("focused");
-    return;
-  }
-
-  // Rows focus
-  const rowObj = state.rows[state.rowIdx];
-  if (!rowObj) return;
-
-  const tile = rowObj.railEl.querySelector(`.tile[data-i="${state.itemIdx}"]`);
-  if (tile) tile.classList.add("focused");
-
-  // Keep focus visible
-  ensureRowVisible(rowObj.rowEl);
-
-  // Ensure the wrap scrollLeft keeps focused tile on screen (remote navigation)
-  const tileEl = tile;
-  if (tileEl){
-    const wrapRect = rowObj.wrapEl.getBoundingClientRect();
-    const tileRect = tileEl.getBoundingClientRect();
-    const margin = 70;
-
-    if (tileRect.left < wrapRect.left + margin){
-      rowObj.wrapEl.scrollLeft -= (wrapRect.left + margin - tileRect.left);
-    } else if (tileRect.right > wrapRect.right - margin){
-      rowObj.wrapEl.scrollLeft += (tileRect.right - (wrapRect.right - margin));
-    }
-  }
+  const row = state.rows[state.rowIdx];
+  if(!row) return;
+  const tile = row.rail.querySelector(`.tile[data-i="${state.itemIdx}"]`);
+  tile?.classList.add("focused");
 }
 
-/* ================= RENDER ================= */
-function buildRows(){
-  rowsEl.innerHTML = "";
-  state.rows = [];
-
-  const genresToShow = (state.filter === "all")
-    ? GENRE_ORDER
-    : GENRE_ORDER.filter(g => g === state.filter);
-
-  genresToShow.forEach(g => {
-    const items = CHANNELS.filter(c => c.genre === g);
-    if (!items.length) return;
-
-    const section = document.createElement("section");
-    section.className = "row";
-    section.dataset.genre = g;
-
-    const head = document.createElement("div");
-    head.className = "row-head";
-    head.innerHTML = `<div class="row-title">${g.toUpperCase()}</div><div class="row-meta">${items.length} channels</div>`;
-
-    const wrap = document.createElement("div");
-    wrap.className = "rail-wrap";
-    wrap.innerHTML = `<div class="rail-fade-left"></div><div class="rail-fade-right"></div>`;
-
-    const rail = document.createElement("div");
-    rail.className = "rail";
-
-    items.forEach((c, i) => {
-      const tile = document.createElement("div");
-      tile.className = "tile";
-      tile.dataset.i = String(i);
-      tile.innerHTML = `
-        <div class="thumb"><img src="${c.logo}" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
-        <div class="tile-foot">${c.name}</div>
-      `;
-
-      tile.addEventListener("click", (e) => {
-        // block click if user was dragging
-        const rowObj = state.rows.find(r => r.genre === g);
-        if (rowObj && rowObj.allowClick === false){
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-      });
-
-      rail.appendChild(tile);
-    });
-
-    wrap.appendChild(rail);
-    section.appendChild(head);
-    section.appendChild(wrap);
-    rowsEl.appendChild(section);
-
-    const rowObj = { genre: g, items, rowEl: section, wrapEl: wrap, railEl: rail };
-    state.rows.push(rowObj);
-    attachRailScroll(rowObj);
-  });
-
-  state.rowIdx = Math.min(state.rowIdx, Math.max(0, state.rows.length - 1));
-  const curRow = state.rows[state.rowIdx];
-  state.itemIdx = Math.min(state.itemIdx, Math.max(0, (curRow?.items.length || 1) - 1));
-
-  updateFocus();
-}
-
-/* ================= FILTER (TABS) ================= */
-function setFilter(cat){
-  state.filter = cat;
-
-  tabs.forEach(t => t.classList.remove("active"));
-  const idx = tabs.findIndex(t => (t.dataset.cat || "all") === cat);
-  state.tabIdx = idx >= 0 ? idx : 0;
-  tabs[state.tabIdx]?.classList.add("active");
-
-  state.rowIdx = 0;
-  state.itemIdx = 0;
-  rowsEl.scrollTop = 0;
-
-  buildRows();
-}
-
-/* ================= PLAYBACK ================= */
+/* ---------- playback ---------- */
 function cleanupPlayback(){
-  if (hls){ try{ hls.destroy(); } catch(_){ } hls = null; }
-  try{ video.pause(); } catch(_){ }
-  video.srcObject = null;
+  if(hls){ try{hls.destroy();}catch{} hls=null; }
+  try{video.pause();}catch{}
   video.removeAttribute("src");
   video.load();
 }
 
-function buildVlcIntent(url){
-  try{
-    const u = new URL(url);
-    const scheme = (u.protocol || "https:").replace(":","");
-    const path = `${u.host}${u.pathname}${u.search}`;
-    const type = /\.m3u8(\?|$)/i.test(url) ? "application/x-mpegURL" : "video/*";
-    return `intent://${path}#Intent;scheme=${scheme};package=org.videolan.vlc;action=android.intent.action.VIEW;type=${type};end`;
-  } catch(_){
-    return `vlc://${url}`;
-  }
-}
-
-function openExternalFallback(url){
-  loading.style.display = "block";
-  loading.innerHTML = isFireTv()
-    ? "Opening VLC…<br><small style='font-size:14px;opacity:.7;'>Press BACK to return</small>"
-    : "Opening external player…<br><small style='font-size:14px;opacity:.7;'>If nothing opens, press BACK.</small>";
-
-  if (isFireTv()){
-    const intentUri = buildVlcIntent(url);
-    try { window.location.href = intentUri; return; } catch(_){ }
-  }
-
-  let opened = null;
-  try { opened = window.open(url, "_blank"); } catch(_) { opened = null; }
-  if (!opened){ try { window.location.assign(url); } catch(_) {} }
-}
-
-function startWebPlayback(url){
+function startPlayback(url){
   cleanupPlayback();
-  if (!url){
-    loading.style.display = "block";
-    loading.innerHTML = "No stream URL for this channel.";
-    return;
-  }
-
-  const isHttp = /^http:\/\//i.test(url);
-  const httpsTry = isHttp ? url.replace(/^http:\/\//i, "https://") : url;
-
-  const tryNative = (src) => new Promise((resolve, reject) => {
-    let done = false;
-
-    const cleanup = () => {
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("canplaythrough", onCanPlay);
-      video.removeEventListener("error", onFail);
-      video.removeEventListener("stalled", onFail);
-    };
-
-    const onCanPlay = async () => {
-      if (done) return;
-      done = true;
-      cleanup();
-      try { await video.play(); } catch(_){ }
-      resolve(true);
-    };
-
-    const onFail = () => {
-      if (done) return;
-      done = true;
-      cleanup();
-      reject(new Error("native_fail"));
-    };
-
-    video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("canplaythrough", onCanPlay);
-    video.addEventListener("error", onFail);
-    video.addEventListener("stalled", onFail);
-
-    video.controls = true;
-    video.autoplay = true;
-    video.muted = false;
-    video.playsInline = true;
-    video.setAttribute("playsinline","");
-    video.setAttribute("webkit-playsinline","");
-
-    video.src = src;
-    video.load();
-
-    setTimeout(() => {
-      if (!done){
-        done = true;
-        cleanup();
-        reject(new Error("native_timeout"));
-      }
-    }, 6500);
-  });
-
-  const tryHlsJs = (src) => new Promise((resolve, reject) => {
-    if (!(window.Hls && Hls.isSupported())) return reject(new Error("hls_not_supported"));
-
-    hls = new Hls({
-      enableWorker: true,
-      lowLatencyMode: true,
-      backBufferLength: 30,
-      xhrSetup: (xhr) => { xhr.withCredentials = false; }
-    });
-
-    const cleanup = () => {
-      if (!hls) return;
-      hls.off(Hls.Events.MANIFEST_PARSED, onParsed);
-      hls.off(Hls.Events.ERROR, onError);
-    };
-
-    const onParsed = async () => {
-      cleanup();
-      try { await video.play(); } catch(_){ }
-      resolve(true);
-    };
-
-    const onError = (_evt, data) => {
-      if (data && data.fatal){
-        cleanup();
-        reject(new Error(data.type || "hls_fatal"));
-      }
-    };
-
-    hls.on(Hls.Events.MANIFEST_PARSED, onParsed);
-    hls.on(Hls.Events.ERROR, onError);
-
-    hls.loadSource(src);
-    hls.attachMedia(video);
-
-    setTimeout(() => {
-      cleanup();
-      reject(new Error("hls_timeout"));
-    }, 9000);
-  });
-
-  (async () => {
-    try{
-      if (httpsTry !== url){
-        try { await tryNative(httpsTry); loading.style.display="none"; return; } catch(_){ }
-      }
-      await tryNative(url);
-      loading.style.display = "none";
-      return;
-    } catch(_nativeErr){
-      try{
-        await tryHlsJs(httpsTry);
-        loading.style.display = "none";
-        return;
-      } catch(_hlsErr){
-        openExternalFallback(url);
-      }
-    }
-  })();
-}
-
-function openPlayer(channel){
-  state.playing = true;
-  state.menu = false;
+  document.body.classList.add("is-playing");
 
   player.classList.add("active");
-  player.classList.remove("show-menu");
-  player.setAttribute("aria-hidden", "false");
+  loading.style.display="block";
 
-  loading.style.display = "block";
-  loading.innerHTML = `Loading stream…<br><small style="font-size:14px;opacity:.7;">${channel.name}</small>`;
-
-  startWebPlayback(channel.url);
-  updateFocus();
+  if(video.canPlayType("application/vnd.apple.mpegurl")){
+    video.src=url;
+    video.play().catch(()=>{});
+  }else if(window.Hls && Hls.isSupported()){
+    hls=new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+  }
 }
 
 function stopPlayback(){
-  state.playing = false;
-  state.menu = false;
-
-  player.classList.remove("active");
-  player.classList.remove("show-menu");
-  player.setAttribute("aria-hidden", "true");
-
   cleanupPlayback();
-
-  loading.style.display = "block";
-  loading.innerHTML = "Loading stream…";
-
+  document.body.classList.remove("is-playing");
+  player.classList.remove("active");
+  state.playing=false;
+  state.focus="tabs";
   updateFocus();
 }
 
-function togglePlayerMenu(){
-  state.menu = !state.menu;
-  player.classList.toggle("show-menu", state.menu);
+/* ---------- exit modal ---------- */
+function openExit(){
+  state.exitOpen=true;
+  exitModal.style.display="flex";
+  updateFocus();
+}
+function closeExit(){
+  state.exitOpen=false;
+  exitModal.style.display="none";
   updateFocus();
 }
 
-/* ================= EXIT MODAL (HARD HIDE) ================= */
-function openExitModal(){
-  state.exitOpen = true;
-  state.exitChoice = 1; // default "No"
-  if (exitModal){
-    exitModal.classList.add("active");
-    exitModal.setAttribute("aria-hidden","false");
-    exitModal.style.display = "flex";   // IMPORTANT (works even without CSS)
-  }
-  updateFocus();
-}
-
-function closeExitModal(){
-  state.exitOpen = false;
-  if (exitModal){
-    exitModal.classList.remove("active");
-    exitModal.setAttribute("aria-hidden","true");
-    exitModal.style.display = "none";   // IMPORTANT
-  }
-  updateFocus();
-}
-
-function doExit(){
-  // PWA/Web can't always close window; this is the best practical behavior:
-  try { window.close(); } catch(_){}
-  try { window.location.href = "about:blank"; } catch(_){}
-}
-
-/* Ensure modal is hidden on startup no matter what */
-function forceHideExitOnLoad(){
-  if (!exitModal) return;
-  exitModal.classList.remove("active");
-  exitModal.setAttribute("aria-hidden","true");
-  exitModal.style.display = "none";
-}
-
-/* ================= ACTIONS ================= */
+/* ---------- actions ---------- */
 function handleEnter(){
-  if (state.exitOpen){
-    if (state.exitChoice === 0) doExit();
-    else closeExitModal();
+  if(state.exitOpen){
+    closeExit();
     return;
   }
 
-  if (state.playing){
-    togglePlayerMenu();
-    return;
-  }
+  if(state.playing) return;
 
-  if (state.focus === "tabs"){
-    const cat = tabs[state.tabIdx]?.dataset.cat || "all";
-    setFilter(cat);
-    state.focus = "rows";
+  if(state.focus==="tabs"){
+    state.focus="rows";
     updateFocus();
     return;
   }
 
-  const rowObj = state.rows[state.rowIdx];
-  const ch = rowObj ? rowObj.items[state.itemIdx] : null;
-  if (ch) openPlayer(ch);
+  const row = state.rows[state.rowIdx];
+  if(!row) return;
+  const ch = row.items[state.itemIdx];
+  if(!ch) return;
+
+  state.playing=true;
+  startPlayback(ch.url);
 }
 
 function handleBack(){
-  // 1) if exit modal open, close it
-  if (state.exitOpen){
-    closeExitModal();
+  if(state.exitOpen){
+    closeExit();
     return true;
   }
 
-  // 2) if playing, stop playback
-  if (state.playing){
+  if(state.playing){
     stopPlayback();
     return true;
   }
 
-  // 3) if on rows, go to tabs
-  if (state.focus === "rows"){
-    state.focus = "tabs";
+  if(state.focus==="rows"){
+    state.focus="tabs";
     updateFocus();
     return true;
   }
 
-  // 4) if already on tabs (root), ask to exit
-  if (state.focus === "tabs"){
-    openExitModal();
-    return true;
-  }
-
-  return false;
+  openExit();
+  return true;
 }
 
-/* ================= CLICK SUPPORT ================= */
-tabsRail.addEventListener("click", (e) => {
-  const tab = e.target.closest(".tab");
-  if (!tab) return;
-  state.tabIdx = tabs.indexOf(tab);
-  setFilter(tab.dataset.cat || "all");
-  state.focus = "rows";
+/* ---------- events ---------- */
+rowsEl.addEventListener("click",(e)=>{
+  const tile=e.target.closest(".tile");
+  if(!tile) return;
+
+  const section=e.target.closest(".row");
+  state.rowIdx=[...rowsEl.children].indexOf(section);
+  state.itemIdx=parseInt(tile.dataset.i,10);
+  state.focus="rows";
+  handleEnter();
+});
+
+backBtn?.addEventListener("click",()=>{
+  stopPlayback();
+});
+
+exitYes?.addEventListener("click",()=>{
+  try{window.close();}catch{}
+  try{location.href="about:blank";}catch{}
+});
+exitNo?.addEventListener("click",closeExit);
+
+window.addEventListener("keydown",(e)=>{
+  const k=e.keyCode;
+
+  if(k===13){ handleEnter(); e.preventDefault(); }
+  if(k===8 || k===27 || k===10009){ handleBack(); e.preventDefault(); }
+
+  if(state.playing) return;
+
+  if(state.focus==="tabs"){
+    if(k===37) state.tabIdx=Math.max(0,state.tabIdx-1);
+    if(k===39) state.tabIdx=Math.min(tabs.length-1,state.tabIdx+1);
+  }else{
+    if(k===37) state.itemIdx=Math.max(0,state.itemIdx-1);
+    if(k===39) state.itemIdx++;
+    if(k===38) state.rowIdx=Math.max(0,state.rowIdx-1);
+    if(k===40) state.rowIdx=Math.min(state.rows.length-1,state.rowIdx+1);
+  }
+
   updateFocus();
 });
 
-rowsEl.addEventListener("click", (e) => {
-  if (state.exitOpen || state.playing) return;
-
-  const tile = e.target.closest(".tile");
-  if (!tile) return;
-
-  const rowSection = e.target.closest(".row");
-  const genre = rowSection ? rowSection.dataset.genre : null;
-  const rIdx = state.rows.findIndex(r => r.genre === genre);
-  const iIdx = parseInt(tile.dataset.i || "0", 10);
-
-  const rowObj = state.rows[rIdx];
-  if (rowObj && rowObj.allowClick === false) return;
-
-  if (rIdx >= 0){
-    state.focus = "rows";
-    state.rowIdx = rIdx;
-    state.itemIdx = iIdx;
-    updateFocus();
-    handleEnter();
-  }
-});
-
-backBtn?.addEventListener("click", stopPlayback);
-
-// Exit modal buttons
-exitYes?.addEventListener("click", doExit);
-exitNo?.addEventListener("click", closeExitModal);
-
-/* Browser back button support */
-window.addEventListener("popstate", () => {
-  // Instead of leaving, show modal
-  if (!state.exitOpen) openExitModal();
-});
-
-/* ================= FIRESTICK REMOTE / KEYBOARD ================= */
-window.addEventListener("keydown", (e) => {
-  const keyCode = e.keyCode;
-  const key = e.key;
-
-  // prevent page scroll for arrows
-  if ([37,38,39,40].includes(keyCode)) e.preventDefault();
-
-  // ENTER
-  if (keyCode === 13 || key === "Enter"){
-    e.preventDefault();
-    handleEnter();
-    return;
-  }
-
-  // BACK
-  if (keyCode === 8 || keyCode === 27 || keyCode === 10009 || key === "Backspace" || key === "Escape"){
-    const handled = handleBack();
-    if (handled) e.preventDefault();
-    return;
-  }
-
-  // If exit modal open: LEFT/RIGHT change choice
-  if (state.exitOpen){
-    if (keyCode === 37 || key === "ArrowLeft" || keyCode === 39 || key === "ArrowRight"){
-      state.exitChoice = state.exitChoice === 0 ? 1 : 0;
-      updateExitFocus();
-    }
-    return;
-  }
-
-  if (state.playing) return;
-
-  if (state.focus === "tabs"){
-    if (keyCode === 37 || key === "ArrowLeft"){
-      state.tabIdx = Math.max(0, state.tabIdx - 1);
-      updateFocus();
-      scheduleTabSnap();
-      return;
-    }
-    if (keyCode === 39 || key === "ArrowRight"){
-      state.tabIdx = Math.min(tabs.length - 1, state.tabIdx + 1);
-      updateFocus();
-      scheduleTabSnap();
-      return;
-    }
-    if (keyCode === 40 || key === "ArrowDown"){
-      state.focus = "rows";
-      updateFocus();
-      return;
-    }
-    return;
-  }
-
-  if (state.focus === "rows"){
-    const rowObj = state.rows[state.rowIdx];
-    if (!rowObj) return;
-
-    if (keyCode === 37 || key === "ArrowLeft"){
-      state.itemIdx = Math.max(0, state.itemIdx - 1);
-      updateFocus();
-      return;
-    }
-    if (keyCode === 39 || key === "ArrowRight"){
-      state.itemIdx = Math.min(rowObj.items.length - 1, state.itemIdx + 1);
-      updateFocus();
-      return;
-    }
-    if (keyCode === 38 || key === "ArrowUp"){
-      if (state.rowIdx === 0){
-        state.focus = "tabs";
-      } else {
-        state.rowIdx = Math.max(0, state.rowIdx - 1);
-        state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
-      }
-      updateFocus();
-      return;
-    }
-    if (keyCode === 40 || key === "ArrowDown"){
-      state.rowIdx = Math.min(state.rows.length - 1, state.rowIdx + 1);
-      state.itemIdx = Math.min(state.itemIdx, state.rows[state.rowIdx].items.length - 1);
-      updateFocus();
-      return;
-    }
-  }
-}, { passive:false });
-
-window.addEventListener("resize", () => {
-  updateFocus();
-  applyTabsShift();
-});
-
+/* ---------- init ---------- */
 function init(){
-  forceHideExitOnLoad();   // <-- ADD THIS
-  setFilter("all");
-  state.focus = "tabs";
+  exitModal.style.display="none";
+  buildRows();
   updateFocus();
-  applyTabsShift();
-
-  // Hook buttons (in case your listeners are above and failed earlier)
-  if (exitYes) exitYes.onclick = () => doExit();
-  if (exitNo) exitNo.onclick = () => closeExitModal();
 }
 init();
+
 
